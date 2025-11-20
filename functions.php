@@ -51,6 +51,9 @@ add_action('after_setup_theme', 'dt_translation');
 ================================================*/
 function custom_login_enqueue_styles() {
     echo '<style>
+    	.language-switcher, #backtoblog, .wp-login-lost-password {
+			display: none;
+		}
         body.login {
             background: linear-gradient(135deg, #0b2447, #19376d, #576cbc);
             display: flex;
@@ -85,17 +88,6 @@ function custom_login_enqueue_styles() {
             font-weight: 700;
             margin-bottom: 10px;
             color: #000;
-        }
-
-        /* Subtítulo */
-        .login form::after {
-            content: "Acesse comunicados da empresa, documentos, diretório de funcionários e ferramentas de colaboração.";
-            display: block;
-            text-align: center;
-            font-size: 14px;
-            color: #555;
-            margin-bottom: 25px;
-            line-height: 1.5;
         }
 
         /* Inputs */
