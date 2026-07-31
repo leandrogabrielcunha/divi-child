@@ -4,6 +4,467 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.3.0
+Version: 1.2.0
 Template: Divi
 */
+
+/*============================================================
+SETCEB - Tela de login (wp-login.php)
+Escopado em body.login. Reconstroi a tela padrao do WordPress.
+============================================================*/
+body.login {
+	--setceb-blue: #123D73;
+	--setceb-blue-light: #1D5B9F;
+	--setceb-turquoise: #1FB7C9;
+	--setceb-white: #FFFFFF;
+	--setceb-gray: #F5F7FA;
+	--setceb-ink: #0F172A;
+	--setceb-muted: #64748B;
+	--setceb-border: #DFE5EE;
+
+	margin: 0;
+	padding: 24px;
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	background-color: #0a2440;
+	background-image:
+		radial-gradient(1100px 720px at 10% -10%, rgba(31, 183, 201, 0.30), transparent 60%),
+		radial-gradient(900px 640px at 100% 0%, rgba(29, 91, 159, 0.55), transparent 55%),
+		radial-gradient(760px 680px at 88% 105%, rgba(31, 183, 201, 0.24), transparent 60%),
+		radial-gradient(520px 420px at -5% 95%, rgba(18, 61, 115, 0.85), transparent 62%),
+		repeating-linear-gradient(118deg, rgba(255, 255, 255, 0.045) 0, rgba(255, 255, 255, 0.045) 1px, transparent 1px, transparent 92px),
+		linear-gradient(135deg, #0a2440 0%, #123D73 42%, #1D5B9F 100%);
+	background-attachment: fixed;
+}
+
+body.login *,
+body.login *::before,
+body.login *::after {
+	box-sizing: border-box;
+}
+
+/* ---------- Remocao dos elementos padrao ---------- */
+body.login h1:not(.setceb-title),
+body.login .language-switcher,
+body.login #backtoblog {
+	display: none !important;
+}
+
+body.login #login {
+	width: 480px;
+	max-width: 100%;
+	margin: 0;
+	padding: 0 !important;
+	position: relative;
+	z-index: 2;
+}
+
+body.login form {
+	margin: 0 !important;
+	padding: 0 !important;
+	background: transparent !important;
+	border: 0 !important;
+	box-shadow: none !important;
+	overflow: visible !important;
+}
+
+/* ---------- Card central ---------- */
+body.login .setceb-card {
+	background: var(--setceb-white);
+	border-radius: 24px;
+	padding: 44px 44px 34px;
+	box-shadow:
+		0 24px 64px rgba(6, 28, 60, 0.38),
+		0 8px 22px rgba(6, 28, 60, 0.16),
+		inset 0 1px 0 rgba(255, 255, 255, 0.9);
+	animation: setceb-card-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ---------- Marca (logo) ---------- */
+body.login .setceb-brand {
+	text-align: center;
+	margin-bottom: 28px;
+}
+
+body.login .setceb-logo {
+	display: block;
+	max-width: 220px;
+	width: auto;
+	height: auto;
+	margin: 0 auto;
+}
+
+/* ---------- Campos ---------- */
+body.login .setceb-field {
+	margin: 0 0 16px;
+}
+
+body.login .setceb-field > label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+body.login .setceb-field-body {
+	position: relative;
+}
+
+body.login input[type="text"],
+body.login input[type="password"],
+body.login input[type="email"] {
+	background: var(--setceb-white) !important;
+	border: 1.5px solid var(--setceb-border) !important;
+	border-radius: 12px !important;
+	font-size: 15px !important;
+	box-shadow: none !important;
+	padding: 14px 16px !important;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.login .setceb-field input[type="text"],
+body.login .setceb-field input[type="password"] {
+	width: 100% !important;
+	height: 58px !important;
+	line-height: 1 !important;
+	padding: 14px 48px !important;
+	color: var(--setceb-ink) !important;
+	border-radius: 14px !important;
+	margin: 0 !important;
+	outline: none;
+}
+
+body.login .setceb-field input[type="password"] {
+	padding-right: 52px !important;
+}
+
+body.login .setceb-field input:focus {
+	border-color: var(--setceb-blue-light) !important;
+	box-shadow: 0 0 0 4px rgba(29, 91, 159, 0.12) !important;
+}
+
+body.login .setceb-field input::placeholder {
+	color: #9aa7b8;
+	opacity: 1;
+}
+
+body.login .setceb-field input::-ms-input-placeholder {
+	color: #9aa7b8;
+}
+
+body.login .setceb-icon {
+	width: 20px;
+	height: 20px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+body.login .setceb-field .setceb-icon {
+	position: absolute;
+	left: 17px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: #9aa7b8;
+	pointer-events: none;
+	transition: color 0.2s ease;
+}
+
+body.login .setceb-field:focus-within .setceb-icon {
+	color: var(--setceb-blue-light);
+}
+
+/* ---------- Botao mostrar senha ---------- */
+body.login .setceb-toggle-password {
+	position: absolute;
+	right: 8px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 42px;
+	height: 42px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+	border: 0;
+	border-radius: 12px;
+	cursor: pointer;
+	color: #94a3b8;
+	transition: background 0.2s ease, color 0.2s ease;
+}
+
+body.login .setceb-toggle-password:hover {
+	background: var(--setceb-gray);
+	color: var(--setceb-blue-light);
+}
+
+body.login .setceb-toggle-password .setceb-icon {
+	position: static;
+	transform: none;
+}
+
+/* ---------- Botao Acessar ---------- */
+body.login .setceb-submit-row {
+	margin: 0 !important;
+}
+
+body.login .setceb-actions {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-auto-rows: 56px;
+	align-items: stretch;
+	gap: 12px;
+}
+
+body.login .setceb-submit {
+	width: 100% !important;
+	height: 56px !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	font-size: 16px !important;
+	font-weight: 600 !important;
+	letter-spacing: 0.2px;
+	color: #fff !important;
+	text-shadow: none !important;
+	border: 0 !important;
+	border-radius: 14px !important;
+	background: linear-gradient(90deg, var(--setceb-blue) 0%, var(--setceb-turquoise) 100%) !important;
+	box-shadow: 0 10px 22px rgba(18, 61, 115, 0.3) !important;
+	cursor: pointer;
+	transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+body.login .setceb-submit:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 16px 30px rgba(18, 61, 115, 0.38) !important;
+	filter: brightness(1.05);
+}
+
+body.login .setceb-submit:active {
+	transform: translateY(0);
+	box-shadow: 0 8px 18px rgba(18, 61, 115, 0.28) !important;
+}
+
+body.login .setceb-submit:focus-visible {
+	outline: 3px solid rgba(31, 183, 201, 0.45);
+	outline-offset: 2px;
+}
+
+/* ---------- Links ---------- */
+body.login .setceb-nav {
+	margin: 0 !important;
+	padding: 0 !important;
+	display: flex;
+	align-items: stretch;
+}
+
+body.login .setceb-nav a {
+	display: flex !important;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	min-height: 56px;
+	line-height: 1;
+	padding: 0 !important;
+	font-size: 16px !important;
+	font-weight: 600 !important;
+	letter-spacing: 0.2px;
+	color: var(--setceb-blue-light) !important;
+	background: #fff !important;
+	border: 1.5px solid var(--setceb-blue-light) !important;
+	border-radius: 14px !important;
+	text-decoration: none;
+	transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+body.login .setceb-nav a:hover {
+	background: var(--setceb-gray);
+	color: var(--setceb-blue);
+	border-color: var(--setceb-blue);
+}
+
+body.login a:focus-visible {
+	outline: 3px solid rgba(31, 183, 201, 0.45);
+	outline-offset: 2px;
+}
+
+/* ---------- Erros e mensagens ---------- */
+body.login #login_error,
+body.login .message,
+body.login .success {
+	background: #fff !important;
+	border: 0 !important;
+	border-left: 4px solid #dc2626 !important;
+	border-radius: 12px;
+	box-shadow: 0 10px 24px rgba(6, 28, 60, 0.12) !important;
+	color: #b91c1c;
+	font-size: 13.5px;
+	padding: 12px 14px !important;
+	margin: 0 0 18px !important;
+}
+
+body.login .message,
+body.login .success {
+	border-left-color: var(--setceb-turquoise) !important;
+	color: #334155;
+}
+
+/* ---------- Fundo decorativo ---------- */
+body.login .setceb-bg {
+	position: fixed;
+	inset: 0;
+	z-index: 0;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+body.login .setceb-bg-curve {
+	position: absolute;
+}
+
+body.login .setceb-bg-curve--a {
+	left: -70px;
+	top: -50px;
+	width: 520px;
+	height: 520px;
+	animation: setceb-float-a 16s ease-in-out infinite;
+}
+
+body.login .setceb-bg-curve--b {
+	right: -90px;
+	bottom: -70px;
+	width: 560px;
+	height: 560px;
+	animation: setceb-float-b 20s ease-in-out infinite;
+}
+
+body.login .setceb-bg-ring {
+	position: absolute;
+	border-radius: 50%;
+	border: 1.5px solid rgba(255, 255, 255, 0.15);
+}
+
+body.login .setceb-bg-ring--a {
+	width: 190px;
+	height: 190px;
+	right: 14%;
+	top: 12%;
+	animation: setceb-float-b 22s ease-in-out infinite;
+}
+
+body.login .setceb-bg-ring--b {
+	width: 54px;
+	height: 54px;
+	left: 10%;
+	bottom: 18%;
+	border-color: rgba(31, 183, 201, 0.55);
+	animation: setceb-float-a 14s ease-in-out infinite;
+}
+
+body.login .setceb-bg-dot {
+	position: absolute;
+	border-radius: 50%;
+}
+
+body.login .setceb-bg-dot--a {
+	width: 10px;
+	height: 10px;
+	background: var(--setceb-turquoise);
+	left: 15%;
+	top: 26%;
+}
+
+body.login .setceb-bg-dot--b {
+	width: 6px;
+	height: 6px;
+	background: rgba(255, 255, 255, 0.7);
+	right: 23%;
+	top: 34%;
+}
+
+body.login .setceb-bg-dot--c {
+	width: 14px;
+	height: 14px;
+	border: 2px solid rgba(255, 255, 255, 0.35);
+	right: 10%;
+	bottom: 24%;
+}
+
+body.login .setceb-bg-dot--d {
+	width: 5px;
+	height: 5px;
+	background: rgba(31, 183, 201, 0.85);
+	left: 27%;
+	bottom: 13%;
+}
+
+/* ---------- Animacoes ---------- */
+@keyframes setceb-card-in {
+	from {
+		opacity: 0;
+		transform: translateY(18px) scale(0.985);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes setceb-float-a {
+	0%, 100% { transform: translate3d(0, 0, 0); }
+	50% { transform: translate3d(0, -16px, 0); }
+}
+
+@keyframes setceb-float-b {
+	0%, 100% { transform: translate3d(0, 0, 0); }
+	50% { transform: translate3d(0, 14px, 0); }
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 560px) {
+	body.login {
+		padding: 16px;
+	}
+
+	body.login #login {
+		width: 100%;
+		max-width: 480px;
+	}
+
+	body.login .setceb-card {
+		padding: 32px 22px 26px;
+		border-radius: 20px;
+	}
+
+	body.login .setceb-logo {
+		max-width: 180px;
+	}
+
+	body.login .setceb-field input[type="text"],
+	body.login .setceb-field input[type="password"] {
+		height: 54px !important;
+	}
+
+	body.login .setceb-actions {
+		grid-auto-rows: 54px;
+		gap: 10px;
+	}
+
+	body.login .setceb-submit,
+	body.login .setceb-nav a {
+		height: 54px !important;
+		min-height: 54px;
+		font-size: 15px !important;
+	}
+}
