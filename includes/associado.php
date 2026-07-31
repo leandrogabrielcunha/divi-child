@@ -51,7 +51,9 @@ function setceb_is_associado( $user = null ) {
 }
 
 /**
- * URL da pagina de perfil do associado (template page-associado.php).
+ * URL da pagina de perfil do associado (page-associado.php).
+ * Busca primeiro pelo slug padrao e depois por qualquer pagina
+ * que use o template "Perfil do Associado".
  *
  * @return string
  */
@@ -62,15 +64,20 @@ function setceb_associado_perfil_url() {
 		return $url;
 	}
 
-	$pages = get_pages(
-		array(
-			'meta_key'   => '_wp_page_template',
-			'meta_value' => 'page-associado.php',
-			'number'     => 1,
-		)
-	);
+	$page = get_page_by_path( 'perfil-do-associado' );
 
-	$url = ! empty( $pages ) ? get_permalink( $pages[0]->ID ) : home_url( '/' );
+	if ( ! $page || 'publish' !== $page->post_status ) {
+		$pages = get_pages(
+			array(
+				'meta_key'   => '_wp_page_template',
+				'meta_value' => 'page-associado.php',
+				'number'     => 1,
+			)
+		);
+		$page = ! empty( $pages ) ? $pages[0] : null;
+	}
+
+	$url = ( $page && 'publish' === $page->post_status ) ? get_permalink( $page->ID ) : home_url( '/' );
 	return $url;
 }
 
