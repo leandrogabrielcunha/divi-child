@@ -81,6 +81,21 @@ function setceb_associado_perfil_url() {
 	return $url;
 }
 
+/**
+ * Garante que a pagina /perfil-do-associado/ use o template da area
+ * do associado, mesmo que o modelo nao esteja selecionado no editor.
+ */
+function setceb_force_associado_template( $template ) {
+	if ( is_page( 'perfil-do-associado' ) ) {
+		$custom = get_stylesheet_directory() . '/page-associado.php';
+		if ( file_exists( $custom ) ) {
+			return $custom;
+		}
+	}
+	return $template;
+}
+add_filter( 'template_include', 'setceb_force_associado_template', 99 );
+
 /* ------------------------------------------------------------
  * 2. Redirecionamentos (associado nao usa o painel)
  * ------------------------------------------------------------ */
