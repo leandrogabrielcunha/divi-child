@@ -371,10 +371,10 @@ body.login form {
 body.login .setceb-card {
 	background: var(--setceb-white);
 	border-radius: 24px;
-	padding: 48px 48px 40px;
+	padding: 52px 52px 44px;
 	box-shadow:
-		0 24px 64px rgba(6, 28, 60, 0.38),
-		0 8px 22px rgba(6, 28, 60, 0.16);
+		0 14px 44px rgba(6, 28, 60, 0.16),
+		0 4px 16px rgba(6, 28, 60, 0.10);
 	animation: setceb-card-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -393,10 +393,10 @@ body.login .setceb-logo {
 }
 
 body.login .setceb-title {
-	font-size: 26px;
+	font-size: 30px;
 	font-weight: 700;
 	color: var(--setceb-blue);
-	letter-spacing: -0.3px;
+	letter-spacing: -0.5px;
 	margin: 0 0 8px !important;
 }
 
@@ -662,9 +662,9 @@ body.login .setceb-note {
 }
 
 body.login .setceb-note .setceb-icon {
-	width: 15px;
-	height: 15px;
-	color: #9fb0c4;
+	width: 13px;
+	height: 13px;
+	color: #94a3b8;
 }
 
 /* ---------- Erros e mensagens ---------- */
