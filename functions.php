@@ -121,3 +121,10 @@ function setceb_login_footer() {
 	<?php
 }
 add_action( 'login_footer', 'setceb_login_footer' );
+
+/*================================================
+#SETCEB - Regras de negocio do Associado
+Role "associado", noticias restritas e area do
+associado (perfil). Ver includes/associado.php
+================================================*/
+require_once get_stylesheet_directory() . '/includes/associado.php';
