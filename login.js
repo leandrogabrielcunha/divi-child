@@ -86,8 +86,13 @@ Reorganiza o HTML padrao do WordPress para montar o card customizado. */
 	}
 
 	function decorateForm(card) {
-		var form = document.getElementById('loginform');
+		var form = document.getElementById('loginform') || document.getElementById('lostpasswordform') || document.getElementById('registerform');
 		if (!form) {
+			return;
+		}
+
+		if (form.id !== 'loginform') {
+			placeholderFields(form);
 			return;
 		}
 
@@ -95,6 +100,25 @@ Reorganiza o HTML padrao do WordPress para montar o card customizado. */
 		decorateField('.login-password', 'lock', 'Senha', true);
 		decorateSubmit(form);
 		buildActions();
+	}
+
+	function placeholderFields(form) {
+		var inputs = form.querySelectorAll('input');
+		var i, name;
+		for (i = 0; i < inputs.length; i += 1) {
+			var input = inputs[i];
+			if (input.type === 'hidden' || input.type === 'submit' || input.type === 'button') {
+				continue;
+			}
+			name = input.name || '';
+			if (name === 'user_login') {
+				input.setAttribute('placeholder', form.id === 'lostpasswordform' ? 'Usu\u00e1rio ou E-mail' : 'Usu\u00e1rio');
+			} else if (name === 'user_email') {
+				input.setAttribute('placeholder', 'E-mail');
+			} else if (name === 'pass1' || name === 'pass2') {
+				input.setAttribute('placeholder', 'Senha');
+			}
+		}
 	}
 
 	function buildActions() {

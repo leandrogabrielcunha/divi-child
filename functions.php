@@ -100,6 +100,13 @@ function setceb_login_header_title() {
 }
 add_filter( 'login_headertext', 'setceb_login_header_title' );
 
+function setceb_login_form_labels( $defaults ) {
+	$defaults['label_username'] = 'Usuário';
+	$defaults['label_password'] = 'Senha';
+	return $defaults;
+}
+add_filter( 'login_form_defaults', 'setceb_login_form_labels' );
+
 function setceb_login_footer() {
 	?>
 	<!-- SETCEB: fundo decorativo (curvas, circulos e pontos) -->
