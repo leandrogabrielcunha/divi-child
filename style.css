@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.9.2
+Version: 1.10.0
 Template: Divi
 */
 
@@ -751,5 +751,460 @@ body.setceb-perfil-associado *::after {
 
 	.setceb-perfil__boletos {
 		grid-template-columns: 1fr;
+	}
+}
+
+/*============================================================
+SETCEB - Header global customizado (v1.10.0)
+Estrutura injetada via wp_body_open (includes/setceb-header.php).
+O header nativo do Divi e ocultado abaixo.
+============================================================*/
+
+/* ---------- Ocultar o header nativo do Divi ---------- */
+body:not(.setceb-perfil-associado) #page-container #top-header,
+body:not(.setceb-perfil-associado) #page-container #main-header,
+body:not(.setceb-perfil-associado) #page-container .et-l--header {
+	display: none !important;
+}
+
+body:not(.setceb-perfil-associado) #page-container {
+	padding-top: 0 !important;
+}
+
+/* ---------- Estrutura ---------- */
+.setceb-header {
+	position: relative;
+	z-index: 1000;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	background: #fff;
+}
+
+.setceb-header a {
+	text-decoration: none;
+}
+
+/* Faixa topo azul-marinho */
+.setceb-header__top {
+	height: 8px;
+	background: #122338;
+}
+
+/* Barra principal */
+.setceb-header__main {
+	background: #fff;
+}
+
+.setceb-header__main-inner {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 28px;
+	max-width: 1280px;
+	margin: 0 auto;
+	padding: 16px 24px;
+}
+
+/* Logo + subtitulo */
+.setceb-header__logo {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+}
+
+.setceb-header__logo img {
+	display: block;
+	height: 54px;
+	width: auto;
+}
+
+.setceb-header__subtitle {
+	max-width: 230px;
+	font-size: 10.5px;
+	line-height: 1.45;
+	letter-spacing: 0.4px;
+	text-transform: uppercase;
+	color: #64748b;
+}
+
+/* Busca central */
+.setceb-header__search {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	max-width: 520px;
+	margin: 0 auto;
+	background: #f2f2f2;
+	border: 1px solid #e6e9ef;
+	border-radius: 999px;
+	overflow: hidden;
+	transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.setceb-header__search:focus-within {
+	border-color: #0d8199;
+	box-shadow: 0 0 0 4px rgba(13, 129, 153, 0.12);
+}
+
+.setceb-header__search input[type="search"] {
+	flex: 1;
+	min-width: 0;
+	padding: 12px 18px;
+	font-size: 14px;
+	color: #0f172a;
+	background: transparent;
+	border: 0;
+	outline: none;
+	-webkit-appearance: none;
+}
+
+.setceb-header__search input::placeholder {
+	color: #94a3b8;
+	opacity: 1;
+}
+
+.setceb-header__search button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	align-self: stretch;
+	width: 48px;
+	border: 0;
+	background: #0d8199;
+	color: #fff;
+	cursor: pointer;
+	transition: background 0.18s ease;
+}
+
+.setceb-header__search button:hover {
+	background: #0b6f84;
+}
+
+.setceb-header__search button svg {
+	width: 18px;
+	height: 18px;
+}
+
+/* Acoes (Area do Associado + icone de usuario) */
+.setceb-header__actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 10px;
+}
+
+.setceb-header__area {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 44px;
+	padding: 0 18px;
+	font-size: 12.5px;
+	font-weight: 700;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
+	color: #fff;
+	background: #163459;
+	border-radius: 10px;
+	transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.setceb-header__area:hover {
+	background: #123159;
+	transform: translateY(-1px);
+}
+
+.setceb-header__user {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	color: #fff;
+	background: #163459;
+	border-radius: 10px;
+	transition: background 0.18s ease;
+}
+
+.setceb-header__user:hover {
+	background: #123159;
+}
+
+.setceb-header__user svg {
+	width: 20px;
+	height: 20px;
+}
+
+/* Botao hamburguer (mobile) */
+.setceb-header__burger {
+	display: none;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border: 0;
+	border-radius: 10px;
+	background: #163459;
+	color: #fff;
+	cursor: pointer;
+}
+
+.setceb-header__burger:hover {
+	background: #123159;
+}
+
+.setceb-header__burger svg {
+	width: 22px;
+	height: 22px;
+}
+
+/* Menu principal */
+.setceb-header__nav {
+	position: relative;
+	background: #fff;
+	border-top: 1px solid #eceff4;
+	box-shadow: 0 2px 10px rgba(18, 35, 56, 0.05);
+}
+
+.setceb-header__list,
+.setceb-header__list ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.setceb-header__list {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	max-width: 1280px;
+	margin: 0 auto;
+	padding: 0 24px;
+}
+
+.setceb-header__list > li {
+	position: relative;
+}
+
+.setceb-header__list > li > a {
+	display: block;
+	padding: 16px 13px;
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.4px;
+	text-transform: uppercase;
+	color: #123159;
+	white-space: nowrap;
+	transition: color 0.18s ease;
+}
+
+.setceb-header__list > li > a:hover {
+	color: #0d8199;
+}
+
+/* Item ASSOCIE-SE em destaque */
+.setceb-header__list > li > a.setceb-header__associe {
+	margin: 9px 0 9px 12px;
+	padding: 10px 20px;
+	color: #fff;
+	background: #0d8199;
+	border-radius: 999px;
+}
+
+.setceb-header__list > li > a.setceb-header__associe:hover {
+	color: #fff;
+	background: #0b6f84;
+}
+
+/* Dropdowns */
+.setceb-header__list .sub-menu {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	min-width: 230px;
+	padding: 6px 0;
+	background: #fff;
+	border: 1px solid #eceff4;
+	border-top: 3px solid #0d8199;
+	border-radius: 0 0 10px 10px;
+	box-shadow: 0 18px 40px rgba(18, 35, 56, 0.16);
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(8px);
+	transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+	z-index: 20;
+}
+
+.setceb-header__list > li:hover > .sub-menu,
+.setceb-header__list > li:focus-within > .sub-menu {
+	opacity: 1;
+	visibility: visible;
+	transform: none;
+}
+
+.setceb-header__list .sub-menu .sub-menu {
+	top: 0;
+	left: 100%;
+	margin-left: 1px;
+	border-top: 0;
+	border-left: 3px solid #0d8199;
+	border-radius: 0 10px 10px 0;
+}
+
+.setceb-header__list .sub-menu a {
+	display: block;
+	padding: 10px 18px;
+	font-size: 13px;
+	font-weight: 600;
+	color: #334155;
+}
+
+.setceb-header__list .sub-menu a:hover {
+	color: #0d8199;
+	background: #f7f9fb;
+}
+
+/* Acoes do menu mobile (visiveis apenas no hamburguer) */
+.setceb-header__mobile-actions {
+	display: none;
+}
+
+.setceb-header__mobile-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 46px;
+	margin-top: 10px;
+	padding: 0 18px;
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.4px;
+	text-transform: uppercase;
+	color: #fff;
+	border-radius: 10px;
+}
+
+.setceb-header__mobile-btn--area {
+	background: #163459;
+}
+
+.setceb-header__mobile-btn--associe {
+	background: #0d8199;
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 1199px) {
+	.setceb-header__subtitle {
+		display: none;
+	}
+
+	.setceb-header__main-inner {
+		gap: 20px;
+	}
+
+	.setceb-header__list > li > a {
+		padding: 16px 10px;
+		font-size: 12px;
+	}
+}
+
+@media (max-width: 1023px) {
+	.setceb-header__search {
+		display: none;
+	}
+
+	.setceb-header__main-inner {
+		grid-template-columns: 1fr auto;
+		padding: 14px 16px;
+	}
+
+	.setceb-header__logo img {
+		height: 44px;
+	}
+
+	.setceb-header__area {
+		display: none;
+	}
+
+	.setceb-header__burger {
+		display: inline-flex;
+	}
+
+	/* Menu vira painel deslizante sob a barra */
+	.setceb-header__nav {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		display: none;
+		max-height: calc(100vh - 80px);
+		overflow-y: auto;
+		border-top: 3px solid #0d8199;
+		box-shadow: 0 24px 48px rgba(18, 35, 56, 0.2);
+		z-index: 100;
+	}
+
+	.setceb-header__nav.is-open {
+		display: block;
+	}
+
+	.setceb-header__list {
+		flex-direction: column;
+		align-items: stretch;
+		padding: 10px 16px;
+	}
+
+	.setceb-header__list > li > a {
+		padding: 13px 4px;
+		font-size: 13px;
+		border-bottom: 1px solid #f1f3f7;
+	}
+
+	/* O destaque ASSOCIE-SE sai do menu e vira botao proprio */
+	.setceb-header__list > li > a.setceb-header__associe,
+	.setceb-header__list > li.setceb-header__associe-item {
+		display: none;
+	}
+
+	.setceb-header__list .sub-menu {
+		position: static;
+		min-width: 0;
+		padding: 0 0 4px 14px;
+		opacity: 1;
+		visibility: visible;
+		transform: none;
+		border: 0;
+		border-left: 3px solid #0d8199;
+		border-radius: 0;
+		box-shadow: none;
+	}
+
+	.setceb-header__list .sub-menu .sub-menu {
+		left: 0;
+		padding-left: 14px;
+		border-left: 3px solid #0d8199;
+	}
+
+	.setceb-header__list .sub-menu a {
+		padding: 10px 4px;
+		border-bottom: 1px solid #f8fafc;
+	}
+
+	.setceb-header__mobile-actions {
+		display: flex;
+		flex-direction: column;
+		padding: 8px 16px 18px;
+	}
+}
+
+@media (max-width: 480px) {
+	.setceb-header__main-inner {
+		padding: 12px;
+		gap: 12px;
+	}
+
+	.setceb-header__logo img {
+		height: 38px;
 	}
 }

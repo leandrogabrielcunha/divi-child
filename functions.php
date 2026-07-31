@@ -128,3 +128,10 @@ Role "associado", noticias restritas e area do
 associado (perfil). Ver includes/associado.php
 ================================================*/
 require_once get_stylesheet_directory() . '/includes/associado.php';
+
+/*================================================
+#SETCEB - Header global customizado
+Estrutura do cabecalho e menu principal.
+Ver includes/setceb-header.php
+================================================*/
+require_once get_stylesheet_directory() . '/includes/setceb-header.php';
