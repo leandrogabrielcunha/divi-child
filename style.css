@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.0.0
+Version: 1.1.0
 Template: Divi
 */
 
@@ -143,6 +143,7 @@ body.login input[type="email"] {
 	border-radius: 12px !important;
 	font-size: 15px !important;
 	box-shadow: none !important;
+	padding: 14px 16px !important;
 	transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -151,7 +152,7 @@ body.login .setceb-field input[type="password"] {
 	width: 100% !important;
 	height: 58px !important;
 	line-height: 1 !important;
-	padding: 0 48px !important;
+	padding: 14px 48px !important;
 	color: var(--setceb-ink) !important;
 	border-radius: 14px !important;
 	margin: 0 !important;
@@ -315,24 +316,6 @@ body.login .setceb-submit:active {
 body.login .setceb-submit:focus-visible {
 	outline: 3px solid rgba(31, 183, 201, 0.45);
 	outline-offset: 2px;
-}
-
-/* ---------- Nota de acesso ---------- */
-body.login .setceb-note {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 8px;
-	margin: 22px 0 0;
-	padding: 0;
-	font-size: 12.5px;
-	color: #8a97a9;
-}
-
-body.login .setceb-note .setceb-icon {
-	width: 15px;
-	height: 15px;
-	color: #9fb0c4;
 }
 
 /* ---------- Links ---------- */

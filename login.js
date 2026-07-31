@@ -93,7 +93,6 @@ Reorganiza o HTML padrao do WordPress para montar o card customizado. */
 		decorateField('.login-password', 'lock', 'Senha', true);
 		decorateRemember();
 		decorateSubmit(form);
-		appendAccessNote(form);
 
 		var nav = document.getElementById('nav');
 		if (nav) {
@@ -170,12 +169,5 @@ Reorganiza o HTML padrao do WordPress para montar o card customizado. */
 		if (row) {
 			row.classList.add('setceb-submit-row');
 		}
-	}
-
-	function appendAccessNote(form) {
-		var note = document.createElement('p');
-		note.className = 'setceb-note';
-		note.innerHTML = ICONS.lock + '<span>Acesso exclusivo para usu\u00e1rios autorizados.</span>';
-		form.appendChild(note);
 	}
 })();
