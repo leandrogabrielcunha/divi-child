@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.1.0
+Version: 1.2.0
 Template: Divi
 */
 
@@ -83,52 +83,35 @@ body.login .setceb-card {
 	animation: setceb-card-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* ---------- Marca (logo, titulo e subtitulo) ---------- */
+/* ---------- Marca (logo) ---------- */
 body.login .setceb-brand {
 	text-align: center;
-	margin-bottom: 30px;
+	margin-bottom: 28px;
 }
 
 body.login .setceb-logo {
-	display: inline-block;
-	margin-bottom: 22px;
-	filter: drop-shadow(0 6px 14px rgba(18, 61, 115, 0.28));
-}
-
-body.login .setceb-title {
-	font-size: 26px;
-	font-weight: 700;
-	color: var(--setceb-blue);
-	letter-spacing: -0.3px;
-	margin: 0 0 6px !important;
-}
-
-body.login .setceb-subtitle {
-	font-size: 15px;
-	color: var(--setceb-muted);
-	margin: 0 0 18px !important;
-}
-
-body.login .setceb-divider {
 	display: block;
-	width: 72px;
-	height: 4px;
+	max-width: 220px;
+	width: auto;
+	height: auto;
 	margin: 0 auto;
-	border-radius: 999px;
-	background: linear-gradient(90deg, var(--setceb-blue), var(--setceb-turquoise));
 }
 
 /* ---------- Campos ---------- */
 body.login .setceb-field {
-	margin: 0 0 18px;
+	margin: 0 0 16px;
 }
 
 body.login .setceb-field > label {
-	display: block;
-	font-size: 13px;
-	font-weight: 600;
-	color: #334155;
-	margin: 0 0 8px;
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+	border: 0;
 }
 
 body.login .setceb-field-body {
@@ -166,6 +149,15 @@ body.login .setceb-field input[type="password"] {
 body.login .setceb-field input:focus {
 	border-color: var(--setceb-blue-light) !important;
 	box-shadow: 0 0 0 4px rgba(29, 91, 159, 0.12) !important;
+}
+
+body.login .setceb-field input::placeholder {
+	color: #9aa7b8;
+	opacity: 1;
+}
+
+body.login .setceb-field input::-ms-input-placeholder {
+	color: #9aa7b8;
 }
 
 body.login .setceb-icon {
@@ -225,7 +217,7 @@ body.login .setceb-toggle-password .setceb-icon {
 body.login .setceb-remember {
 	display: flex;
 	align-items: center;
-	margin: 6px 0 24px;
+	margin: 4px 0 28px;
 }
 
 body.login .setceb-remember label {
@@ -284,6 +276,12 @@ body.login .setceb-submit-row {
 	margin: 0 !important;
 }
 
+body.login .setceb-actions {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 12px;
+}
+
 body.login .setceb-submit {
 	width: 100% !important;
 	height: 56px !important;
@@ -319,22 +317,34 @@ body.login .setceb-submit:focus-visible {
 }
 
 /* ---------- Links ---------- */
-body.login #nav {
-	margin: 20px 0 0 !important;
+body.login .setceb-nav {
+	margin: 0 !important;
 	padding: 0 !important;
-	text-align: center;
+	display: flex;
+	align-items: stretch;
 }
 
-body.login #nav a {
-	color: var(--setceb-muted);
-	font-size: 13.5px;
-	font-weight: 500;
-	text-decoration: none;
-	transition: color 0.2s ease;
-}
-
-body.login #nav a:hover {
+body.login .setceb-nav a {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 56px;
+	font-size: 16px;
+	font-weight: 600;
+	letter-spacing: 0.2px;
 	color: var(--setceb-blue-light);
+	background: #fff;
+	border: 1.5px solid var(--setceb-blue-light);
+	border-radius: 14px;
+	text-decoration: none;
+	transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+body.login .setceb-nav a:hover {
+	background: var(--setceb-gray);
+	color: var(--setceb-blue);
+	border-color: var(--setceb-blue);
 }
 
 body.login a:focus-visible {
@@ -482,10 +492,30 @@ body.login .setceb-bg-dot--d {
 
 	body.login #login {
 		width: 100%;
+		max-width: 480px;
 	}
 
 	body.login .setceb-card {
-		padding: 34px 26px 28px;
+		padding: 32px 22px 26px;
 		border-radius: 20px;
+	}
+
+	body.login .setceb-logo {
+		max-width: 180px;
+	}
+
+	body.login .setceb-field input[type="text"],
+	body.login .setceb-field input[type="password"] {
+		height: 54px !important;
+	}
+
+	body.login .setceb-submit,
+	body.login .setceb-nav a {
+		height: 54px !important;
+		font-size: 15px !important;
+	}
+
+	body.login .setceb-actions {
+		gap: 10px;
 	}
 }

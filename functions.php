@@ -68,6 +68,14 @@ function setceb_login_enqueue_assets() {
 		$theme->get( 'Version' ),
 		true
 	);
+
+	wp_localize_script(
+		'setceb-login',
+		'SetcebLogin',
+		array(
+			'logo' => get_stylesheet_directory_uri() . '/logo-cor-02.png',
+		)
+	);
 }
 add_action( 'login_enqueue_scripts', 'setceb_login_enqueue_assets' );
 

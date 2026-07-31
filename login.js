@@ -17,6 +17,10 @@ Reorganiza o HTML padrao do WordPress para montar o card customizado. */
 		'<circle cx="24" cy="19" r="2.5" fill="#1FB7C9"/>' +
 		'</svg>';
 
+	var LOGO_HTML = window.SetcebLogin && window.SetcebLogin.logo
+		? '<img class="setceb-logo" src="' + window.SetcebLogin.logo + '" alt="SETCEB" width="265" height="62" />'
+		: SVG_LOGO;
+
 	var ICONS = {
 		user: '<svg class="setceb-icon" aria-hidden="true"><use href="#setceb-icon-user"/></svg>',
 		lock: '<svg class="setceb-icon" aria-hidden="true"><use href="#setceb-icon-lock"/></svg>',
@@ -70,16 +74,9 @@ Reorganiza o HTML padrao do WordPress para montar o card customizado. */
 	}
 
 	function buildBrand(card) {
-		var isLostPassword = document.body.classList.contains('login-action-lostpassword');
-
 		var brand = document.createElement('div');
 		brand.className = 'setceb-brand';
-		brand.innerHTML =
-			SVG_LOGO +
-			'<h1 class="setceb-title">' + (isLostPassword ? 'Recuperar senha' : 'Fa\u00e7a login') + '</h1>' +
-			'<p class="setceb-subtitle">' + (isLostPassword ? 'informe seu usu\u00e1rio' : 'para continuar') + '</p>' +
-			'<span class="setceb-divider"></span>';
-
+		brand.innerHTML = LOGO_HTML;
 		card.insertBefore(brand, card.firstChild);
 	}
 
@@ -93,10 +90,29 @@ Reorganiza o HTML padrao do WordPress para montar o card customizado. */
 		decorateField('.login-password', 'lock', 'Senha', true);
 		decorateRemember();
 		decorateSubmit(form);
+		buildActions();
+	}
+
+	function buildActions() {
+		var row = document.querySelector('.setceb-submit-row');
+		if (!row) {
+			return;
+		}
 
 		var nav = document.getElementById('nav');
+		var link = nav ? nav.querySelector('a') : null;
+		if (link && document.body.classList.contains('login-action-login')) {
+			link.textContent = 'Recuperar senha';
+		}
+
+		var actions = document.createElement('div');
+		actions.className = 'setceb-actions';
+		row.parentNode.insertBefore(actions, row);
+		actions.appendChild(row);
+
 		if (nav) {
 			nav.classList.add('setceb-nav');
+			actions.appendChild(nav);
 		}
 	}
 
@@ -117,6 +133,7 @@ Reorganiza o HTML padrao do WordPress para montar o card customizado. */
 		if (!input) {
 			return;
 		}
+		input.setAttribute('placeholder', labelText);
 
 		var body = document.createElement('div');
 		body.className = 'setceb-field-body';
