@@ -1,13 +1,9 @@
-/* SETCEB - Tela de login
-A estrutura do formulario e renderizada no servidor (functions.php).
-Este script apenas adiciona o comportamento do botao mostrar/ocultar senha. */
+/* SETCEB - Tela de login (modelo da branch main)
+O layout e feito 100% por CSS (style.css). Este script apenas
+melhora a tela de forma progressiva, SEM alterar a estrutura
+do DOM: define os placeholders e o texto do botao de acesso. */
 (function () {
 	'use strict';
-
-	var ICONS = {
-		eye: '<svg class="setceb-icon" aria-hidden="true"><use href="#setceb-icon-eye"/></svg>',
-		eyeOff: '<svg class="setceb-icon" aria-hidden="true"><use href="#setceb-icon-eye-off"/></svg>'
-	};
 
 	function whenReady(fn) {
 		if (document.readyState !== 'loading') {
@@ -18,21 +14,24 @@ Este script apenas adiciona o comportamento do botao mostrar/ocultar senha. */
 	}
 
 	whenReady(function () {
-		var toggles = document.querySelectorAll('.setceb-toggle-password');
-		var i;
-		for (i = 0; i < toggles.length; i += 1) {
-			(function (toggle) {
-				toggle.addEventListener('click', function () {
-					var input = toggle.parentNode.querySelector('input');
-					if (!input) {
-						return;
-					}
-					var visible = input.type === 'text';
-					input.type = visible ? 'password' : 'text';
-					toggle.innerHTML = visible ? ICONS.eye : ICONS.eyeOff;
-					toggle.setAttribute('aria-label', visible ? 'Mostrar senha' : 'Ocultar senha');
-				});
-			})(toggles[i]);
+		var login = document.getElementById('login');
+		if (!login) {
+			return;
+		}
+
+		var log = document.getElementById('user_login');
+		if (log) {
+			log.setAttribute('placeholder', 'Usu\u00e1rio');
+		}
+
+		var pass = document.getElementById('user_pass');
+		if (pass) {
+			pass.setAttribute('placeholder', 'Senha');
+		}
+
+		var submit = document.getElementById('wp-submit');
+		if (submit) {
+			submit.value = 'Acessar';
 		}
 	});
 })();
