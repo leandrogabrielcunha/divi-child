@@ -48,7 +48,8 @@ add_action('after_setup_theme', 'dt_translation');
 
 /*================================================
 #SETCEB - Custom login screen (wp-login.php)
-Reconstroi a tela de login sem tocar no core.
+A estrutura da tela e gerada no servidor (buffer no login_init),
+sem alterar o core. O login.js so cuida do botao mostrar senha.
 CSS: style.css | JS: login.js | PHP: este arquivo
 ================================================*/
 function setceb_login_enqueue_assets() {
@@ -68,14 +69,6 @@ function setceb_login_enqueue_assets() {
 		$theme->get( 'Version' ),
 		true
 	);
-
-	wp_localize_script(
-		'setceb-login',
-		'SetcebLogin',
-		array(
-			'logo' => get_stylesheet_directory_uri() . '/logo-cor-02.png',
-		)
-	);
 }
 add_action( 'login_enqueue_scripts', 'setceb_login_enqueue_assets' );
 
@@ -86,15 +79,6 @@ function setceb_login_head() {
 		. 'body.login h1:not(.setceb-title),'
 		. 'body.login .language-switcher,'
 		. 'body.login #backtoblog{display:none!important}'
-	);
-
-	wp_print_inline_script_tag(
-		"document.documentElement.classList.add('setceb-js');"
-		. "window.setTimeout(function(){"
-		. "if(!(window.SetcebLogin&&window.SetcebLogin.ready)){"
-		. "document.documentElement.classList.remove('setceb-js');"
-		. "}"
-		. "},4000);"
 	);
 }
 add_action( 'login_head', 'setceb_login_head' );
@@ -109,12 +93,100 @@ function setceb_login_header_title() {
 }
 add_filter( 'login_headertext', 'setceb_login_header_title' );
 
-function setceb_login_form_labels( $defaults ) {
-	$defaults['label_username'] = 'Usuário';
-	$defaults['label_password'] = 'Senha';
-	return $defaults;
+/* Captura a pagina do login para reescrever o formulario no servidor. */
+function setceb_login_buffer_start() {
+	ob_start( 'setceb_login_buffer_callback' );
 }
-add_filter( 'login_form_defaults', 'setceb_login_form_labels' );
+add_action( 'login_init', 'setceb_login_buffer_start' );
+
+function setceb_login_buffer_callback( $html ) {
+	if ( false === strpos( $html, 'id="loginform"' ) ) {
+		return $html;
+	}
+	return setceb_login_rewrite( $html );
+}
+
+function setceb_login_rewrite( $html ) {
+	/* Move mensagens (erro/sucesso) para dentro do card. */
+	$messages = '';
+	$patterns = array(
+		'/<div[^>]*id="login_error"[^>]*>.*?<\/div>/s',
+		'/<div[^>]*class="[^"]*\b(message|success)\b[^"]*"[^>]*>.*?<\/div>/s',
+	);
+	foreach ( $patterns as $pattern ) {
+		if ( preg_match( $pattern, $html, $m ) ) {
+			$messages .= $m[0];
+			$html      = str_replace( $m[0], '', $html );
+		}
+	}
+
+	$card = '<div class="setceb-card">' . setceb_login_brand_html() . setceb_login_build_form( $messages ) . '</div>';
+
+	$html = preg_replace( '/<form[^>]*id="loginform"[^>]*>.*?<\/form>/s', $card, $html, 1 );
+
+	/* Remove elementos padrao (o CSS ja oculta, o DOM fica limpo). */
+	$html = preg_replace( '/<h1[^>]*>.*?<\/h1>/s', '', $html, 1 );
+	$html = preg_replace( '/<p[^>]*\b(id|class)="[^"]*backtoblog[^"]*"[^>]*>.*?<\/p>/s', '', $html, 1 );
+	$html = preg_replace( '/<div[^>]*\bclass="[^"]*language-switcher[^"]*"[^>]*>.*?<\/div>/s', '', $html, 1 );
+
+	return $html;
+}
+
+function setceb_login_brand_html() {
+	$logo = get_stylesheet_directory_uri() . '/logo-cor-02.png';
+	return '<div class="setceb-brand">'
+		. '<img class="setceb-logo" src="' . esc_url( $logo ) . '" alt="SETCEB" width="265" height="62">'
+		. '</div>';
+}
+
+function setceb_login_build_form( $messages = '' ) {
+	$action   = esc_url( site_url( 'wp-login.php', 'login_post' ) );
+	$redirect = isset( $_REQUEST['redirect_to'] ) && is_string( $_REQUEST['redirect_to'] ) ? wp_unslash( $_REQUEST['redirect_to'] ) : admin_url();
+	$user     = isset( $_POST['log'] ) ? wp_unslash( $_POST['log'] ) : '';
+	$lost_url = wp_lostpassword_url();
+
+	$icon_user = '<svg class="setceb-icon" aria-hidden="true"><use href="#setceb-icon-user"/></svg>';
+	$icon_lock = '<svg class="setceb-icon" aria-hidden="true"><use href="#setceb-icon-lock"/></svg>';
+	$icon_eye  = '<svg class="setceb-icon" aria-hidden="true"><use href="#setceb-icon-eye"/></svg>';
+
+	ob_start();
+	?>
+	<form name="loginform" id="loginform" action="<?php echo $action; ?>" method="post">
+		<?php echo $messages; ?>
+
+		<div class="setceb-field setceb-field--user">
+			<label for="user_login">Usuário</label>
+			<div class="setceb-field-body">
+				<?php echo $icon_user; ?>
+				<input type="text" name="log" id="user_login" class="input" value="<?php echo esc_attr( $user ); ?>" size="20" autocapitalize="off" autocomplete="username" placeholder="Usuário" required="required">
+			</div>
+		</div>
+
+		<div class="setceb-field setceb-field--lock">
+			<label for="user_pass">Senha</label>
+			<div class="setceb-field-body">
+				<?php echo $icon_lock; ?>
+				<input type="password" name="pwd" id="user_pass" class="input" value="" size="20" autocomplete="current-password" spellcheck="false" placeholder="Senha" required="required">
+				<button type="button" class="setceb-toggle-password" aria-label="Mostrar senha">
+					<?php echo $icon_eye; ?>
+				</button>
+			</div>
+		</div>
+
+		<div class="setceb-actions">
+			<p class="submit setceb-submit-row">
+				<input type="submit" name="wp-submit" id="wp-submit" class="button button-primary button-large setceb-submit" value="Acessar">
+				<input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect ); ?>">
+				<input type="hidden" name="testcookie" value="1">
+			</p>
+			<p id="nav" class="setceb-nav">
+				<a href="<?php echo esc_url( $lost_url ); ?>">Recuperar senha</a>
+			</p>
+		</div>
+	</form>
+	<?php
+	return ob_get_clean();
+}
 
 function setceb_login_footer() {
 	?>
