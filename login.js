@@ -96,8 +96,21 @@ Reorganiza o HTML padrao do WordPress para montar o card customizado. */
 			return;
 		}
 
-		decorateField('.login-username', 'user', 'Usu\u00e1rio', false);
-		decorateField('.login-password', 'lock', 'Senha', true);
+		var userLabel = form.querySelector('label[for="user_login"]');
+		if (userLabel) {
+			decorateField(userLabel.parentNode, 'user', 'Usu\u00e1rio', false);
+		}
+
+		var passLabel = form.querySelector('label[for="user_pass"]');
+		if (passLabel) {
+			var passWrap = passLabel.parentNode;
+			var wpPwd = passWrap.querySelector('.wp-pwd');
+			if (wpPwd) {
+				wpPwd.remove();
+			}
+			decorateField(passWrap, 'lock', 'Senha', true);
+		}
+
 		decorateSubmit(form);
 		buildActions();
 	}
@@ -144,8 +157,7 @@ Reorganiza o HTML padrao do WordPress para montar o card customizado. */
 		}
 	}
 
-	function decorateField(selector, icon, labelText, withToggle) {
-		var field = document.querySelector(selector);
+	function decorateField(field, icon, labelText, withToggle) {
 		if (!field) {
 			return;
 		}
