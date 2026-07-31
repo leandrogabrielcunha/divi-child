@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.5.0
+Version: 1.6.0
 Template: Divi
 */
 
@@ -12,6 +12,17 @@ Template: Divi
 SETCEB - Tela de login (wp-login.php)
 Escopado em body.login. Reconstroi a tela padrao do WordPress.
 ============================================================*/
+/* Evita o flash do layout padrao: o JS (setceb-js) esconde #login
+ate reorganizar o DOM; se o script falhar, um timeout remove a classe. */
+html.setceb-js body.login:not(.setceb-ready) #login {
+	visibility: hidden;
+	opacity: 0;
+}
+
+html.setceb-js body.login #login {
+	transition: opacity 0.3s ease;
+}
+
 body.login {
 	--setceb-blue: #123D73;
 	--setceb-blue-light: #1D5B9F;

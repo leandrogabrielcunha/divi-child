@@ -87,6 +87,15 @@ function setceb_login_head() {
 		. 'body.login .language-switcher,'
 		. 'body.login #backtoblog{display:none!important}'
 	);
+
+	wp_print_inline_script_tag(
+		"document.documentElement.classList.add('setceb-js');"
+		. "window.setTimeout(function(){"
+		. "if(!(window.SetcebLogin&&window.SetcebLogin.ready)){"
+		. "document.documentElement.classList.remove('setceb-js');"
+		. "}"
+		. "},4000);"
+	);
 }
 add_action( 'login_head', 'setceb_login_head' );
 

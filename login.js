@@ -54,6 +54,9 @@ Reorganiza o HTML padrao do WordPress para montar o card customizado. */
 		decorateForm(card);
 
 		document.body.classList.add('setceb-ready');
+
+		window.SetcebLogin = window.SetcebLogin || {};
+		window.SetcebLogin.ready = true;
 	});
 
 	function removeDefaultElements() {
@@ -106,6 +109,10 @@ Reorganiza o HTML padrao do WordPress para montar o card customizado. */
 			var passWrap = passLabel.parentNode;
 			var wpPwd = passWrap.querySelector('.wp-pwd');
 			if (wpPwd) {
+				var pwdInput = wpPwd.querySelector('input');
+				if (pwdInput) {
+					passWrap.appendChild(pwdInput);
+				}
 				wpPwd.remove();
 			}
 			decorateField(passWrap, 'lock', 'Senha', true);
