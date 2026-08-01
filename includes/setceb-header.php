@@ -91,7 +91,16 @@ function setceb_header_markup() {
 	$home   = home_url( '/' );
 	$logo   = get_stylesheet_directory_uri() . '/logo-cor-02.png';
 	$perfil = setceb_associado_perfil_url();
-	$label  = 'Area do Associado';
+
+	if ( is_user_logged_in() ) {
+		$user       = wp_get_current_user();
+		$first_name = trim( (string) $user->first_name ) !== '' ? $user->first_name : $user->display_name;
+		$label      = sprintf( 'Olá, %s', $first_name );
+	} else {
+		$label = 'Area do Associado';
+	}
+
+	$user_class = is_user_logged_in() ? ' setceb-header__area--user' : '';
 
 	ob_start();
 	?>
@@ -113,7 +122,7 @@ function setceb_header_markup() {
 				</form>
 
 				<div class="setceb-header__actions">
-					<a class="setceb-header__area" href="<?php echo esc_url( $perfil ); ?>"><?php echo esc_html( $label ); ?></a>
+					<a class="setceb-header__area<?php echo esc_attr( $user_class ); ?>" href="<?php echo esc_url( $perfil ); ?>"><?php echo esc_html( $label ); ?></a>
 					<a class="setceb-header__user" href="<?php echo esc_url( $perfil ); ?>" aria-label="<?php echo esc_attr( $label ); ?>">
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"></path></svg>
 					</a>
@@ -127,7 +136,7 @@ function setceb_header_markup() {
 		<nav class="setceb-header__nav" id="setceb-header-menu" aria-label="Menu principal">
 			<?php setceb_header_menu(); ?>
 			<div class="setceb-header__mobile-actions">
-				<a class="setceb-header__mobile-btn setceb-header__mobile-btn--area" href="<?php echo esc_url( $perfil ); ?>"><?php echo esc_html( $label ); ?></a>
+				<a class="setceb-header__mobile-btn setceb-header__mobile-btn--area<?php echo esc_attr( $user_class ); ?>" href="<?php echo esc_url( $perfil ); ?>"><?php echo esc_html( $label ); ?></a>
 				<a class="setceb-header__mobile-btn setceb-header__mobile-btn--associe" href="<?php echo esc_url( setceb_associe_url() ); ?>">Associe-se</a>
 			</div>
 		</nav>
@@ -178,13 +187,23 @@ function setceb_header_menu_fallback() {
 		'associe-se'   => array( 'Associe-se', setceb_associe_url() ),
 	);
 
+	$current_path = trailingslashit( (string) wp_parse_url( home_url( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH ) );
+
 	echo '<ul class="setceb-header__list">';
 	foreach ( $items as $key => $item ) {
-		$class = ( 'associe-se' === $key ) ? ' setceb-header__associe' : '';
+		$item_path  = trailingslashit( (string) wp_parse_url( $item[1], PHP_URL_PATH ) );
+		$is_current = $item_path === $current_path;
+		$li_class   = ( 'associe-se' === $key ) ? ' setceb-header__associe-item' : '';
+		$link_class = ( 'associe-se' === $key ) ? ' setceb-header__associe' : '';
+
+		if ( $is_current ) {
+			$li_class .= ' current-menu-item';
+		}
+
 		printf(
 			'<li class="setceb-header__item%s"><a class="setceb-header__link%s" href="%s">%s</a></li>',
-			esc_attr( ( 'associe-se' === $key ) ? ' setceb-header__associe-item' : '' ),
-			esc_attr( $class ),
+			esc_attr( $li_class ),
+			esc_attr( $link_class ),
 			esc_url( $item[1] ),
 			esc_html( $item[0] )
 		);

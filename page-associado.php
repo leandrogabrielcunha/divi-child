@@ -12,7 +12,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$user        = wp_get_current_user();
 $is_entitled = setceb_is_associado() || current_user_can( 'manage_options' );
 $home        = home_url( '/' );
 $page_title  = $is_entitled ? 'Perfil do Associado' : 'Acesso restrito';
@@ -31,15 +30,6 @@ $page_title  = $is_entitled ? 'Perfil do Associado' : 'Acesso restrito';
 <?php echo setceb_header_markup(); ?>
 
 <main class="setceb-perfil">
-	<header class="setceb-perfil__header">
-		<nav class="setceb-perfil__nav">
-			<a href="<?php echo esc_url( $home ); ?>">Voltar ao site</a>
-			<?php if ( is_user_logged_in() ) : ?>
-				<a href="<?php echo esc_url( wp_logout_url( $home ) ); ?>">Sair</a>
-			<?php endif; ?>
-		</nav>
-	</header>
-
 	<div class="setceb-perfil__card">
 		<?php if ( ! is_user_logged_in() ) : ?>
 
@@ -60,11 +50,6 @@ $page_title  = $is_entitled ? 'Perfil do Associado' : 'Acesso restrito';
 			</div>
 
 		<?php else : ?>
-
-			<div class="setceb-perfil__hello">
-				<h1>Olá, <?php echo esc_html( $user->display_name ); ?></h1>
-				<p><?php echo esc_html( $user->user_email ); ?></p>
-			</div>
 
 			<h2 class="setceb-perfil__section-title">Geração de boletos</h2>
 			<div class="setceb-perfil__boletos">

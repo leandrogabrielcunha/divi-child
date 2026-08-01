@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.10.4
+Version: 1.10.5
 Template: Divi
 */
 
@@ -474,35 +474,6 @@ body.setceb-perfil-associado *::after {
 	padding: 32px 20px 56px;
 }
 
-.setceb-perfil__header {
-	display: flex;
-	align-items: center;
-	justify-content: flex-end;
-	gap: 8px;
-	margin-bottom: 22px;
-}
-
-.setceb-perfil__nav {
-	display: flex;
-	gap: 8px;
-}
-
-.setceb-perfil__nav a {
-	padding: 8px 14px;
-	font-size: 14px;
-	font-weight: 600;
-	color: rgba(255, 255, 255, 0.92);
-	text-decoration: none;
-	border: 1px solid rgba(255, 255, 255, 0.35);
-	border-radius: 10px;
-	transition: background 0.18s ease, color 0.18s ease;
-}
-
-.setceb-perfil__nav a:hover {
-	background: rgba(255, 255, 255, 0.12);
-	color: #fff;
-}
-
 .setceb-perfil__card {
 	padding: 36px;
 	background: var(--setceb-white);
@@ -510,18 +481,6 @@ body.setceb-perfil-associado *::after {
 	box-shadow:
 		0 24px 64px rgba(6, 28, 60, 0.38),
 		0 8px 22px rgba(6, 28, 60, 0.16);
-}
-
-.setceb-perfil__hello h1 {
-	margin: 0 0 4px;
-	font-size: 26px;
-	color: var(--setceb-ink);
-}
-
-.setceb-perfil__hello p {
-	margin: 0;
-	font-size: 14px;
-	color: var(--setceb-muted);
 }
 
 .setceb-perfil__section-title {
@@ -733,11 +692,6 @@ body.setceb-perfil-associado *::after {
 		padding: 20px 14px 40px;
 	}
 
-	.setceb-perfil__header {
-		justify-content: center;
-		margin-bottom: 18px;
-	}
-
 	.setceb-perfil__card {
 		padding: 24px 18px;
 		border-radius: 20px;
@@ -749,7 +703,7 @@ body.setceb-perfil-associado *::after {
 }
 
 /*============================================================
-SETCEB - Header global customizado (v1.10.4)
+SETCEB - Header global customizado (v1.10.5)
 Estrutura renderizada no topo via hook et_before_main_content.
 O header nativo do Divi e ocultado abaixo.
 ============================================================*/
@@ -899,6 +853,12 @@ body:not(.setceb-perfil-associado) #page-container {
 	transform: translateY(-1px);
 }
 
+.setceb-header__area--user {
+	text-transform: none;
+	font-size: 13.5px;
+	letter-spacing: 0.2px;
+}
+
 .setceb-header__user {
 	display: inline-flex;
 	align-items: center;
@@ -987,6 +947,31 @@ body:not(.setceb-perfil-associado) #page-container {
 	color: #0d8199;
 }
 
+/* Item ativo (pagina atual) */
+.setceb-header__list > li.current-menu-item > a,
+.setceb-header__list > li.current_page_item > a,
+.setceb-header__list > li.current-menu-ancestor > a,
+.setceb-header__list > li.current_page_ancestor > a {
+	color: #0d8199;
+}
+
+.setceb-header__list > li.current-menu-item > a:not(.setceb-header__associe)::after,
+.setceb-header__list > li.current_page_item > a:not(.setceb-header__associe)::after {
+	content: "";
+	position: absolute;
+	left: 13px;
+	right: 13px;
+	bottom: 0;
+	height: 3px;
+	background: #0d8199;
+	border-radius: 3px 3px 0 0;
+}
+
+.setceb-header__list .sub-menu li.current-menu-item > a,
+.setceb-header__list .sub-menu li.current_page_item > a {
+	color: #0d8199;
+}
+
 /* Item ASSOCIE-SE em destaque */
 .setceb-header__list > li > a.setceb-header__associe {
 	margin: 9px 0 9px 12px;
@@ -1071,6 +1056,11 @@ body:not(.setceb-perfil-associado) #page-container {
 
 .setceb-header__mobile-btn--area {
 	background: #163459;
+}
+
+.setceb-header__mobile-btn--area.setceb-header__area--user {
+	text-transform: none;
+	letter-spacing: 0.2px;
 }
 
 .setceb-header__mobile-btn--associe {
