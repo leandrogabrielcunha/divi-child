@@ -2,10 +2,9 @@
 /**
  * SETCEB - Header global customizado
  *
- * Estrutura do cabecalho (faixa topo + barra principal + menu) injetada
- * logo apos a abertura do <body>, via wp_body_open (Divi 4) ou
- * et_body_top (Divi 5). O header nativo do Divi e ocultado por CSS
- * (style.css).
+ * Estrutura do cabecalho (faixa topo + barra principal + menu) renderizada
+ * no topo do conteudo via hook proprio do Divi (et_before_main_content).
+ * O header nativo do Divi e ocultado por CSS (style.css).
  *
  * A pagina /perfil-do-associado/ usa template proprio e fica de fora.
  *
@@ -70,30 +69,21 @@ function setceb_associe_url() {
 }
 
 /**
- * O header deve renderizar nesta requisicao?
+ * Renderiza o header global no topo do conteudo (#main-content), logo
+ * apos a abertura do container principal do Divi. O header nativo do
+ * Divi e ocultado por CSS, entao o customizado fica no topo visual.
  *
- * Fora do admin, da pagina do perfil do associado e dos modos de
- * edicao/customizacao do Divi.
- *
- * @return bool
+ * Nunca na pagina do perfil do associado (template proprio, sem hooks
+ * do tema).
  */
-function setceb_should_render_header() {
-	if ( is_admin() || is_page( 'perfil-do-associado' ) || is_customize_preview() ) {
-		return false;
+function setceb_render_header() {
+	if ( is_page( 'perfil-do-associado' ) ) {
+		return;
 	}
 
-	// Saidas que nao sao paginas HTML completas.
-	if ( is_feed() || is_embed() || is_trackback() ) {
-		return false;
-	}
-
-	// Visual Builder do Divi (preview em iframe).
-	if ( isset( $_GET['et_fb'] ) ) {
-		return false;
-	}
-
-	return true;
+	echo setceb_header_markup();
 }
+add_action( 'et_before_main_content', 'setceb_render_header', 1 );
 
 /**
  * Markup completa do header global.
@@ -148,34 +138,6 @@ function setceb_header_markup() {
 	</header>
 	<?php
 	return ob_get_clean();
-}
-
-/**
- * Inicia o buffer da pagina no front-end. O header e injetado logo apos
- * a abertura do <body>, sem depender de hooks do tema (o Divi 5 nao
- * dispara wp_body_open no markup classico).
- */
-function setceb_inject_header_start() {
-	if ( setceb_should_render_header() ) {
-		ob_start( 'setceb_inject_header' );
-	}
-}
-add_action( 'template_redirect', 'setceb_inject_header_start', 1 );
-
-/**
- * Callback do buffer: injeta a markup do header apos <body ...>.
- *
- * @param string $html HTML completo da pagina.
- * @return string
- */
-function setceb_inject_header( $html ) {
-	$markup = setceb_header_markup();
-
-	if ( '' === $markup || false === stripos( $html, '<body' ) ) {
-		return $html;
-	}
-
-	return preg_replace( '/(<body[^>]*>)/i', '$1' . $markup, $html, 1 );
 }
 
 /* ------------------------------------------------------------
