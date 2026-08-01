@@ -70,21 +70,43 @@ function setceb_associe_url() {
 }
 
 /**
- * Renderiza o header global. Nunca na pagina do perfil do associado.
+ * O header deve renderizar nesta requisicao?
+ *
+ * Fora do admin, da pagina do perfil do associado e dos modos de
+ * edicao/customizacao do Divi.
+ *
+ * @return bool
  */
-function setceb_render_header() {
-	static $rendered = false;
-
-	if ( $rendered || is_page( 'perfil-do-associado' ) ) {
-		return;
+function setceb_should_render_header() {
+	if ( is_admin() || is_page( 'perfil-do-associado' ) || is_customize_preview() ) {
+		return false;
 	}
 
-	$rendered = true;
+	// Saidas que nao sao paginas HTML completas.
+	if ( is_feed() || is_embed() || is_trackback() ) {
+		return false;
+	}
 
+	// Visual Builder do Divi (preview em iframe).
+	if ( isset( $_GET['et_fb'] ) ) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Markup completa do header global.
+ *
+ * @return string
+ */
+function setceb_header_markup() {
 	$home   = home_url( '/' );
 	$logo   = get_stylesheet_directory_uri() . '/logo-cor-02.png';
 	$perfil = setceb_associado_perfil_url();
 	$label  = 'Area do Associado';
+
+	ob_start();
 	?>
 	<header class="setceb-header" id="setceb-header">
 		<div class="setceb-header__top" aria-hidden="true"></div>
@@ -125,9 +147,36 @@ function setceb_render_header() {
 		</nav>
 	</header>
 	<?php
+	return ob_get_clean();
 }
-add_action( 'wp_body_open', 'setceb_render_header', 1 );
-add_action( 'et_body_top', 'setceb_render_header', 1 );
+
+/**
+ * Inicia o buffer da pagina no front-end. O header e injetado logo apos
+ * a abertura do <body>, sem depender de hooks do tema (o Divi 5 nao
+ * dispara wp_body_open no markup classico).
+ */
+function setceb_inject_header_start() {
+	if ( setceb_should_render_header() ) {
+		ob_start( 'setceb_inject_header' );
+	}
+}
+add_action( 'template_redirect', 'setceb_inject_header_start', 1 );
+
+/**
+ * Callback do buffer: injeta a markup do header apos <body ...>.
+ *
+ * @param string $html HTML completo da pagina.
+ * @return string
+ */
+function setceb_inject_header( $html ) {
+	$markup = setceb_header_markup();
+
+	if ( '' === $markup || false === stripos( $html, '<body' ) ) {
+		return $html;
+	}
+
+	return preg_replace( '/(<body[^>]*>)/i', '$1' . $markup, $html, 1 );
+}
 
 /* ------------------------------------------------------------
  * 4. Menu principal (8 itens) com fallback estatico
