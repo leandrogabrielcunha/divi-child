@@ -6,8 +6,8 @@
  * no topo do conteudo via hook proprio do Divi (et_before_main_content).
  * O header nativo do Divi e ocultado por CSS (style.css).
  *
- * A pagina /perfil-do-associado/ usa template proprio (sem hooks do Divi)
- * e inclui o mesmo header chamando setceb_header_markup() diretamente.
+ * A pagina /perfil-do-associado/ usa template proprio, mas passa pelo
+ * mesmo fluxo (get_header/get_footer), entao o hook tambem dispara la.
  *
  * Carregado em functions.php.
  */
@@ -69,15 +69,8 @@ function setceb_associe_url() {
  * Renderiza o header global no topo do conteudo (#main-content), logo
  * apos a abertura do container principal do Divi. O header nativo do
  * Divi e ocultado por CSS, entao o customizado fica no topo visual.
- *
- * Na pagina do perfil do associado o hook nao dispara (template proprio);
- * la o markup e incluido por page-associado.php via setceb_header_markup().
  */
 function setceb_render_header() {
-	if ( is_page( 'perfil-do-associado' ) ) {
-		return;
-	}
-
 	echo setceb_header_markup();
 }
 add_action( 'et_before_main_content', 'setceb_render_header', 1 );

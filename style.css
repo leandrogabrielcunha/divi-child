@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.10.7
+Version: 1.10.8
 Template: Divi
 */
 
@@ -580,19 +580,19 @@ body.setceb-perfil-associado *::after {
 }
 
 /*============================================================
-SETCEB - Header global customizado (v1.10.7)
+SETCEB - Header global customizado (v1.10.8)
 Estrutura renderizada no topo via hook et_before_main_content.
 O header nativo do Divi e ocultado abaixo.
 ============================================================*/
 
 /* ---------- Ocultar o header nativo do Divi ---------- */
-body:not(.setceb-perfil-associado) #page-container #top-header,
-body:not(.setceb-perfil-associado) #page-container #main-header,
-body:not(.setceb-perfil-associado) #page-container .et-l--header {
+#page-container #top-header,
+#page-container #main-header,
+#page-container .et-l--header {
 	display: none !important;
 }
 
-body:not(.setceb-perfil-associado) #page-container {
+#page-container {
 	padding-top: 0 !important;
 }
 
