@@ -145,7 +145,9 @@ function setceb_header_markup() {
 			<?php setceb_header_menu(); ?>
 			<div class="setceb-header__mobile-actions">
 				<a class="setceb-header__mobile-btn setceb-header__mobile-btn--area<?php echo esc_attr( $user_class ); ?>" href="<?php echo esc_url( $perfil ); ?>"><?php echo esc_html( $label ); ?></a>
-				<a class="setceb-header__mobile-btn setceb-header__mobile-btn--associe" href="<?php echo esc_url( setceb_associe_url() ); ?>">Associe-se</a>
+				<?php if ( ! is_user_logged_in() ) : ?>
+					<a class="setceb-header__mobile-btn setceb-header__mobile-btn--associe" href="<?php echo esc_url( setceb_associe_url() ); ?>">Associe-se</a>
+				<?php endif; ?>
 			</div>
 		</nav>
 	</header>
@@ -154,7 +156,7 @@ function setceb_header_markup() {
 }
 
 /* ------------------------------------------------------------
- * 4. Menu principal (8 itens) com fallback estatico
+ * 4. Menu principal com fallback estatico
  * ------------------------------------------------------------ */
 
 /**
@@ -199,6 +201,10 @@ function setceb_header_menu_fallback() {
 
 	echo '<ul class="setceb-header__list">';
 	foreach ( $items as $key => $item ) {
+		if ( is_user_logged_in() && 'associe-se' === $key ) {
+			continue;
+		}
+
 		$item_path  = trailingslashit( (string) wp_parse_url( $item[1], PHP_URL_PATH ) );
 		$is_current = $item_path === $current_path;
 		$li_class   = ( 'associe-se' === $key ) ? ' setceb-header__associe-item' : '';
@@ -238,3 +244,32 @@ function setceb_header_menu_item_classes( $classes, $item, $args ) {
 	return $classes;
 }
 add_filter( 'nav_menu_css_class', 'setceb_header_menu_item_classes', 10, 3 );
+
+/**
+ * Remove o item "Associe-se" do menu real quando o usuario esta logado
+ * (incluindo eventuais subitens).
+ */
+function setceb_header_menu_remove_associe( $items, $args ) {
+	if ( ! is_user_logged_in() || ! isset( $args->theme_location ) || 'setceb-header' !== $args->theme_location ) {
+		return $items;
+	}
+
+	$removed = array();
+	foreach ( $items as $key => $item ) {
+		if ( false !== stripos( $item->title, 'associe' ) ) {
+			$removed[] = (int) $item->ID;
+			unset( $items[ $key ] );
+		}
+	}
+
+	if ( $removed ) {
+		foreach ( $items as $key => $item ) {
+			if ( isset( $item->menu_item_parent ) && in_array( (int) $item->menu_item_parent, $removed, true ) ) {
+				unset( $items[ $key ] );
+			}
+		}
+	}
+
+	return $items;
+}
+add_filter( 'wp_nav_menu_objects', 'setceb_header_menu_remove_associe', 10, 2 );
