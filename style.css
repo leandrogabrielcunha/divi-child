@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.10.5
+Version: 1.10.6
 Template: Divi
 */
 
@@ -451,15 +451,7 @@ body.setceb-perfil-associado {
 	min-height: 100vh;
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	color: var(--setceb-ink);
-	background-color: #0a2440;
-	background-image:
-		radial-gradient(1100px 720px at 10% -10%, rgba(31, 183, 201, 0.30), transparent 60%),
-		radial-gradient(900px 640px at 100% 0%, rgba(29, 91, 159, 0.55), transparent 55%),
-		radial-gradient(760px 680px at 88% 105%, rgba(31, 183, 201, 0.24), transparent 60%),
-		radial-gradient(520px 420px at -5% 95%, rgba(18, 61, 115, 0.85), transparent 62%),
-		repeating-linear-gradient(118deg, rgba(255, 255, 255, 0.045) 0, rgba(255, 255, 255, 0.045) 1px, transparent 1px, transparent 92px),
-		linear-gradient(135deg, #0a2440 0%, #123D73 42%, #1D5B9F 100%);
-	background-attachment: fixed;
+	background-color: #eef2f7;
 }
 
 body.setceb-perfil-associado *,
@@ -469,18 +461,19 @@ body.setceb-perfil-associado *::after {
 }
 
 .setceb-perfil {
-	max-width: 920px;
+	max-width: 1280px;
 	margin: 0 auto;
-	padding: 32px 20px 56px;
+	padding: 20px 24px 56px;
 }
 
 .setceb-perfil__card {
 	padding: 36px;
 	background: var(--setceb-white);
-	border-radius: 24px;
+	border: 1px solid #e3e9f0;
+	border-radius: 20px;
 	box-shadow:
-		0 24px 64px rgba(6, 28, 60, 0.38),
-		0 8px 22px rgba(6, 28, 60, 0.16);
+		0 12px 32px rgba(18, 61, 115, 0.10),
+		0 4px 12px rgba(18, 61, 115, 0.06);
 }
 
 .setceb-perfil__section-title {
@@ -547,11 +540,6 @@ body.setceb-perfil-associado *::after {
 	text-transform: uppercase;
 	letter-spacing: 0.4px;
 	color: var(--setceb-blue-light);
-}
-
-.setceb-perfil__footer {
-	margin-top: 28px;
-	text-align: center;
 }
 
 /* ---------- Estados (convidado / sem permissao) ---------- */
@@ -684,12 +672,8 @@ body.setceb-perfil-associado *::after {
 }
 
 @media (max-width: 640px) {
-	body.setceb-perfil-associado {
-		background-attachment: scroll;
-	}
-
 	.setceb-perfil {
-		padding: 20px 14px 40px;
+		padding: 16px 14px 40px;
 	}
 
 	.setceb-perfil__card {
@@ -703,7 +687,7 @@ body.setceb-perfil-associado *::after {
 }
 
 /*============================================================
-SETCEB - Header global customizado (v1.10.5)
+SETCEB - Header global customizado (v1.10.6)
 Estrutura renderizada no topo via hook et_before_main_content.
 O header nativo do Divi e ocultado abaixo.
 ============================================================*/
@@ -723,6 +707,7 @@ body:not(.setceb-perfil-associado) #page-container {
 .setceb-header {
 	position: relative;
 	z-index: 1000;
+	margin-bottom: 20px;
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	background: #fff;
 	box-shadow: 0 4px 14px rgba(18, 35, 56, 0.08);
@@ -865,9 +850,12 @@ body:not(.setceb-perfil-associado) #page-container {
 	justify-content: center;
 	width: 44px;
 	height: 44px;
+	padding: 0;
+	border: 0;
 	color: #fff;
 	background: #163459;
 	border-radius: 10px;
+	cursor: pointer;
 	transition: background 0.18s ease;
 }
 
@@ -878,6 +866,66 @@ body:not(.setceb-perfil-associado) #page-container {
 .setceb-header__user svg {
 	width: 20px;
 	height: 20px;
+}
+
+/* Dropdown do icone de usuario (menu Sair) */
+.setceb-header__user-wrap {
+	position: relative;
+}
+
+.setceb-header__user-menu {
+	position: absolute;
+	top: calc(100% + 10px);
+	right: 0;
+	min-width: 190px;
+	padding: 8px;
+	background: #fff;
+	border: 1px solid #eceff4;
+	border-radius: 12px;
+	box-shadow: 0 18px 40px rgba(18, 35, 56, 0.16);
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(6px);
+	transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s;
+	z-index: 30;
+}
+
+.setceb-header__user-wrap.is-open .setceb-header__user-menu {
+	opacity: 1;
+	visibility: visible;
+	transform: none;
+}
+
+.setceb-header__user-name {
+	display: block;
+	padding: 8px 10px;
+	font-size: 13px;
+	font-weight: 700;
+	color: #123159;
+	white-space: nowrap;
+}
+
+.setceb-header__user-menu a {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 9px 10px;
+	font-size: 13.5px;
+	font-weight: 600;
+	color: #334155;
+	text-decoration: none;
+	border-radius: 8px;
+	transition: background 0.16s ease, color 0.16s ease;
+}
+
+.setceb-header__user-menu a:hover {
+	background: #f1f5f9;
+	color: #0d8199;
+}
+
+.setceb-header__user-menu a svg {
+	width: 17px;
+	height: 17px;
 }
 
 /* Botao hamburguer (mobile) */
@@ -974,16 +1022,16 @@ body:not(.setceb-perfil-associado) #page-container {
 
 /* Item ASSOCIE-SE em destaque */
 .setceb-header__list > li > a.setceb-header__associe {
-	margin: 9px 0 9px 12px;
-	padding: 10px 20px;
+	margin: 6px 0 6px 10px;
+	padding: 8px 16px;
 	color: #fff;
-	background: #0d8199;
-	border-radius: 999px;
+	background: #0e94a8;
+	border-radius: 8px;
 }
 
 .setceb-header__list > li > a.setceb-header__associe:hover {
 	color: #fff;
-	background: #0b6f84;
+	background: #0b8296;
 }
 
 /* Dropdowns */

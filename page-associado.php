@@ -64,10 +64,6 @@ $page_title  = $is_entitled ? 'Perfil do Associado' : 'Acesso restrito';
 				<?php endforeach; ?>
 			</div>
 
-			<div class="setceb-perfil__footer">
-				<a class="setceb-perfil__btn setceb-perfil__btn--ghost" href="<?php echo esc_url( $home ); ?>">Voltar ao site</a>
-			</div>
-
 		<?php endif; ?>
 	</div>
 </main>

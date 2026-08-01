@@ -123,9 +123,24 @@ function setceb_header_markup() {
 
 				<div class="setceb-header__actions">
 					<a class="setceb-header__area<?php echo esc_attr( $user_class ); ?>" href="<?php echo esc_url( $perfil ); ?>"><?php echo esc_html( $label ); ?></a>
-					<a class="setceb-header__user" href="<?php echo esc_url( $perfil ); ?>" aria-label="<?php echo esc_attr( $label ); ?>">
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"></path></svg>
-					</a>
+					<?php if ( is_user_logged_in() ) : ?>
+						<div class="setceb-header__user-wrap">
+							<button class="setceb-header__user" type="button" aria-expanded="false" aria-haspopup="true" aria-label="Menu do usuário">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"></path></svg>
+							</button>
+							<div class="setceb-header__user-menu" role="menu">
+								<span class="setceb-header__user-name"><?php echo esc_html( $label ); ?></span>
+								<a href="<?php echo esc_url( wp_logout_url( $home ) ); ?>" role="menuitem">
+									<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>
+									Sair
+								</a>
+							</div>
+						</div>
+					<?php else : ?>
+						<a class="setceb-header__user" href="<?php echo esc_url( $perfil ); ?>" aria-label="<?php echo esc_attr( $label ); ?>">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"></path></svg>
+						</a>
+					<?php endif; ?>
 					<button class="setceb-header__burger" type="button" aria-expanded="false" aria-controls="setceb-header-menu" aria-label="Abrir menu">
 						<svg class="setceb-header__burger-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M3 12h18"></path><path d="M3 18h18"></path></svg>
 					</button>
