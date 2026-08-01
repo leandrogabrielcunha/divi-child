@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.10.6
+Version: 1.10.7
 Template: Divi
 */
 
@@ -42,15 +42,7 @@ body.login {
 	align-items: center;
 	justify-content: center;
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-	background-color: #0a2440;
-	background-image:
-		radial-gradient(1100px 720px at 10% -10%, rgba(31, 183, 201, 0.30), transparent 60%),
-		radial-gradient(900px 640px at 100% 0%, rgba(29, 91, 159, 0.55), transparent 55%),
-		radial-gradient(760px 680px at 88% 105%, rgba(31, 183, 201, 0.24), transparent 60%),
-		radial-gradient(520px 420px at -5% 95%, rgba(18, 61, 115, 0.85), transparent 62%),
-		repeating-linear-gradient(118deg, rgba(255, 255, 255, 0.045) 0, rgba(255, 255, 255, 0.045) 1px, transparent 1px, transparent 92px),
-		linear-gradient(135deg, #0a2440 0%, #123D73 42%, #1D5B9F 100%);
-	background-attachment: fixed;
+	background-color: #eef2f7;
 }
 
 body.login *,
@@ -89,11 +81,11 @@ body.login #login {
 	position: relative;
 	z-index: 2;
 	background: var(--setceb-white);
-	border-radius: 24px;
+	border: 1px solid #e3e9f0;
+	border-radius: 20px;
 	box-shadow:
-		0 24px 64px rgba(6, 28, 60, 0.38),
-		0 8px 22px rgba(6, 28, 60, 0.16),
-		inset 0 1px 0 rgba(255, 255, 255, 0.9);
+		0 12px 32px rgba(18, 61, 115, 0.10),
+		0 4px 12px rgba(18, 61, 115, 0.06);
 	display: grid;
 	grid-template-columns: 1fr;
 	column-gap: 12px;
@@ -302,95 +294,6 @@ body.login .success {
 	color: #334155;
 }
 
-/* ---------- Fundo decorativo ---------- */
-body.login .setceb-bg {
-	position: fixed;
-	inset: 0;
-	z-index: 0;
-	overflow: hidden;
-	pointer-events: none;
-}
-
-body.login .setceb-bg-curve {
-	position: absolute;
-}
-
-body.login .setceb-bg-curve--a {
-	left: -70px;
-	top: -50px;
-	width: 520px;
-	height: 520px;
-	animation: setceb-float-a 16s ease-in-out infinite;
-}
-
-body.login .setceb-bg-curve--b {
-	right: -90px;
-	bottom: -70px;
-	width: 560px;
-	height: 560px;
-	animation: setceb-float-b 20s ease-in-out infinite;
-}
-
-body.login .setceb-bg-ring {
-	position: absolute;
-	border-radius: 50%;
-	border: 1.5px solid rgba(255, 255, 255, 0.15);
-}
-
-body.login .setceb-bg-ring--a {
-	width: 190px;
-	height: 190px;
-	right: 14%;
-	top: 12%;
-	animation: setceb-float-b 22s ease-in-out infinite;
-}
-
-body.login .setceb-bg-ring--b {
-	width: 54px;
-	height: 54px;
-	left: 10%;
-	bottom: 18%;
-	border-color: rgba(31, 183, 201, 0.55);
-	animation: setceb-float-a 14s ease-in-out infinite;
-}
-
-body.login .setceb-bg-dot {
-	position: absolute;
-	border-radius: 50%;
-}
-
-body.login .setceb-bg-dot--a {
-	width: 10px;
-	height: 10px;
-	background: var(--setceb-turquoise);
-	left: 15%;
-	top: 26%;
-}
-
-body.login .setceb-bg-dot--b {
-	width: 6px;
-	height: 6px;
-	background: rgba(255, 255, 255, 0.7);
-	right: 23%;
-	top: 34%;
-}
-
-body.login .setceb-bg-dot--c {
-	width: 14px;
-	height: 14px;
-	border: 2px solid rgba(255, 255, 255, 0.35);
-	right: 10%;
-	bottom: 24%;
-}
-
-body.login .setceb-bg-dot--d {
-	width: 5px;
-	height: 5px;
-	background: rgba(31, 183, 201, 0.85);
-	left: 27%;
-	bottom: 13%;
-}
-
 /* ---------- Animacoes ---------- */
 @keyframes setceb-card-in {
 	from {
@@ -401,16 +304,6 @@ body.login .setceb-bg-dot--d {
 		opacity: 1;
 		transform: none;
 	}
-}
-
-@keyframes setceb-float-a {
-	0%, 100% { transform: translate3d(0, 0, 0); }
-	50% { transform: translate3d(0, -16px, 0); }
-}
-
-@keyframes setceb-float-b {
-	0%, 100% { transform: translate3d(0, 0, 0); }
-	50% { transform: translate3d(0, 14px, 0); }
 }
 
 /* ---------- Responsivo ---------- */
@@ -687,7 +580,7 @@ body.setceb-perfil-associado *::after {
 }
 
 /*============================================================
-SETCEB - Header global customizado (v1.10.6)
+SETCEB - Header global customizado (v1.10.7)
 Estrutura renderizada no topo via hook et_before_main_content.
 O header nativo do Divi e ocultado abaixo.
 ============================================================*/

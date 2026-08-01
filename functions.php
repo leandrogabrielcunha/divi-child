@@ -79,7 +79,7 @@ add_action( 'login_enqueue_scripts', 'setceb_login_enqueue_assets' );
 function setceb_login_head() {
 	wp_add_inline_style(
 		'setceb-login',
-		'html{background-color:#0a2440}'
+		'html{background-color:#eef2f7}'
 	);
 }
 add_action( 'login_head', 'setceb_login_head' );
@@ -93,34 +93,6 @@ function setceb_login_header_title() {
 	return get_bloginfo( 'name' );
 }
 add_filter( 'login_headertext', 'setceb_login_header_title' );
-
-function setceb_login_footer() {
-	?>
-	<!-- SETCEB: fundo decorativo (curvas, circulos e pontos) -->
-	<div class="setceb-bg" aria-hidden="true">
-		<svg class="setceb-bg-curve setceb-bg-curve--a" viewBox="0 0 520 520" fill="none" preserveAspectRatio="none">
-			<path d="M-40 460 C140 380 170 220 30 40" stroke="rgba(255,255,255,0.16)" stroke-width="2.5" stroke-linecap="round"/>
-			<path d="M0 470 C180 370 190 200 60 70" stroke="rgba(255,255,255,0.10)" stroke-width="2" stroke-linecap="round"/>
-			<path d="M40 520 C210 430 240 250 120 150" stroke="rgba(255,255,255,0.07)" stroke-width="2" stroke-linecap="round"/>
-			<circle cx="190" cy="120" r="46" stroke="rgba(255,255,255,0.16)" stroke-width="2.5"/>
-			<circle cx="190" cy="120" r="9" fill="#1FB7C9"/>
-		</svg>
-		<svg class="setceb-bg-curve setceb-bg-curve--b" viewBox="0 0 520 520" fill="none" preserveAspectRatio="none">
-			<path d="M480 40 C340 140 330 300 470 480" stroke="rgba(255,255,255,0.14)" stroke-width="2.5" stroke-linecap="round"/>
-			<path d="M460 20 C320 150 320 320 490 500" stroke="rgba(255,255,255,0.09)" stroke-width="2" stroke-linecap="round"/>
-			<circle cx="330" cy="120" r="34" stroke="rgba(31,183,201,0.4)" stroke-width="2.5"/>
-			<circle cx="330" cy="120" r="7" fill="rgba(255,255,255,0.85)"/>
-		</svg>
-		<span class="setceb-bg-ring setceb-bg-ring--a"></span>
-		<span class="setceb-bg-ring setceb-bg-ring--b"></span>
-		<span class="setceb-bg-dot setceb-bg-dot--a"></span>
-		<span class="setceb-bg-dot setceb-bg-dot--b"></span>
-		<span class="setceb-bg-dot setceb-bg-dot--c"></span>
-		<span class="setceb-bg-dot setceb-bg-dot--d"></span>
-	</div>
-	<?php
-}
-add_action( 'login_footer', 'setceb_login_footer' );
 
 /*================================================
 #SETCEB - Regras de negocio do Associado
