@@ -6,7 +6,8 @@
  * no topo do conteudo via hook proprio do Divi (et_before_main_content).
  * O header nativo do Divi e ocultado por CSS (style.css).
  *
- * A pagina /perfil-do-associado/ usa template proprio e fica de fora.
+ * A pagina /perfil-do-associado/ usa template proprio (sem hooks do Divi)
+ * e inclui o mesmo header chamando setceb_header_markup() diretamente.
  *
  * Carregado em functions.php.
  */
@@ -31,10 +32,6 @@ add_action( 'after_setup_theme', 'setceb_register_header_menu' );
  * 2. Scripts do header (menu mobile)
  * ------------------------------------------------------------ */
 function setceb_header_enqueue_assets() {
-	if ( is_page( 'perfil-do-associado' ) ) {
-		return;
-	}
-
 	$theme = wp_get_theme();
 
 	wp_enqueue_script(
@@ -73,8 +70,8 @@ function setceb_associe_url() {
  * apos a abertura do container principal do Divi. O header nativo do
  * Divi e ocultado por CSS, entao o customizado fica no topo visual.
  *
- * Nunca na pagina do perfil do associado (template proprio, sem hooks
- * do tema).
+ * Na pagina do perfil do associado o hook nao dispara (template proprio);
+ * la o markup e incluido por page-associado.php via setceb_header_markup().
  */
 function setceb_render_header() {
 	if ( is_page( 'perfil-do-associado' ) ) {

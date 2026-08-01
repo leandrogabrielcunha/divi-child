@@ -15,7 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 $user        = wp_get_current_user();
 $is_entitled = setceb_is_associado() || current_user_can( 'manage_options' );
 $home        = home_url( '/' );
-$logo        = get_stylesheet_directory_uri() . '/logo-cor-02.png';
 $page_title  = $is_entitled ? 'Perfil do Associado' : 'Acesso restrito';
 ?>
 <!DOCTYPE html>
@@ -29,11 +28,10 @@ $page_title  = $is_entitled ? 'Perfil do Associado' : 'Acesso restrito';
 </head>
 <body class="setceb-perfil-associado <?php echo $is_entitled ? 'is-entitled' : 'not-entitled'; ?>">
 
+<?php echo setceb_header_markup(); ?>
+
 <main class="setceb-perfil">
 	<header class="setceb-perfil__header">
-		<a class="setceb-perfil__logo" href="<?php echo esc_url( $home ); ?>">
-			<img src="<?php echo esc_url( $logo ); ?>" alt="<?php bloginfo( 'name' ); ?>">
-		</a>
 		<nav class="setceb-perfil__nav">
 			<a href="<?php echo esc_url( $home ); ?>">Voltar ao site</a>
 			<?php if ( is_user_logged_in() ) : ?>
