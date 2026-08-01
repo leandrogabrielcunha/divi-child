@@ -105,7 +105,6 @@ function setceb_header_markup() {
 			<div class="setceb-header__main-inner">
 				<a class="setceb-header__logo" href="<?php echo esc_url( $home ); ?>">
 					<img src="<?php echo esc_url( $logo ); ?>" alt="<?php bloginfo( 'name' ); ?>">
-					<span class="setceb-header__subtitle">Sindicato das Empresas de Transportes de Cargas do Estado da Bahia</span>
 				</a>
 
 				<form class="setceb-header__search" role="search" method="get" action="<?php echo esc_url( $home ); ?>">
