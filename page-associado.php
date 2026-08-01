@@ -38,8 +38,6 @@ add_filter(
 );
 
 get_header();
-
-do_action( 'et_before_main_content' );
 ?>
 
 <div id="main-content">
@@ -83,8 +81,4 @@ do_action( 'et_before_main_content' );
 	</main>
 </div>
 
-<?php
-do_action( 'et_after_main_content' );
-
-get_footer();
-?>
+<?php get_footer(); ?>
