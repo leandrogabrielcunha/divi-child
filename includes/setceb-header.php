@@ -71,6 +71,9 @@ function setceb_associe_url() {
  * Divi e ocultado por CSS, entao o customizado fica no topo visual.
  */
 function setceb_render_header() {
+	if ( setceb_header_is_hidden() ) {
+		return;
+	}
 	echo setceb_header_markup();
 }
 add_action( 'et_before_main_content', 'setceb_render_header', 1 );
@@ -273,3 +276,88 @@ function setceb_header_menu_remove_associe( $items, $args ) {
 	return $items;
 }
 add_filter( 'wp_nav_menu_objects', 'setceb_header_menu_remove_associe', 10, 2 );
+
+/* ------------------------------------------------------------
+ * 5. Ocultar o header por pagina
+ *
+ * Metabox "Cabecalho" no editor (paginas, posts e post types
+ * publicos) com a opcao de nao exibir o header global.
+ * ------------------------------------------------------------ */
+
+/**
+ * Tipos de conteudo que recebem o metabox do header.
+ *
+ * @return array
+ */
+function setceb_header_meta_post_types() {
+	$post_types = get_post_types(
+		array(
+			'public' => true,
+		),
+		'names'
+	);
+
+	return array_values( $post_types );
+}
+
+/**
+ * Registra o metabox de opcoes do header.
+ */
+function setceb_header_meta_box() {
+	add_meta_box(
+		'setceb_header_options',
+		'Cabecalho',
+		'setceb_header_meta_box_render',
+		setceb_header_meta_post_types(),
+		'side',
+		'high'
+	);
+}
+add_action( 'add_meta_boxes', 'setceb_header_meta_box' );
+
+function setceb_header_meta_box_render( $post ) {
+	wp_nonce_field( 'setceb_header_options', 'setceb_header_options_nonce' );
+	$hidden = '1' === get_post_meta( $post->ID, '_setceb_hide_header', true );
+	?>
+	<label for="setceb_hide_header">
+		<input type="checkbox" id="setceb_hide_header" name="setceb_hide_header" value="1" <?php checked( $hidden ); ?> />
+		Ocultar o cabeçalho nesta página
+	</label>
+	<p class="description">
+		Remove o cabeçalho global (faixa, logo, busca e menu) do topo desta página.
+	</p>
+	<?php
+}
+
+function setceb_header_meta_box_save( $post_id ) {
+	if ( ! isset( $_POST['setceb_header_options_nonce'] ) || ! wp_verify_nonce( $_POST['setceb_header_options_nonce'], 'setceb_header_options' ) ) {
+		return;
+	}
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+	if ( ! empty( $_POST['setceb_hide_header'] ) ) {
+		update_post_meta( $post_id, '_setceb_hide_header', '1' );
+	} else {
+		delete_post_meta( $post_id, '_setceb_hide_header' );
+	}
+}
+add_action( 'save_post', 'setceb_header_meta_box_save' );
+
+/**
+ * O header deve ser ocultado na pagina atual?
+ *
+ * @return bool
+ */
+function setceb_header_is_hidden() {
+	$post_id = get_queried_object_id();
+
+	if ( ! $post_id ) {
+		return false;
+	}
+
+	return '1' === get_post_meta( $post_id, '_setceb_hide_header', true );
+}
