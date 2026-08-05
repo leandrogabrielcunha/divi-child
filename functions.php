@@ -107,3 +107,15 @@ Estrutura do cabecalho e menu principal.
 Ver includes/setceb-header.php
 ================================================*/
 require_once get_stylesheet_directory() . '/includes/setceb-header.php';
+
+/*================================================
+#SETCEB - Banner / Carrossel (plugin embutido)
+Plugin nativo do WordPress localizado em
+setceb-banner/. Pode ser movido para
+wp-content/plugins/ sem nenhuma alteracao.
+A guarda evita carregamento duplicado caso o
+plugin tambem esteja instalado via wp-content.
+================================================*/
+if ( ! function_exists( 'setceb_banner' ) ) {
+	require_once get_stylesheet_directory() . '/setceb-banner/setceb-banner.php';
+}
