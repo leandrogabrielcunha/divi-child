@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       SETCEB Banner
  * Description:       Carrossel de banners gerenciado pelo painel do WordPress. Registra o CPT "Banners", uma página de configurações e o shortcode [setceb_banner].
- * Version:           1.1.0
+ * Version:           1.1.1
  * Requires at least: 6.0
  * Requires PHP:      8.2
  * Author:            SETCEB
@@ -16,7 +16,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SETCEB_BANNER_VERSION', '1.1.0' );
+define( 'SETCEB_BANNER_VERSION', '1.1.1' );
 define( 'SETCEB_BANNER_FILE', __FILE__ );
 define( 'SETCEB_BANNER_DIR', plugin_dir_path( __FILE__ ) );
 
