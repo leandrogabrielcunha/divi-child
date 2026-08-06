@@ -72,16 +72,31 @@ final class Setceb_Banner_Assets {
 	}
 
 	/**
-	 * Enfileira somente quando o shortcode está em uso.
+	 * Enfileira somente quando o shortcode está em uso ou o builder do Divi está ativo.
 	 *
 	 * @return void
 	 */
 	public static function maybe_enqueue_frontend() {
-		if ( ! self::shortcode_in_use() ) {
-			return;
+		if ( self::is_divi_builder_active() || self::shortcode_in_use() ) {
+			self::enqueue_frontend();
+		}
+	}
+
+	/**
+	 * Detecta o frontend builder do Divi para carregar os assets na prévia.
+	 *
+	 * @return bool
+	 */
+	private static function is_divi_builder_active() {
+		if ( function_exists( 'is_et_fb' ) && is_et_fb() ) {
+			return true;
 		}
 
-		self::enqueue_frontend();
+		if ( function_exists( 'et_core_is_fb_enabled' ) && et_core_is_fb_enabled() ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

@@ -32,7 +32,7 @@
 			spaceBetween: 0,
 			speed: config.speed || 500,
 			loop: Boolean(config.loop),
-			watchOverflow: true,
+			watchOverflow: false,
 			grabCursor: true,
 			keyboard: {
 				enabled: true,

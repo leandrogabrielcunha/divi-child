@@ -5,7 +5,7 @@
  * transição suave, responsivo e suporte a swipe (nativo do Swiper).
  */
 .setceb-banner {
-	--setceb-banner-radius: 18px;
+	--setceb-banner-radius: 15px;
 	--setceb-banner-h-desktop: 420px;
 	--setceb-banner-h-mobile: 280px;
 
