@@ -9,31 +9,31 @@ Template: Divi
 */
 
 /*============================================================
-SETCEB - Tela de login (wp-login.php)
+CE TECH - Tela de login (wp-login.php)
 Modelo da branch main: estiliza a tela padrao do WordPress
 somente com CSS, sem JS de layout, sem buffer e sem alterar o
 core. O login.js aplica apenas placeholder e o texto do botao.
 ============================================================*/
 :root {
-	--setceb-blue: #123D73;
-	--setceb-blue-light: #1D5B9F;
-	--setceb-turquoise: #1FB7C9;
-	--setceb-white: #FFFFFF;
-	--setceb-gray: #F5F7FA;
-	--setceb-ink: #0F172A;
-	--setceb-muted: #64748B;
-	--setceb-border: #DFE5EE;
+	--cetech-blue: #123D73;
+	--cetech-blue-light: #1D5B9F;
+	--cetech-turquoise: #1FB7C9;
+	--cetech-white: #FFFFFF;
+	--cetech-gray: #F5F7FA;
+	--cetech-ink: #0F172A;
+	--cetech-muted: #64748B;
+	--cetech-border: #DFE5EE;
 }
 
 body.login {
-	--setceb-blue: #123D73;
-	--setceb-blue-light: #1D5B9F;
-	--setceb-turquoise: #1FB7C9;
-	--setceb-white: #FFFFFF;
-	--setceb-gray: #F5F7FA;
-	--setceb-ink: #0F172A;
-	--setceb-muted: #64748B;
-	--setceb-border: #DFE5EE;
+	--cetech-blue: #123D73;
+	--cetech-blue-light: #1D5B9F;
+	--cetech-turquoise: #1FB7C9;
+	--cetech-white: #FFFFFF;
+	--cetech-gray: #F5F7FA;
+	--cetech-ink: #0F172A;
+	--cetech-muted: #64748B;
+	--cetech-border: #DFE5EE;
 
 	margin: 0;
 	padding: 24px;
@@ -80,7 +80,7 @@ body.login #login {
 	padding: 44px 44px 34px;
 	position: relative;
 	z-index: 2;
-	background: var(--setceb-white);
+	background: var(--cetech-white);
 	border: 1px solid #e3e9f0;
 	border-radius: 20px;
 	box-shadow:
@@ -89,7 +89,7 @@ body.login #login {
 	display: grid;
 	grid-template-columns: 1fr;
 	column-gap: 12px;
-	animation: setceb-card-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+	animation: cetech-card-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 body.login #login > h1,
@@ -172,9 +172,9 @@ body.login input[type="email"] {
 	padding: 14px 48px !important;
 	font-size: 15px !important;
 	line-height: 1 !important;
-	color: var(--setceb-ink) !important;
-	background: var(--setceb-white) !important;
-	border: 1.5px solid var(--setceb-border) !important;
+	color: var(--cetech-ink) !important;
+	background: var(--cetech-white) !important;
+	border: 1.5px solid var(--cetech-border) !important;
 	border-radius: 14px !important;
 	box-shadow: none !important;
 	outline: none;
@@ -186,7 +186,7 @@ body.login input[type="password"] {
 }
 
 body.login input:focus {
-	border-color: var(--setceb-blue-light) !important;
+	border-color: var(--cetech-blue-light) !important;
 	box-shadow: 0 0 0 4px rgba(29, 91, 159, 0.12) !important;
 }
 
@@ -223,8 +223,8 @@ body.login #login .wp-hide-pw {
 }
 
 body.login #login .wp-hide-pw:hover {
-	background: var(--setceb-gray);
-	color: var(--setceb-blue-light);
+	background: var(--cetech-gray);
+	color: var(--cetech-blue-light);
 }
 
 body.login #login .wp-hide-pw .dashicons {
@@ -246,7 +246,7 @@ body.login #login form .submit input[type="submit"] {
 	text-shadow: none !important;
 	border: 0 !important;
 	border-radius: 14px !important;
-	background: linear-gradient(90deg, var(--setceb-blue) 0%, var(--setceb-turquoise) 100%) !important;
+	background: linear-gradient(90deg, var(--cetech-blue) 0%, var(--cetech-turquoise) 100%) !important;
 	box-shadow: 0 10px 22px rgba(18, 61, 115, 0.3) !important;
 	cursor: pointer;
 	transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
@@ -290,12 +290,12 @@ body.login .success {
 
 body.login .message,
 body.login .success {
-	border-left-color: var(--setceb-turquoise) !important;
+	border-left-color: var(--cetech-turquoise) !important;
 	color: #334155;
 }
 
 /* ---------- Animacoes ---------- */
-@keyframes setceb-card-in {
+@keyframes cetech-card-in {
 	from {
 		opacity: 0;
 		transform: translateY(18px) scale(0.985);
@@ -336,248 +336,6 @@ body.login .success {
 	}
 }
 
-/*============================================================
-SETCEB - Area do Associado (perfil fora do painel)
-============================================================*/
-body.setceb-perfil-associado {
-	margin: 0;
-	min-height: 100vh;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-	color: var(--setceb-ink);
-	background-color: #eef2f7;
-}
-
-body.setceb-perfil-associado *,
-body.setceb-perfil-associado *::before,
-body.setceb-perfil-associado *::after {
-	box-sizing: border-box;
-}
-
-.setceb-perfil {
-	max-width: 1280px;
-	margin: 0 auto;
-	padding: 20px 24px 56px;
-}
-
-.setceb-perfil__card {
-	padding: 36px;
-	background: var(--setceb-white);
-	border: 1px solid #e3e9f0;
-	border-radius: 20px;
-	box-shadow:
-		0 12px 32px rgba(18, 61, 115, 0.10),
-		0 4px 12px rgba(18, 61, 115, 0.06);
-}
-
-.setceb-perfil__section-title {
-	margin: 28px 0 16px;
-	font-size: 18px;
-	color: var(--setceb-blue);
-}
-
-.setceb-perfil__boletos {
-	display: grid;
-	grid-template-columns: repeat(3, 1fr);
-	gap: 14px;
-}
-
-.setceb-perfil__boleto {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	gap: 10px;
-	padding: 26px 16px;
-	text-align: center;
-	text-decoration: none;
-	color: var(--setceb-ink);
-	background: var(--setceb-gray);
-	border: 1.5px solid var(--setceb-border);
-	border-radius: 16px;
-	transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
-}
-
-.setceb-perfil__boleto:hover {
-	transform: translateY(-3px);
-	background: #fff;
-	border-color: var(--setceb-turquoise);
-	box-shadow: 0 14px 28px rgba(18, 61, 115, 0.14);
-}
-
-.setceb-perfil__boleto-icon {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 52px;
-	height: 52px;
-	border-radius: 14px;
-	background: linear-gradient(135deg, var(--setceb-blue) 0%, var(--setceb-turquoise) 100%);
-	color: #fff;
-}
-
-.setceb-perfil__boleto-icon svg {
-	width: 26px;
-	height: 26px;
-}
-
-.setceb-perfil__boleto-label {
-	font-size: 14px;
-	font-weight: 600;
-	line-height: 1.35;
-	color: var(--setceb-ink);
-}
-
-.setceb-perfil__boleto-cta {
-	font-size: 12.5px;
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 0.4px;
-	color: var(--setceb-blue-light);
-}
-
-/* ---------- Estados (convidado / sem permissao) ---------- */
-.setceb-perfil__state {
-	text-align: center;
-	padding: 16px 0;
-}
-
-.setceb-perfil__state .setceb-perfil__icon {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 64px;
-	height: 64px;
-	margin: 0 auto 18px;
-	border-radius: 18px;
-	background: linear-gradient(135deg, var(--setceb-blue) 0%, var(--setceb-turquoise) 100%);
-	color: #fff;
-}
-
-.setceb-perfil__state .setceb-perfil__icon svg {
-	width: 30px;
-	height: 30px;
-}
-
-.setceb-perfil__state h1 {
-	margin: 0 0 8px;
-	font-size: 24px;
-	color: var(--setceb-ink);
-}
-
-.setceb-perfil__state p {
-	margin: 0 auto 22px;
-	max-width: 420px;
-	font-size: 15px;
-	line-height: 1.55;
-	color: var(--setceb-muted);
-}
-
-.setceb-perfil__btn {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	min-height: 48px;
-	padding: 0 26px;
-	font-size: 15px;
-	font-weight: 600;
-	color: #fff;
-	text-decoration: none;
-	background: linear-gradient(90deg, var(--setceb-blue) 0%, var(--setceb-turquoise) 100%);
-	border-radius: 12px;
-	box-shadow: 0 10px 22px rgba(18, 61, 115, 0.28);
-	transition: transform 0.18s ease, box-shadow 0.18s ease;
-}
-
-.setceb-perfil__btn:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 14px 28px rgba(18, 61, 115, 0.34);
-}
-
-.setceb-perfil__btn--ghost {
-	background: #fff;
-	color: var(--setceb-blue-light);
-	border: 1.5px solid var(--setceb-blue-light);
-	box-shadow: none;
-}
-
-/* ---------- Gate de noticia restrita ---------- */
-.setceb-news-gate {
-	margin: 24px 0;
-	padding: 28px 24px;
-	text-align: center;
-	background: #fff;
-	border: 1.5px dashed var(--setceb-border);
-	border-radius: 16px;
-}
-
-.setceb-news-gate__icon {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 56px;
-	height: 56px;
-	margin: 0 auto 14px;
-	border-radius: 16px;
-	background: linear-gradient(135deg, var(--setceb-blue) 0%, var(--setceb-turquoise) 100%);
-	color: #fff;
-}
-
-.setceb-news-gate__icon svg {
-	width: 28px;
-	height: 28px;
-}
-
-.setceb-news-gate h3 {
-	margin: 0 0 8px;
-	font-size: 20px;
-	color: var(--setceb-ink);
-}
-
-.setceb-news-gate p {
-	margin: 0 0 18px;
-	font-size: 15px;
-	line-height: 1.55;
-	color: var(--setceb-muted);
-}
-
-.setceb-news-gate__btn {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	min-height: 44px;
-	padding: 0 22px;
-	font-size: 14.5px;
-	font-weight: 600;
-	color: #fff;
-	text-decoration: none;
-	background: linear-gradient(90deg, var(--setceb-blue) 0%, var(--setceb-turquoise) 100%);
-	border-radius: 12px;
-	box-shadow: 0 10px 22px rgba(18, 61, 115, 0.28);
-}
-
-.setceb-news-gate__btn:hover {
-	transform: translateY(-2px);
-}
-
-.setceb-restricted-teaser {
-	font-style: italic;
-	color: var(--setceb-muted);
-}
-
-@media (max-width: 640px) {
-	.setceb-perfil {
-		padding: 16px 14px 40px;
-	}
-
-	.setceb-perfil__card {
-		padding: 24px 18px;
-		border-radius: 20px;
-	}
-
-	.setceb-perfil__boletos {
-		grid-template-columns: 1fr;
-	}
-}
 
 /*============================================================
 CE TECH - Header global customizado (redesign v2.0.0)
@@ -614,7 +372,7 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 }
 
 /* ---------- Estrutura ---------- */
-.setceb-header {
+.cetech-header {
 	position: relative;
 	z-index: 1000;
 	margin-bottom: 20px;
@@ -624,28 +382,28 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	box-shadow: 0 2px 16px rgba(32, 32, 238, 0.07);
 }
 
-.setceb-header,
-.setceb-header *,
-.setceb-header *::before,
-.setceb-header *::after {
+.cetech-header,
+.cetech-header *,
+.cetech-header *::before,
+.cetech-header *::after {
 	box-sizing: border-box;
 }
 
-.setceb-header a {
+.cetech-header a {
 	text-decoration: none;
 }
 
 /* Faixa topo do layout antigo removida no redesign */
-.setceb-header__top {
+.cetech-header__top {
 	display: none;
 }
 
 /* Barra principal (logo + busca + acoes) */
-.setceb-header__main {
+.cetech-header__main {
 	background: #fff;
 }
 
-.setceb-header__main-inner {
+.cetech-header__main-inner {
 	display: grid;
 	grid-template-columns: auto minmax(0, 1fr) auto;
 	align-items: center;
@@ -656,20 +414,20 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 }
 
 /* Logo */
-.setceb-header__logo {
+.cetech-header__logo {
 	display: flex;
 	align-items: center;
 	gap: 14px;
 }
 
-.setceb-header__logo img {
+.cetech-header__logo img {
 	display: block;
 	height: 40px;
 	width: auto;
 }
 
 /* Busca central */
-.setceb-header__search {
+.cetech-header__search {
 	display: flex;
 	align-items: center;
 	width: 100%;
@@ -682,12 +440,12 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
-.setceb-header__search:focus-within {
+.cetech-header__search:focus-within {
 	border-color: var(--cetech-blue);
 	box-shadow: 0 0 0 4px rgba(32, 32, 238, 0.10);
 }
 
-.setceb-header__search input[type="search"] {
+.cetech-header__search input[type="search"] {
 	flex: 1;
 	min-width: 0;
 	padding: 10px 16px;
@@ -699,12 +457,12 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	-webkit-appearance: none;
 }
 
-.setceb-header__search input::placeholder {
+.cetech-header__search input::placeholder {
 	color: #9aa3b2;
 	opacity: 1;
 }
 
-.setceb-header__search button {
+.cetech-header__search button {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -717,24 +475,24 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	transition: background 0.18s ease;
 }
 
-.setceb-header__search button:hover {
+.cetech-header__search button:hover {
 	background: var(--cetech-blue-dark);
 }
 
-.setceb-header__search button svg {
+.cetech-header__search button svg {
 	width: 18px;
 	height: 18px;
 }
 
-/* Acoes (Area do Associado + icone de usuario) */
-.setceb-header__actions {
+/* Acoes (Area do Cliente + botoes de acesso) */
+.cetech-header__actions {
 	display: flex;
 	align-items: center;
 	justify-content: flex-end;
 	gap: 10px;
 }
 
-.setceb-header__area {
+.cetech-header__area {
 	display: inline-flex;
 	align-items: center;
 	gap: 8px;
@@ -749,16 +507,16 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	transition: background 0.18s ease, transform 0.18s ease;
 }
 
-.setceb-header__area:hover {
+.cetech-header__area:hover {
 	background: var(--cetech-green-dark);
 	transform: translateY(-1px);
 }
 
-.setceb-header__area--user {
+.cetech-header__area--user {
 	text-transform: none;
 }
 
-.setceb-header__user {
+.cetech-header__user {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -773,21 +531,21 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	transition: background 0.18s ease;
 }
 
-.setceb-header__user:hover {
+.cetech-header__user:hover {
 	background: var(--cetech-blue-dark);
 }
 
-.setceb-header__user svg {
+.cetech-header__user svg {
 	width: 19px;
 	height: 19px;
 }
 
 /* Dropdown do icone de usuario (menu Sair) */
-.setceb-header__user-wrap {
+.cetech-header__user-wrap {
 	position: relative;
 }
 
-.setceb-header__user-menu {
+.cetech-header__user-menu {
 	position: absolute;
 	top: calc(100% + 10px);
 	right: 0;
@@ -804,13 +562,13 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	z-index: 30;
 }
 
-.setceb-header__user-wrap.is-open .setceb-header__user-menu {
+.cetech-header__user-wrap.is-open .cetech-header__user-menu {
 	opacity: 1;
 	visibility: visible;
 	transform: none;
 }
 
-.setceb-header__user-name {
+.cetech-header__user-name {
 	display: block;
 	padding: 8px 10px;
 	font-size: 13px;
@@ -819,7 +577,7 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	white-space: nowrap;
 }
 
-.setceb-header__user-menu a {
+.cetech-header__user-menu a {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -832,18 +590,18 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	transition: background 0.16s ease, color 0.16s ease;
 }
 
-.setceb-header__user-menu a:hover {
+.cetech-header__user-menu a:hover {
 	background: var(--cetech-blue-light);
 	color: var(--cetech-blue);
 }
 
-.setceb-header__user-menu a svg {
+.cetech-header__user-menu a svg {
 	width: 17px;
 	height: 17px;
 }
 
 /* Botao hamburguer (mobile) */
-.setceb-header__burger {
+.cetech-header__burger {
 	display: none;
 	align-items: center;
 	justify-content: center;
@@ -857,30 +615,30 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	cursor: pointer;
 }
 
-.setceb-header__burger:hover {
+.cetech-header__burger:hover {
 	background: var(--cetech-blue-dark);
 }
 
-.setceb-header__burger svg {
+.cetech-header__burger svg {
 	width: 22px;
 	height: 22px;
 }
 
 /* ---------- Menu (container proprio, max 1140px) ---------- */
-.setceb-header__nav {
+.cetech-header__nav {
 	position: relative;
 	background: #fff;
 	border-top: 1px solid var(--cetech-border);
 }
 
-.setceb-header__list,
-.setceb-header__list ul {
+.cetech-header__list,
+.cetech-header__list ul {
 	list-style: none;
 	margin: 0;
 	padding: 0;
 }
 
-.setceb-header__list {
+.cetech-header__list {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -891,11 +649,11 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	padding: 10px 24px;
 }
 
-.setceb-header__list > li {
+.cetech-header__list > li {
 	position: relative;
 }
 
-.setceb-header__list > li > a {
+.cetech-header__list > li > a {
 	display: block;
 	padding: 8px 14px;
 	font-size: 15px;
@@ -908,35 +666,35 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	transition: color 0.15s ease, background 0.15s ease;
 }
 
-.setceb-header__list > li > a:hover {
+.cetech-header__list > li > a:hover {
 	color: var(--cetech-blue);
 	background: var(--cetech-blue-light);
 }
 
-.setceb-header__list > li > a:focus-visible,
-.setceb-header__user:focus-visible,
-.setceb-header__burger:focus-visible {
+.cetech-header__list > li > a:focus-visible,
+.cetech-header__user:focus-visible,
+.cetech-header__burger:focus-visible {
 	outline: 3px solid rgba(32, 32, 238, 0.35);
 	outline-offset: 2px;
 }
 
 /* Item ativo (pagina atual) - pill azul */
-.setceb-header__list > li.current-menu-item > a:not(.setceb-header__associe),
-.setceb-header__list > li.current_page_item > a:not(.setceb-header__associe),
-.setceb-header__list > li.current-menu-ancestor > a:not(.setceb-header__associe),
-.setceb-header__list > li.current_page_ancestor > a:not(.setceb-header__associe) {
+.cetech-header__list > li.current-menu-item > a:not(.cetech-header__associe),
+.cetech-header__list > li.current_page_item > a:not(.cetech-header__associe),
+.cetech-header__list > li.current-menu-ancestor > a:not(.cetech-header__associe),
+.cetech-header__list > li.current_page_ancestor > a:not(.cetech-header__associe) {
 	color: var(--cetech-blue);
 	background: var(--cetech-blue-light);
 }
 
-.setceb-header__list .sub-menu li.current-menu-item > a,
-.setceb-header__list .sub-menu li.current_page_item > a {
+.cetech-header__list .sub-menu li.current-menu-item > a,
+.cetech-header__list .sub-menu li.current_page_item > a {
 	color: var(--cetech-blue);
 	background: var(--cetech-blue-light);
 }
 
 /* Item ASSOCIE-SE em destaque (CTA verde) */
-.setceb-header__list > li > a.setceb-header__associe {
+.cetech-header__list > li > a.cetech-header__associe {
 	margin: 4px 0 4px 10px;
 	padding: 8px 18px;
 	color: #fff;
@@ -945,13 +703,13 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	border-radius: 8px;
 }
 
-.setceb-header__list > li > a.setceb-header__associe:hover {
+.cetech-header__list > li > a.cetech-header__associe:hover {
 	color: #fff;
 	background: var(--cetech-green-dark);
 }
 
 /* Dropdowns */
-.setceb-header__list .sub-menu {
+.cetech-header__list .sub-menu {
 	position: absolute;
 	top: calc(100% + 6px);
 	left: 0;
@@ -968,20 +726,20 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	z-index: 20;
 }
 
-.setceb-header__list > li:hover > .sub-menu,
-.setceb-header__list > li:focus-within > .sub-menu {
+.cetech-header__list > li:hover > .sub-menu,
+.cetech-header__list > li:focus-within > .sub-menu {
 	opacity: 1;
 	visibility: visible;
 	transform: none;
 }
 
-.setceb-header__list .sub-menu .sub-menu {
+.cetech-header__list .sub-menu .sub-menu {
 	top: 0;
 	left: 100%;
 	margin-left: 2px;
 }
 
-.setceb-header__list .sub-menu a {
+.cetech-header__list .sub-menu a {
 	display: block;
 	padding: 9px 12px;
 	font-size: 14px;
@@ -991,17 +749,17 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	transition: color 0.15s ease, background 0.15s ease;
 }
 
-.setceb-header__list .sub-menu a:hover {
+.cetech-header__list .sub-menu a:hover {
 	color: var(--cetech-blue);
 	background: var(--cetech-blue-light);
 }
 
 /* Acoes do menu mobile (visiveis apenas no hamburguer) */
-.setceb-header__mobile-actions {
+.cetech-header__mobile-actions {
 	display: none;
 }
 
-.setceb-header__mobile-btn {
+.cetech-header__mobile-btn {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -1014,62 +772,62 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	border-radius: 8px;
 }
 
-.setceb-header__mobile-btn--area {
+.cetech-header__mobile-btn--area {
 	background: var(--cetech-blue);
 }
 
-.setceb-header__mobile-btn--area:hover {
+.cetech-header__mobile-btn--area:hover {
 	background: var(--cetech-blue-dark);
 }
 
-.setceb-header__mobile-btn--area.setceb-header__area--user {
+.cetech-header__mobile-btn--area.cetech-header__area--user {
 	text-transform: none;
 }
 
-.setceb-header__mobile-btn--associe {
+.cetech-header__mobile-btn--associe {
 	background: var(--cetech-green);
 }
 
-.setceb-header__mobile-btn--associe:hover {
+.cetech-header__mobile-btn--associe:hover {
 	background: var(--cetech-green-dark);
 }
 
 /* ---------- Responsivo ---------- */
 @media (max-width: 1199px) {
-	.setceb-header__main-inner {
+	.cetech-header__main-inner {
 		gap: 20px;
 	}
 
-	.setceb-header__list > li > a {
+	.cetech-header__list > li > a {
 		padding: 8px 12px;
 		font-size: 14px;
 	}
 }
 
 @media (max-width: 1023px) {
-	.setceb-header__search {
+	.cetech-header__search {
 		display: none;
 	}
 
-	.setceb-header__main-inner {
+	.cetech-header__main-inner {
 		grid-template-columns: 1fr auto;
 		padding: 12px 16px;
 	}
 
-	.setceb-header__logo img {
+	.cetech-header__logo img {
 		height: 36px;
 	}
 
-	.setceb-header__area {
+	.cetech-header__area {
 		display: none;
 	}
 
-	.setceb-header__burger {
+	.cetech-header__burger {
 		display: inline-flex;
 	}
 
 	/* Menu vira painel deslizante sob a barra */
-	.setceb-header__nav {
+	.cetech-header__nav {
 		position: absolute;
 		top: 100%;
 		left: 0;
@@ -1083,18 +841,18 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 		z-index: 100;
 	}
 
-	.setceb-header__nav.is-open {
+	.cetech-header__nav.is-open {
 		display: block;
 	}
 
-	.setceb-header__list {
+	.cetech-header__list {
 		flex-direction: column;
 		align-items: stretch;
 		gap: 0;
 		padding: 12px 24px;
 	}
 
-	.setceb-header__list > li > a {
+	.cetech-header__list > li > a {
 		padding: 12px 0;
 		font-size: 16px;
 		font-weight: 500;
@@ -1103,22 +861,22 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 		border-radius: 0;
 	}
 
-	.setceb-header__list > li.current-menu-item > a:not(.setceb-header__associe),
-	.setceb-header__list > li.current_page_item > a:not(.setceb-header__associe),
-	.setceb-header__list > li.current-menu-ancestor > a:not(.setceb-header__associe),
-	.setceb-header__list > li.current_page_ancestor > a:not(.setceb-header__associe) {
+	.cetech-header__list > li.current-menu-item > a:not(.cetech-header__associe),
+	.cetech-header__list > li.current_page_item > a:not(.cetech-header__associe),
+	.cetech-header__list > li.current-menu-ancestor > a:not(.cetech-header__associe),
+	.cetech-header__list > li.current_page_ancestor > a:not(.cetech-header__associe) {
 		color: var(--cetech-blue);
 		background: transparent;
 	}
 
 	/* O destaque ASSOCIE-SE sai do menu e vira botao proprio */
-	.setceb-header__list > li > a.setceb-header__associe,
-	.setceb-header__list > li.setceb-header__associe-item {
+	.cetech-header__list > li > a.cetech-header__associe,
+	.cetech-header__list > li.cetech-header__associe-item {
 		display: none;
 	}
 
 	/* Submenus empilhados no painel */
-	.setceb-header__list .sub-menu {
+	.cetech-header__list .sub-menu {
 		position: static;
 		min-width: 0;
 		padding: 0 0 4px 14px;
@@ -1130,18 +888,18 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 		box-shadow: none;
 	}
 
-	.setceb-header__list .sub-menu .sub-menu {
+	.cetech-header__list .sub-menu .sub-menu {
 		left: 0;
 		padding-left: 14px;
 	}
 
-	.setceb-header__list .sub-menu a {
+	.cetech-header__list .sub-menu a {
 		padding: 10px 0;
 		border-bottom: 1px solid #f8fafc;
 		border-radius: 0;
 	}
 
-	.setceb-header__mobile-actions {
+	.cetech-header__mobile-actions {
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
@@ -1150,12 +908,12 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 }
 
 @media (max-width: 480px) {
-	.setceb-header__main-inner {
+	.cetech-header__main-inner {
 		padding: 10px 14px;
 		gap: 12px;
 	}
 
-	.setceb-header__logo img {
+	.cetech-header__logo img {
 		height: 32px;
 	}
 }

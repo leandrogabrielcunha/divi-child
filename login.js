@@ -1,4 +1,4 @@
-/* SETCEB - Tela de login (modelo da branch main)
+/* CE Tech - Tela de login
 O layout e feito 100% por CSS (style.css). Este script apenas
 melhora a tela de forma progressiva, SEM alterar a estrutura
 do DOM: define os placeholders e o texto do botao de acesso. */

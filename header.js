@@ -1,19 +1,19 @@
 (function () {
 	'use strict';
 
-	var header = document.getElementById('setceb-header');
+	var header = document.getElementById('cetech-header');
 	if (!header) {
 		return;
 	}
 
-	var toggle = header.querySelector('.setceb-header__burger');
-	var nav = header.querySelector('.setceb-header__nav');
+	var toggle = header.querySelector('.cetech-header__burger');
+	var nav = header.querySelector('.cetech-header__nav');
 	if (!toggle || !nav) {
 		return;
 	}
 
-	var userWrap = header.querySelector('.setceb-header__user-wrap');
-	var userBtn = header.querySelector('.setceb-header__user');
+	var userWrap = header.querySelector('.cetech-header__user-wrap');
+	var userBtn = header.querySelector('.cetech-header__user');
 
 	function closeMenu() {
 		nav.classList.remove('is-open');
