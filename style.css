@@ -124,10 +124,10 @@ body.login #login h1 {
 
 body.login #login h1 a {
 	display: block;
-	width: 220px;
-	height: 52px;
+	width: 250px;
+	height: 64px;
 	margin: 0 auto;
-	background: url('logo-cor-02.png') no-repeat center / contain;
+	background: url('https://cetech.net.br/wp-content/uploads/2025/07/01-Logo-Horizontal-Principal-2-scaled.png') no-repeat center / contain;
 	text-indent: -9999px;
 	overflow: hidden;
 	outline: none;
@@ -320,8 +320,8 @@ body.login .success {
 	}
 
 	body.login #login h1 a {
-		width: 180px;
-		height: 42px;
+		width: 200px;
+		height: 51px;
 	}
 
 	body.login input[type="text"],
@@ -580,10 +580,27 @@ body.setceb-perfil-associado *::after {
 }
 
 /*============================================================
-SETCEB - Header global customizado (v1.10.9)
+CE TECH - Header global customizado (redesign v2.0.0)
 Estrutura renderizada no topo via hook et_before_main_content.
 O header nativo do Divi e ocultado abaixo.
+
+Estilo baseado na referencia visual do menu CE Tech (figma.site):
+- barra branca (nao transparente), borda e sombra suaves
+- container proprio com max-width 1140px, centralizado
+- links em "pill" (hover azul + fundo claro), CTA verde
+- paleta: azul #2020EE / verde #00E8A8
 ============================================================*/
+
+:root {
+	--cetech-blue: #2020EE;
+	--cetech-blue-dark: #1515C0;
+	--cetech-blue-light: #EEEEFF;
+	--cetech-green: #00E8A8;
+	--cetech-green-dark: #00C48E;
+	--cetech-ink: #1a1a2e;
+	--cetech-muted: #555555;
+	--cetech-border: #e8e8f0;
+}
 
 /* ---------- Ocultar o header nativo do Divi ---------- */
 #page-container #top-header,
@@ -601,22 +618,29 @@ O header nativo do Divi e ocultado abaixo.
 	position: relative;
 	z-index: 1000;
 	margin-bottom: 20px;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	background: #fff;
-	box-shadow: 0 4px 14px rgba(18, 35, 56, 0.08);
+	border-bottom: 1px solid var(--cetech-border);
+	box-shadow: 0 2px 16px rgba(32, 32, 238, 0.07);
+}
+
+.setceb-header,
+.setceb-header *,
+.setceb-header *::before,
+.setceb-header *::after {
+	box-sizing: border-box;
 }
 
 .setceb-header a {
 	text-decoration: none;
 }
 
-/* Faixa topo azul-marinho */
+/* Faixa topo do layout antigo removida no redesign */
 .setceb-header__top {
-	height: 8px;
-	background: #122338;
+	display: none;
 }
 
-/* Barra principal */
+/* Barra principal (logo + busca + acoes) */
 .setceb-header__main {
 	background: #fff;
 }
@@ -626,9 +650,9 @@ O header nativo do Divi e ocultado abaixo.
 	grid-template-columns: auto minmax(0, 1fr) auto;
 	align-items: center;
 	gap: 28px;
-	max-width: 1280px;
+	max-width: 1140px;
 	margin: 0 auto;
-	padding: 16px 24px;
+	padding: 14px 24px;
 }
 
 /* Logo */
@@ -640,7 +664,7 @@ O header nativo do Divi e ocultado abaixo.
 
 .setceb-header__logo img {
 	display: block;
-	height: 54px;
+	height: 40px;
 	width: auto;
 }
 
@@ -649,26 +673,26 @@ O header nativo do Divi e ocultado abaixo.
 	display: flex;
 	align-items: center;
 	width: 100%;
-	max-width: 520px;
+	max-width: 460px;
 	margin: 0 auto;
-	background: #f2f2f2;
-	border: 1px solid #e6e9ef;
-	border-radius: 10px;
+	background: #fff;
+	border: 1.5px solid var(--cetech-border);
+	border-radius: 8px;
 	overflow: hidden;
 	transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .setceb-header__search:focus-within {
-	border-color: #0d8199;
-	box-shadow: 0 0 0 4px rgba(13, 129, 153, 0.12);
+	border-color: var(--cetech-blue);
+	box-shadow: 0 0 0 4px rgba(32, 32, 238, 0.10);
 }
 
 .setceb-header__search input[type="search"] {
 	flex: 1;
 	min-width: 0;
-	padding: 12px 18px;
+	padding: 10px 16px;
 	font-size: 14px;
-	color: #0f172a;
+	color: var(--cetech-ink);
 	background: transparent;
 	border: 0;
 	outline: none;
@@ -676,7 +700,7 @@ O header nativo do Divi e ocultado abaixo.
 }
 
 .setceb-header__search input::placeholder {
-	color: #94a3b8;
+	color: #9aa3b2;
 	opacity: 1;
 }
 
@@ -685,16 +709,16 @@ O header nativo do Divi e ocultado abaixo.
 	align-items: center;
 	justify-content: center;
 	align-self: stretch;
-	width: 48px;
+	width: 46px;
 	border: 0;
-	background: #0d8199;
+	background: var(--cetech-blue);
 	color: #fff;
 	cursor: pointer;
 	transition: background 0.18s ease;
 }
 
 .setceb-header__search button:hover {
-	background: #0b6f84;
+	background: var(--cetech-blue-dark);
 }
 
 .setceb-header__search button svg {
@@ -714,51 +738,48 @@ O header nativo do Divi e ocultado abaixo.
 	display: inline-flex;
 	align-items: center;
 	gap: 8px;
-	min-height: 44px;
+	min-height: 42px;
 	padding: 0 18px;
-	font-size: 12.5px;
+	font-size: 13px;
 	font-weight: 700;
-	letter-spacing: 0.5px;
-	text-transform: uppercase;
+	letter-spacing: 0.2px;
 	color: #fff;
-	background: #163459;
-	border-radius: 10px;
+	background: var(--cetech-green);
+	border-radius: 8px;
 	transition: background 0.18s ease, transform 0.18s ease;
 }
 
 .setceb-header__area:hover {
-	background: #123159;
+	background: var(--cetech-green-dark);
 	transform: translateY(-1px);
 }
 
 .setceb-header__area--user {
 	text-transform: none;
-	font-size: 13.5px;
-	letter-spacing: 0.2px;
 }
 
 .setceb-header__user {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 44px;
-	height: 44px;
+	width: 42px;
+	height: 42px;
 	padding: 0;
 	border: 0;
 	color: #fff;
-	background: #163459;
-	border-radius: 10px;
+	background: var(--cetech-blue);
+	border-radius: 8px;
 	cursor: pointer;
 	transition: background 0.18s ease;
 }
 
 .setceb-header__user:hover {
-	background: #123159;
+	background: var(--cetech-blue-dark);
 }
 
 .setceb-header__user svg {
-	width: 20px;
-	height: 20px;
+	width: 19px;
+	height: 19px;
 }
 
 /* Dropdown do icone de usuario (menu Sair) */
@@ -773,9 +794,9 @@ O header nativo do Divi e ocultado abaixo.
 	min-width: 190px;
 	padding: 8px;
 	background: #fff;
-	border: 1px solid #eceff4;
+	border: 1px solid var(--cetech-border);
 	border-radius: 12px;
-	box-shadow: 0 18px 40px rgba(18, 35, 56, 0.16);
+	box-shadow: 0 18px 40px rgba(26, 26, 46, 0.12);
 	opacity: 0;
 	visibility: hidden;
 	transform: translateY(6px);
@@ -794,7 +815,7 @@ O header nativo do Divi e ocultado abaixo.
 	padding: 8px 10px;
 	font-size: 13px;
 	font-weight: 700;
-	color: #123159;
+	color: var(--cetech-ink);
 	white-space: nowrap;
 }
 
@@ -805,15 +826,15 @@ O header nativo do Divi e ocultado abaixo.
 	padding: 9px 10px;
 	font-size: 13.5px;
 	font-weight: 600;
-	color: #334155;
+	color: var(--cetech-muted);
 	text-decoration: none;
 	border-radius: 8px;
 	transition: background 0.16s ease, color 0.16s ease;
 }
 
 .setceb-header__user-menu a:hover {
-	background: #f1f5f9;
-	color: #0d8199;
+	background: var(--cetech-blue-light);
+	color: var(--cetech-blue);
 }
 
 .setceb-header__user-menu a svg {
@@ -826,18 +847,18 @@ O header nativo do Divi e ocultado abaixo.
 	display: none;
 	align-items: center;
 	justify-content: center;
-	width: 44px;
-	height: 44px;
+	width: 42px;
+	height: 42px;
 	padding: 0;
 	border: 0;
-	border-radius: 10px;
-	background: #163459;
+	border-radius: 8px;
+	background: var(--cetech-blue);
 	color: #fff;
 	cursor: pointer;
 }
 
 .setceb-header__burger:hover {
-	background: #123159;
+	background: var(--cetech-blue-dark);
 }
 
 .setceb-header__burger svg {
@@ -845,10 +866,11 @@ O header nativo do Divi e ocultado abaixo.
 	height: 22px;
 }
 
-/* Menu principal */
+/* ---------- Menu (container proprio, max 1140px) ---------- */
 .setceb-header__nav {
 	position: relative;
 	background: #fff;
+	border-top: 1px solid var(--cetech-border);
 }
 
 .setceb-header__list,
@@ -863,9 +885,10 @@ O header nativo do Divi e ocultado abaixo.
 	align-items: center;
 	justify-content: center;
 	flex-wrap: wrap;
-	max-width: 1280px;
+	gap: 4px;
+	max-width: 1140px;
 	margin: 0 auto;
-	padding: 0 24px;
+	padding: 10px 24px;
 }
 
 .setceb-header__list > li {
@@ -874,71 +897,70 @@ O header nativo do Divi e ocultado abaixo.
 
 .setceb-header__list > li > a {
 	display: block;
-	padding: 16px 13px;
-	font-size: 13px;
-	font-weight: 700;
-	letter-spacing: 0.4px;
-	text-transform: uppercase;
-	color: #123159;
+	padding: 8px 14px;
+	font-size: 15px;
+	font-weight: 500;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--cetech-muted);
 	white-space: nowrap;
-	transition: color 0.18s ease;
+	border-radius: 7px;
+	transition: color 0.15s ease, background 0.15s ease;
 }
 
 .setceb-header__list > li > a:hover {
-	color: #0d8199;
+	color: var(--cetech-blue);
+	background: var(--cetech-blue-light);
 }
 
-/* Item ativo (pagina atual) */
-.setceb-header__list > li.current-menu-item > a,
-.setceb-header__list > li.current_page_item > a,
-.setceb-header__list > li.current-menu-ancestor > a,
-.setceb-header__list > li.current_page_ancestor > a {
-	color: #0d8199;
+.setceb-header__list > li > a:focus-visible,
+.setceb-header__user:focus-visible,
+.setceb-header__burger:focus-visible {
+	outline: 3px solid rgba(32, 32, 238, 0.35);
+	outline-offset: 2px;
 }
 
-.setceb-header__list > li.current-menu-item > a:not(.setceb-header__associe)::after,
-.setceb-header__list > li.current_page_item > a:not(.setceb-header__associe)::after {
-	content: "";
-	position: absolute;
-	left: 13px;
-	right: 13px;
-	bottom: 0;
-	height: 3px;
-	background: #0d8199;
-	border-radius: 3px 3px 0 0;
+/* Item ativo (pagina atual) - pill azul */
+.setceb-header__list > li.current-menu-item > a:not(.setceb-header__associe),
+.setceb-header__list > li.current_page_item > a:not(.setceb-header__associe),
+.setceb-header__list > li.current-menu-ancestor > a:not(.setceb-header__associe),
+.setceb-header__list > li.current_page_ancestor > a:not(.setceb-header__associe) {
+	color: var(--cetech-blue);
+	background: var(--cetech-blue-light);
 }
 
 .setceb-header__list .sub-menu li.current-menu-item > a,
 .setceb-header__list .sub-menu li.current_page_item > a {
-	color: #0d8199;
+	color: var(--cetech-blue);
+	background: var(--cetech-blue-light);
 }
 
-/* Item ASSOCIE-SE em destaque */
+/* Item ASSOCIE-SE em destaque (CTA verde) */
 .setceb-header__list > li > a.setceb-header__associe {
-	margin: 6px 0 6px 10px;
-	padding: 8px 16px;
+	margin: 4px 0 4px 10px;
+	padding: 8px 18px;
 	color: #fff;
-	background: #0e94a8;
+	font-weight: 700;
+	background: var(--cetech-green);
 	border-radius: 8px;
 }
 
 .setceb-header__list > li > a.setceb-header__associe:hover {
 	color: #fff;
-	background: #0b8296;
+	background: var(--cetech-green-dark);
 }
 
 /* Dropdowns */
 .setceb-header__list .sub-menu {
 	position: absolute;
-	top: 100%;
+	top: calc(100% + 6px);
 	left: 0;
 	min-width: 230px;
-	padding: 6px 0;
+	padding: 6px;
 	background: #fff;
-	border: 1px solid #eceff4;
-	border-top: 3px solid #0d8199;
-	border-radius: 0 0 10px 10px;
-	box-shadow: 0 18px 40px rgba(18, 35, 56, 0.16);
+	border: 1px solid var(--cetech-border);
+	border-radius: 12px;
+	box-shadow: 0 18px 40px rgba(26, 26, 46, 0.12);
 	opacity: 0;
 	visibility: hidden;
 	transform: translateY(8px);
@@ -956,23 +978,22 @@ O header nativo do Divi e ocultado abaixo.
 .setceb-header__list .sub-menu .sub-menu {
 	top: 0;
 	left: 100%;
-	margin-left: 1px;
-	border-top: 0;
-	border-left: 3px solid #0d8199;
-	border-radius: 0 10px 10px 0;
+	margin-left: 2px;
 }
 
 .setceb-header__list .sub-menu a {
 	display: block;
-	padding: 10px 18px;
-	font-size: 13px;
-	font-weight: 600;
-	color: #334155;
+	padding: 9px 12px;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--cetech-muted);
+	border-radius: 8px;
+	transition: color 0.15s ease, background 0.15s ease;
 }
 
 .setceb-header__list .sub-menu a:hover {
-	color: #0d8199;
-	background: #f7f9fb;
+	color: var(--cetech-blue);
+	background: var(--cetech-blue-light);
 }
 
 /* Acoes do menu mobile (visiveis apenas no hamburguer) */
@@ -985,27 +1006,32 @@ O header nativo do Divi e ocultado abaixo.
 	align-items: center;
 	justify-content: center;
 	min-height: 46px;
-	margin-top: 10px;
 	padding: 0 18px;
-	font-size: 13px;
+	font-size: 14px;
 	font-weight: 700;
-	letter-spacing: 0.4px;
-	text-transform: uppercase;
+	letter-spacing: 0.2px;
 	color: #fff;
-	border-radius: 10px;
+	border-radius: 8px;
 }
 
 .setceb-header__mobile-btn--area {
-	background: #163459;
+	background: var(--cetech-blue);
+}
+
+.setceb-header__mobile-btn--area:hover {
+	background: var(--cetech-blue-dark);
 }
 
 .setceb-header__mobile-btn--area.setceb-header__area--user {
 	text-transform: none;
-	letter-spacing: 0.2px;
 }
 
 .setceb-header__mobile-btn--associe {
-	background: #0d8199;
+	background: var(--cetech-green);
+}
+
+.setceb-header__mobile-btn--associe:hover {
+	background: var(--cetech-green-dark);
 }
 
 /* ---------- Responsivo ---------- */
@@ -1015,8 +1041,8 @@ O header nativo do Divi e ocultado abaixo.
 	}
 
 	.setceb-header__list > li > a {
-		padding: 16px 10px;
-		font-size: 12px;
+		padding: 8px 12px;
+		font-size: 14px;
 	}
 }
 
@@ -1027,11 +1053,11 @@ O header nativo do Divi e ocultado abaixo.
 
 	.setceb-header__main-inner {
 		grid-template-columns: 1fr auto;
-		padding: 14px 16px;
+		padding: 12px 16px;
 	}
 
 	.setceb-header__logo img {
-		height: 44px;
+		height: 36px;
 	}
 
 	.setceb-header__area {
@@ -1051,6 +1077,9 @@ O header nativo do Divi e ocultado abaixo.
 		display: none;
 		max-height: calc(100vh - 80px);
 		overflow-y: auto;
+		background: #fff;
+		border-top: 1px solid var(--cetech-border);
+		box-shadow: 0 18px 40px rgba(26, 26, 46, 0.10);
 		z-index: 100;
 	}
 
@@ -1061,13 +1090,25 @@ O header nativo do Divi e ocultado abaixo.
 	.setceb-header__list {
 		flex-direction: column;
 		align-items: stretch;
-		padding: 10px 16px;
+		gap: 0;
+		padding: 12px 24px;
 	}
 
 	.setceb-header__list > li > a {
-		padding: 13px 4px;
-		font-size: 13px;
-		border-bottom: 1px solid #f1f3f7;
+		padding: 12px 0;
+		font-size: 16px;
+		font-weight: 500;
+		color: #444444;
+		border-bottom: 1px solid #f0f0f0;
+		border-radius: 0;
+	}
+
+	.setceb-header__list > li.current-menu-item > a:not(.setceb-header__associe),
+	.setceb-header__list > li.current_page_item > a:not(.setceb-header__associe),
+	.setceb-header__list > li.current-menu-ancestor > a:not(.setceb-header__associe),
+	.setceb-header__list > li.current_page_ancestor > a:not(.setceb-header__associe) {
+		color: var(--cetech-blue);
+		background: transparent;
 	}
 
 	/* O destaque ASSOCIE-SE sai do menu e vira botao proprio */
@@ -1076,6 +1117,7 @@ O header nativo do Divi e ocultado abaixo.
 		display: none;
 	}
 
+	/* Submenus empilhados no painel */
 	.setceb-header__list .sub-menu {
 		position: static;
 		min-width: 0;
@@ -1084,7 +1126,6 @@ O header nativo do Divi e ocultado abaixo.
 		visibility: visible;
 		transform: none;
 		border: 0;
-		border-left: 3px solid #0d8199;
 		border-radius: 0;
 		box-shadow: none;
 	}
@@ -1092,28 +1133,29 @@ O header nativo do Divi e ocultado abaixo.
 	.setceb-header__list .sub-menu .sub-menu {
 		left: 0;
 		padding-left: 14px;
-		border-left: 3px solid #0d8199;
 	}
 
 	.setceb-header__list .sub-menu a {
-		padding: 10px 4px;
+		padding: 10px 0;
 		border-bottom: 1px solid #f8fafc;
+		border-radius: 0;
 	}
 
 	.setceb-header__mobile-actions {
 		display: flex;
 		flex-direction: column;
-		padding: 8px 16px 18px;
+		gap: 10px;
+		padding: 12px 24px 24px;
 	}
 }
 
 @media (max-width: 480px) {
 	.setceb-header__main-inner {
-		padding: 12px;
+		padding: 10px 14px;
 		gap: 12px;
 	}
 
 	.setceb-header__logo img {
-		height: 38px;
+		height: 32px;
 	}
 }
