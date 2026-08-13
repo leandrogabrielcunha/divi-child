@@ -64,6 +64,33 @@
 	window.addEventListener('resize', function () {
 		if (window.innerWidth >= 1024) {
 			closeMenu();
+			closeUserMenu();
 		}
 	});
+
+	/* ---------- Efeito de flutuar ao rolar ---------- */
+	var scrollClass = 'scrolled';
+	var scrollTick = false;
+
+	function onScroll() {
+		var top = window.scrollY || window.pageYOffset;
+		if (top > 40) {
+			header.classList.add(scrollClass);
+		} else {
+			header.classList.remove(scrollClass);
+		}
+		scrollTick = false;
+	}
+
+	function requestTick() {
+		if (!scrollTick) {
+			scrollTick = true;
+			requestAnimationFrame(onScroll);
+		}
+	}
+
+	if ('requestAnimationFrame' in window) {
+		window.addEventListener('scroll', requestTick, { passive: true });
+		requestTick();
+	}
 })();

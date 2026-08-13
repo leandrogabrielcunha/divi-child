@@ -338,26 +338,21 @@ body.login .success {
 
 
 /*============================================================
-CE TECH - Header global customizado (redesign v2.0.0)
-Estrutura renderizada no topo via hook et_before_main_content.
-O header nativo do Divi e ocultado abaixo.
-
-Estilo baseado na referencia visual do menu CE Tech (figma.site):
-- barra branca (nao transparente), borda e sombra suaves
-- container proprio com max-width 1140px, centralizado
-- links em "pill" (hover azul + fundo claro), CTA verde
-- paleta: azul #2020EE / verde #00E8A8
+CE TECH - Header global (redesign 2.0.0)
+Caixa flutuante centralizada: logo | menu | acoes.
+Identidade visual: azul (#2020EE) e turquesa/verde (#00E8A8).
 ============================================================*/
 
 :root {
 	--cetech-blue: #2020EE;
 	--cetech-blue-dark: #1515C0;
-	--cetech-blue-light: #EEEEFF;
+	--cetech-blue-light: #EEF1FF;
 	--cetech-green: #00E8A8;
 	--cetech-green-dark: #00C48E;
 	--cetech-ink: #1a1a2e;
 	--cetech-muted: #555555;
 	--cetech-border: #e8e8f0;
+	--cetech-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /* ---------- Ocultar o header nativo do Divi ---------- */
@@ -371,15 +366,31 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	padding-top: 0 !important;
 }
 
-/* ---------- Estrutura ---------- */
+/* ---------- Caixa flutuante centralizada ---------- */
 .cetech-header {
-	position: relative;
+	position: sticky;
+	top: 20px;
+	left: 0;
+	right: 0;
 	z-index: 1000;
-	margin-bottom: 20px;
-	font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-	background: #fff;
-	border-bottom: 1px solid var(--cetech-border);
-	box-shadow: 0 2px 16px rgba(32, 32, 238, 0.07);
+	margin: 0 auto 24px;
+	max-width: 1140px;
+	padding: 6px;
+	background: var(--cetech-white, #ffffff);
+	border-radius: 18px;
+	box-shadow:
+		0 14px 38px rgba(32, 32, 238, 0.09),
+		0 4px 14px rgba(32, 32, 238, 0.05);
+	transition: top 0.2s ease, box-shadow 0.2s ease, padding 0.2s ease;
+	font-family: var(--cetech-font);
+}
+
+.cetech-header.scrolled {
+	top: 8px;
+	padding: 4px;
+	box-shadow:
+		0 10px 30px rgba(32, 32, 238, 0.12),
+		0 4px 12px rgba(32, 32, 238, 0.06);
 }
 
 .cetech-header,
@@ -393,145 +404,265 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	text-decoration: none;
 }
 
-/* Faixa topo do layout antigo removida no redesign */
-.cetech-header__top {
-	display: none;
+.cetech-header button {
+	font-family: inherit;
 }
 
-/* Barra principal (logo + busca + acoes) */
-.cetech-header__main {
-	background: #fff;
-}
-
-.cetech-header__main-inner {
+/* ---------- Linha interna (logo | nav | acoes) ---------- */
+.cetech-header__box {
 	display: grid;
-	grid-template-columns: auto minmax(0, 1fr) auto;
+	grid-template-columns: auto 1fr auto;
 	align-items: center;
-	gap: 28px;
-	max-width: 1140px;
-	margin: 0 auto;
-	padding: 14px 24px;
+	gap: 20px;
+	padding: 8px 8px 8px 4px;
 }
 
-/* Logo */
-.cetech-header__logo {
+.cetech-header__start,
+.cetech-header__nav,
+.cetech-header__end {
 	display: flex;
 	align-items: center;
-	gap: 14px;
+}
+
+.cetech-header__nav {
+	justify-content: center;
+}
+
+/* ---------- Logo ---------- */
+.cetech-header__logo {
+	display: inline-flex;
+	align-items: center;
 }
 
 .cetech-header__logo img {
 	display: block;
-	height: 40px;
+	height: 44px;
 	width: auto;
+	max-width: 220px;
 }
 
-/* Busca central */
-.cetech-header__search {
-	display: flex;
-	align-items: center;
-	width: 100%;
-	max-width: 460px;
-	margin: 0 auto;
-	background: #fff;
-	border: 1.5px solid var(--cetech-border);
-	border-radius: 8px;
-	overflow: hidden;
-	transition: border-color 0.18s ease, box-shadow 0.18s ease;
-}
-
-.cetech-header__search:focus-within {
-	border-color: var(--cetech-blue);
-	box-shadow: 0 0 0 4px rgba(32, 32, 238, 0.10);
-}
-
-.cetech-header__search input[type="search"] {
-	flex: 1;
-	min-width: 0;
-	padding: 10px 16px;
-	font-size: 14px;
-	color: var(--cetech-ink);
-	background: transparent;
-	border: 0;
-	outline: none;
-	-webkit-appearance: none;
-}
-
-.cetech-header__search input::placeholder {
-	color: #9aa3b2;
-	opacity: 1;
-}
-
-.cetech-header__search button {
+/* ---------- Navegacao (desktop) ---------- */
+.cetech-header__list {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	align-self: stretch;
-	width: 46px;
+	flex-wrap: wrap;
+	gap: 2px;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.cetech-header__list > li {
+	position: relative;
+}
+
+.cetech-header__list > li > a {
+	display: block;
+	padding: 8px 16px;
+	font-size: 15px;
+	font-weight: 500;
+	letter-spacing: 0;
+	color: var(--cetech-ink);
+	white-space: nowrap;
+	border-radius: 8px;
+	transition: color 0.18s ease, background 0.18s ease;
+}
+
+.cetech-header__list > li > a:hover,
+.cetech-header__list > li > a:focus-visible {
+	color: var(--cetech-blue);
+	background: var(--cetech-blue-light);
+}
+
+/* Item ativo (pagina atual) */
+.cetech-header__list > li.current-menu-item > a,
+.cetech-header__list > li.current_page_item > a,
+.cetech-header__list > li.current-menu-ancestor > a,
+.cetech-header__list > li.current_page_ancestor > a {
+	color: var(--cetech-blue);
+	font-weight: 600;
+	background: var(--cetech-blue-light);
+}
+
+.cetech-header__list .sub-menu li.current-menu-item > a,
+.cetech-header__list .sub-menu li.current_page_item > a {
+	color: var(--cetech-blue);
+	font-weight: 600;
+}
+
+/* Dropdowns */
+.cetech-header__list .sub-menu {
+	position: absolute;
+	top: calc(100% + 8px);
+	left: 0;
+	min-width: 230px;
+	padding: 8px;
+	background: #fff;
+	border: 1px solid var(--cetech-border);
+	border-radius: 12px;
+	box-shadow: 0 18px 42px rgba(26, 26, 46, 0.12);
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(8px);
+	transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+	z-index: 20;
+}
+
+.cetech-header__list > li:hover > .sub-menu,
+.cetech-header__list > li:focus-within > .sub-menu {
+	opacity: 1;
+	visibility: visible;
+	transform: none;
+}
+
+.cetech-header__list .sub-menu .sub-menu {
+	top: 0;
+	left: 100%;
+	margin-left: 2px;
+}
+
+.cetech-header__list .sub-menu a {
+	display: block;
+	padding: 9px 12px;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--cetech-ink);
+	border-radius: 8px;
+	transition: color 0.15s ease, background 0.15s ease;
+}
+
+.cetech-header__list .sub-menu a:hover,
+.cetech-header__list .sub-menu a:focus-visible {
+	color: var(--cetech-blue);
+	background: var(--cetech-blue-light);
+}
+
+/* ---------- Burger (mobile) ---------- */
+.cetech-header__burger {
+	display: none;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	width: 38px;
+	height: 20px;
+	padding: 0;
 	border: 0;
+	border-radius: 10px;
 	background: var(--cetech-blue);
 	color: #fff;
 	cursor: pointer;
-	transition: background 0.18s ease;
+	transition: background 0.18s ease, transform 0.16s ease;
 }
 
-.cetech-header__search button:hover {
+.cetech-header__burger:hover {
 	background: var(--cetech-blue-dark);
 }
 
-.cetech-header__search button svg {
-	width: 18px;
-	height: 18px;
+.cetech-header__burger:focus-visible {
+	outline: 3px solid rgba(32, 32, 238, 0.35);
+	outline-offset: 2px;
 }
 
-/* Acoes (Area do Cliente + botoes de acesso) */
-.cetech-header__actions {
+.cetech-header__burger-line {
+	display: block;
+	width: 22px;
+	height: 2px;
+	border-radius: 2px;
+	background: currentColor;
+	transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.cetech-header__burger.is-open .cetech-header__burger-line:nth-child(1) {
+	transform: translateY(9px) rotate(45deg);
+}
+
+.cetech-header__burger.is-open .cetech-header__burger-line:nth-child(2) {
+	opacity: 0;
+}
+
+.cetech-header__burger.is-open .cetech-header__burger-line:nth-child(3) {
+	transform: translateY(-9px) rotate(-45deg);
+}
+
+/* ---------- Acoes (botoes) ---------- */
+.cetech-header__end {
 	display: flex;
 	align-items: center;
 	justify-content: flex-end;
 	gap: 10px;
 }
 
-.cetech-header__area {
+.cetech-header__btn {
 	display: inline-flex;
 	align-items: center;
-	gap: 8px;
+	justify-content: center;
 	min-height: 42px;
-	padding: 0 18px;
-	font-size: 13px;
+	padding: 0 20px;
+	font-size: 14px;
 	font-weight: 700;
 	letter-spacing: 0.2px;
+	border-radius: 12px;
+	border: 1.5px solid transparent;
+	cursor: pointer;
+	transition: background 0.18s ease, transform 0.16s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.cetech-header__btn:focus-visible {
+	outline: 3px solid rgba(0, 232, 168, 0.45);
+	outline-offset: 2px;
+}
+
+/* Botao secundario: "2ª Via do Boleto" (contorno azul) */
+.cetech-header__btn--boleto {
+	color: var(--cetech-blue);
+	background: transparent;
+	border-color: var(--cetech-blue);
+}
+
+.cetech-header__btn--boleto:hover,
+.cetech-header__btn--boleto:focus-visible {
 	color: #fff;
-	background: var(--cetech-green);
-	border-radius: 8px;
-	transition: background 0.18s ease, transform 0.18s ease;
-}
-
-.cetech-header__area:hover {
-	background: var(--cetech-green-dark);
+	background: var(--cetech-blue);
+	border-color: var(--cetech-blue);
 	transform: translateY(-1px);
+	box-shadow: 0 8px 18px rgba(32, 32, 238, 0.22);
 }
 
-.cetech-header__area--user {
-	text-transform: none;
+/* Botao principal: "Área do Cliente" (CTA verde/turquesa) */
+.cetech-header__btn--cliente {
+	color: var(--cetech-ink);
+	background: var(--cetech-green);
+	border-color: var(--cetech-green);
+	box-shadow: 0 6px 16px rgba(0, 232, 168, 0.22);
 }
 
+.cetech-header__btn--cliente:hover,
+.cetech-header__btn--cliente:focus-visible {
+	background: var(--cetech-green-dark);
+	border-color: var(--cetech-green-dark);
+	transform: translateY(-1px);
+	box-shadow: 0 10px 22px rgba(0, 232, 168, 0.30);
+}
+
+/* Avatar do usuario (apenas quando logado) */
 .cetech-header__user {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 42px;
-	height: 42px;
+	width: 40px;
+	height: 40px;
 	padding: 0;
 	border: 0;
+	border-radius: 10px;
 	color: #fff;
 	background: var(--cetech-blue);
-	border-radius: 8px;
 	cursor: pointer;
-	transition: background 0.18s ease;
+	transition: background 0.18s ease, transform 0.16s ease;
 }
 
-.cetech-header__user:hover {
+.cetech-header__user:hover,
+.cetech-header__user:focus-visible {
 	background: var(--cetech-blue-dark);
 }
 
@@ -540,7 +671,7 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	height: 19px;
 }
 
-/* Dropdown do icone de usuario (menu Sair) */
+/* Dropdown do usuario (Sair) */
 .cetech-header__user-wrap {
 	position: relative;
 }
@@ -554,7 +685,7 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	background: #fff;
 	border: 1px solid var(--cetech-border);
 	border-radius: 12px;
-	box-shadow: 0 18px 40px rgba(26, 26, 46, 0.12);
+	box-shadow: 0 18px 42px rgba(26, 26, 46, 0.12);
 	opacity: 0;
 	visibility: hidden;
 	transform: translateY(6px);
@@ -585,12 +716,12 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	font-size: 13.5px;
 	font-weight: 600;
 	color: var(--cetech-muted);
-	text-decoration: none;
 	border-radius: 8px;
 	transition: background 0.16s ease, color 0.16s ease;
 }
 
-.cetech-header__user-menu a:hover {
+.cetech-header__user-menu a:hover,
+.cetech-header__user-menu a:focus-visible {
 	background: var(--cetech-blue-light);
 	color: var(--cetech-blue);
 }
@@ -600,245 +731,89 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 	height: 17px;
 }
 
-/* Botao hamburguer (mobile) */
-.cetech-header__burger {
+/* Acoes duplicadas do painel mobile (ocultas no desktop) */
+.cetech-header__mobile-actions,
+.cetech-header__mobile-user {
 	display: none;
-	align-items: center;
-	justify-content: center;
-	width: 42px;
-	height: 42px;
-	padding: 0;
-	border: 0;
-	border-radius: 8px;
-	background: var(--cetech-blue);
-	color: #fff;
-	cursor: pointer;
-}
-
-.cetech-header__burger:hover {
-	background: var(--cetech-blue-dark);
-}
-
-.cetech-header__burger svg {
-	width: 22px;
-	height: 22px;
-}
-
-/* ---------- Menu (container proprio, max 1140px) ---------- */
-.cetech-header__nav {
-	position: relative;
-	background: #fff;
-	border-top: 1px solid var(--cetech-border);
-}
-
-.cetech-header__list,
-.cetech-header__list ul {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-}
-
-.cetech-header__list {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-wrap: wrap;
-	gap: 4px;
-	max-width: 1140px;
-	margin: 0 auto;
-	padding: 10px 24px;
-}
-
-.cetech-header__list > li {
-	position: relative;
-}
-
-.cetech-header__list > li > a {
-	display: block;
-	padding: 8px 14px;
-	font-size: 15px;
-	font-weight: 500;
-	letter-spacing: 0;
-	text-transform: none;
-	color: var(--cetech-muted);
-	white-space: nowrap;
-	border-radius: 7px;
-	transition: color 0.15s ease, background 0.15s ease;
-}
-
-.cetech-header__list > li > a:hover {
-	color: var(--cetech-blue);
-	background: var(--cetech-blue-light);
-}
-
-.cetech-header__list > li > a:focus-visible,
-.cetech-header__user:focus-visible,
-.cetech-header__burger:focus-visible {
-	outline: 3px solid rgba(32, 32, 238, 0.35);
-	outline-offset: 2px;
-}
-
-/* Item ativo (pagina atual) - pill azul */
-.cetech-header__list > li.current-menu-item > a:not(.cetech-header__associe),
-.cetech-header__list > li.current_page_item > a:not(.cetech-header__associe),
-.cetech-header__list > li.current-menu-ancestor > a:not(.cetech-header__associe),
-.cetech-header__list > li.current_page_ancestor > a:not(.cetech-header__associe) {
-	color: var(--cetech-blue);
-	background: var(--cetech-blue-light);
-}
-
-.cetech-header__list .sub-menu li.current-menu-item > a,
-.cetech-header__list .sub-menu li.current_page_item > a {
-	color: var(--cetech-blue);
-	background: var(--cetech-blue-light);
-}
-
-/* Item ASSOCIE-SE em destaque (CTA verde) */
-.cetech-header__list > li > a.cetech-header__associe {
-	margin: 4px 0 4px 10px;
-	padding: 8px 18px;
-	color: #fff;
-	font-weight: 700;
-	background: var(--cetech-green);
-	border-radius: 8px;
-}
-
-.cetech-header__list > li > a.cetech-header__associe:hover {
-	color: #fff;
-	background: var(--cetech-green-dark);
-}
-
-/* Dropdowns */
-.cetech-header__list .sub-menu {
-	position: absolute;
-	top: calc(100% + 6px);
-	left: 0;
-	min-width: 230px;
-	padding: 6px;
-	background: #fff;
-	border: 1px solid var(--cetech-border);
-	border-radius: 12px;
-	box-shadow: 0 18px 40px rgba(26, 26, 46, 0.12);
-	opacity: 0;
-	visibility: hidden;
-	transform: translateY(8px);
-	transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
-	z-index: 20;
-}
-
-.cetech-header__list > li:hover > .sub-menu,
-.cetech-header__list > li:focus-within > .sub-menu {
-	opacity: 1;
-	visibility: visible;
-	transform: none;
-}
-
-.cetech-header__list .sub-menu .sub-menu {
-	top: 0;
-	left: 100%;
-	margin-left: 2px;
-}
-
-.cetech-header__list .sub-menu a {
-	display: block;
-	padding: 9px 12px;
-	font-size: 14px;
-	font-weight: 500;
-	color: var(--cetech-muted);
-	border-radius: 8px;
-	transition: color 0.15s ease, background 0.15s ease;
-}
-
-.cetech-header__list .sub-menu a:hover {
-	color: var(--cetech-blue);
-	background: var(--cetech-blue-light);
-}
-
-/* Acoes do menu mobile (visiveis apenas no hamburguer) */
-.cetech-header__mobile-actions {
-	display: none;
-}
-
-.cetech-header__mobile-btn {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	min-height: 46px;
-	padding: 0 18px;
-	font-size: 14px;
-	font-weight: 700;
-	letter-spacing: 0.2px;
-	color: #fff;
-	border-radius: 8px;
-}
-
-.cetech-header__mobile-btn--area {
-	background: var(--cetech-blue);
-}
-
-.cetech-header__mobile-btn--area:hover {
-	background: var(--cetech-blue-dark);
-}
-
-.cetech-header__mobile-btn--area.cetech-header__area--user {
-	text-transform: none;
-}
-
-.cetech-header__mobile-btn--associe {
-	background: var(--cetech-green);
-}
-
-.cetech-header__mobile-btn--associe:hover {
-	background: var(--cetech-green-dark);
 }
 
 /* ---------- Responsivo ---------- */
 @media (max-width: 1199px) {
-	.cetech-header__main-inner {
-		gap: 20px;
+	.cetech-header__box {
+		gap: 14px;
+		padding: 6px 8px;
 	}
 
 	.cetech-header__list > li > a {
 		padding: 8px 12px;
 		font-size: 14px;
 	}
-}
 
-@media (max-width: 1023px) {
-	.cetech-header__search {
-		display: none;
+	.cetech-header__end {
+		gap: 8px;
 	}
 
-	.cetech-header__main-inner {
-		grid-template-columns: 1fr auto;
-		padding: 12px 16px;
+	.cetech-header__btn {
+		padding: 0 16px;
+		font-size: 13.5px;
 	}
 
 	.cetech-header__logo img {
-		height: 36px;
+		height: 40px;
+	}
+}
+
+@media (max-width: 1023px) {
+	.cetech-header {
+		position: relative;
+		top: 0;
+		margin: 0 auto 24px;
 	}
 
-	.cetech-header__area {
+	.cetech-header.scrolled {
+		top: 0;
+	}
+
+	.cetech-header__box {
+		grid-template-columns: auto auto;
+		align-items: center;
+	}
+
+	.cetech-header__start {
+		grid-column: 1;
+	}
+
+	.cetech-header__end {
+		grid-column: 2;
+		justify-content: flex-end;
+	}
+
+	.cetech-header__end .cetech-header__btn,
+	.cetech-header__end .cetech-header__user-wrap {
 		display: none;
 	}
 
 	.cetech-header__burger {
-		display: inline-flex;
+		display: flex;
 	}
 
-	/* Menu vira painel deslizante sob a barra */
+	.cetech-header__logo img {
+		height: 38px;
+	}
+
+	/* Painel mobile do menu */
 	.cetech-header__nav {
 		position: absolute;
-		top: 100%;
+		top: calc(100% + 6px);
 		left: 0;
 		right: 0;
 		display: none;
-		max-height: calc(100vh - 80px);
+		max-height: calc(100vh - 90px);
 		overflow-y: auto;
 		background: #fff;
-		border-top: 1px solid var(--cetech-border);
-		box-shadow: 0 18px 40px rgba(26, 26, 46, 0.10);
-		z-index: 100;
+		border: 1px solid var(--cetech-border);
+		border-radius: 14px;
+		box-shadow: 0 20px 44px rgba(26, 26, 46, 0.14);
 	}
 
 	.cetech-header__nav.is-open {
@@ -849,37 +824,33 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 		flex-direction: column;
 		align-items: stretch;
 		gap: 0;
-		padding: 12px 24px;
+		padding: 8px 8px 4px;
+		margin: 0;
 	}
 
 	.cetech-header__list > li > a {
-		padding: 12px 0;
+		padding: 12px 12px;
 		font-size: 16px;
 		font-weight: 500;
-		color: #444444;
-		border-bottom: 1px solid #f0f0f0;
+		color: var(--cetech-ink);
 		border-radius: 0;
+		border-bottom: 1px solid var(--cetech-border);
 	}
 
-	.cetech-header__list > li.current-menu-item > a:not(.cetech-header__associe),
-	.cetech-header__list > li.current_page_item > a:not(.cetech-header__associe),
-	.cetech-header__list > li.current-menu-ancestor > a:not(.cetech-header__associe),
-	.cetech-header__list > li.current_page_ancestor > a:not(.cetech-header__associe) {
+	.cetech-header__list > li.current-menu-item > a,
+	.cetech-header__list > li.current_page_item > a,
+	.cetech-header__list > li.current-menu-ancestor > a,
+	.cetech-header__list > li.current_page_ancestor > a {
 		color: var(--cetech-blue);
 		background: transparent;
+		font-weight: 600;
 	}
 
-	/* O destaque ASSOCIE-SE sai do menu e vira botao proprio */
-	.cetech-header__list > li > a.cetech-header__associe,
-	.cetech-header__list > li.cetech-header__associe-item {
-		display: none;
-	}
-
-	/* Submenus empilhados no painel */
 	.cetech-header__list .sub-menu {
 		position: static;
 		min-width: 0;
 		padding: 0 0 4px 14px;
+		margin: 0;
 		opacity: 1;
 		visibility: visible;
 		transform: none;
@@ -895,25 +866,60 @@ Estilo baseado na referencia visual do menu CE Tech (figma.site):
 
 	.cetech-header__list .sub-menu a {
 		padding: 10px 0;
-		border-bottom: 1px solid #f8fafc;
+		font-size: 14px;
+		border-bottom: 1px solid rgba(82, 82, 94, 0.06);
 		border-radius: 0;
 	}
 
+	.cetech-header__list .sub-menu a:last-child {
+		border-bottom: 0;
+	}
+
+	/* Acoes dentro do painel mobile */
 	.cetech-header__mobile-actions {
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
-		padding: 12px 24px 24px;
+		padding: 16px 16px 20px;
+	}
+
+	.cetech-header__mobile-actions .cetech-header__btn {
+		width: 100%;
+		justify-content: center;
+	}
+
+	.cetech-header__mobile-user {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding-top: 4px;
+		border-top: 1px solid var(--cetech-border);
+	}
+
+	.cetech-header__mobile-user-name {
+		font-size: 14px;
+		font-weight: 700;
+		color: var(--cetech-ink);
+	}
+
+	.cetech-header__mobile-user-link {
+		display: inline-block;
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--cetech-blue);
 	}
 }
 
 @media (max-width: 480px) {
-	.cetech-header__main-inner {
-		padding: 10px 14px;
-		gap: 12px;
+	.cetech-header__box {
+		padding: 4px 6px;
+	}
+
+	.cetech-header__mobile-actions {
+		padding: 14px 14px 20px;
 	}
 
 	.cetech-header__logo img {
-		height: 32px;
+		height: 34px;
 	}
 }
