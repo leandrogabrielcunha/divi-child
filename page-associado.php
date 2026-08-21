@@ -41,7 +41,6 @@ add_filter(
 get_header();
 
 $user         = wp_get_current_user();
-$first_name   = trim( (string) $user->first_name ) !== '' ? $user->first_name : $user->display_name;
 $categorias   = setceb_associado_categorias();
 $anos         = setceb_associado_anos();
 $ano_atual    = ! empty( $anos ) ? (string) $anos[0] : (string) gmdate( 'Y' );
@@ -86,14 +85,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 <div id="main-content">
 	<main class="setceb-perfil">
 
-		<header class="assoc-hero">
-			<div class="assoc-hero__inner">
-				<h1 class="assoc-hero__title">Área do Associado</h1>
-				<?php if ( is_user_logged_in() && $is_entitled ) : ?>
-					<p class="assoc-hero__hello">Olá, <?php echo esc_html( $first_name ); ?>. Este é o seu espaço exclusivo.</p>
-				<?php endif; ?>
-			</div>
-		</header>
+		<h1 class="assoc-sr-only">Área do Associado</h1>
 
 		<div class="assoc-container">
 
