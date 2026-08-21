@@ -293,6 +293,327 @@ function setceb_boletos() {
 	);
 }
 
+/* ------------------------------------------------------------
+ * 5. Area do associado - conteudos (categorias, anos, documentos)
+ * ------------------------------------------------------------ */
+
+/**
+ * Assets exclusivos da pagina da area do associado.
+ *
+ * Usa a fonte de icones Dashicons (embutida no WordPress) e o script
+ * de interacoes (abas, seletor de ano, filtros e estados dos forms).
+ */
+function setceb_associado_enqueue_assets() {
+	if ( ! is_page( 'perfil-do-associado' ) && ! is_page_template( 'page-associado.php' ) ) {
+		return;
+	}
+
+	$theme = wp_get_theme();
+
+	wp_enqueue_style( 'dashicons' );
+
+	wp_enqueue_script(
+		'setceb-associado',
+		get_stylesheet_directory_uri() . '/associado.js',
+		array(),
+		$theme->get( 'Version' ),
+		true
+	);
+}
+add_action( 'wp_enqueue_scripts', 'setceb_associado_enqueue_assets' );
+
+/**
+ * Categorias exibidas no menu lateral da area do associado.
+ *
+ * @return array slug => rotulo
+ */
+function setceb_associado_categorias() {
+	$categorias = array(
+		'container'               => 'Container',
+		'fracionada'              => 'Fracionada',
+		'frigorificada'           => 'Frigorificada',
+		'graos-e-solidos'         => 'Grãos e Sólidos',
+		'internacional'           => 'Internacional',
+		'liquida'                 => 'Líquida',
+		'lotacao'                 => 'Lotação',
+		'maquinas-e-equipamentos' => 'Máquinas e Equipamentos',
+		'veiculos'                => 'Veículos',
+	);
+
+	return apply_filters( 'setceb_associado_categorias', $categorias );
+}
+
+/**
+ * Anos disponiveis no seletor (atual ate 2015, decrescente).
+ *
+ * @return int[]
+ */
+function setceb_associado_anos() {
+	$anos = range( (int) gmdate( 'Y' ), 2015 );
+
+	return apply_filters( 'setceb_associado_anos', $anos );
+}
+
+/**
+ * Planilhas disponibilizadas ao associado.
+ *
+ * Cada item: array com 'titulo', 'url' e opcionalmente 'descricao' e
+ * 'ano'. Popule via filtro setceb_planilhas ou integre a uma fonte de
+ * dados quando existir.
+ *
+ * @return array[]
+ */
+function setceb_planilhas() {
+	return apply_filters( 'setceb_planilhas', array() );
+}
+
+/**
+ * Relatorios disponibilizados ao associado.
+ *
+ * Cada item: array com 'titulo', 'categoria' (slug de
+ * setceb_associado_categorias), 'ano', 'url' e opcionalmente
+ * 'destaque' => true para receber o card em evidencia.
+ *
+ * @return array[]
+ */
+function setceb_relatorios() {
+	return apply_filters( 'setceb_relatorios', array() );
+}
+
+/**
+ * Convencoes coletivas disponibilizadas ao associado.
+ *
+ * Cada item: array com 'titulo', 'url' e opcionalmente 'ano' e
+ * 'descricao'.
+ *
+ * @return array[]
+ */
+function setceb_convencoes() {
+	return apply_filters( 'setceb_convencoes', array() );
+}
+
+/**
+ * Assuntos do formulario Fale Conosco.
+ *
+ * @return array slug => rotulo
+ */
+function setceb_contato_assuntos() {
+	$assuntos = array(
+		'associacao' => 'Associação',
+		'boletos'    => 'Boletos e mensalidades',
+		'juridico'   => 'Assessoria jurídica',
+		'cursos'     => 'Cursos e eventos',
+		'convencoes' => 'Convenções coletivas',
+		'outros'     => 'Outros assuntos',
+	);
+
+	return apply_filters( 'setceb_contato_assuntos', $assuntos );
+}
+
+/**
+ * Destinatario dos formularios da area do associado.
+ *
+ * @param string $contexto 'juridico' ou 'fale-conosco'.
+ * @return string
+ */
+function setceb_form_recipient( $contexto ) {
+	return apply_filters( 'setceb_form_recipient', get_option( 'admin_email' ), $contexto );
+}
+
+/**
+ * Mensagem de sucesso/erro retornada pelo envio do formulario,
+ * lida dos parametros de query apos o redirect do admin-post.
+ *
+ * @return array|null
+ */
+function setceb_associado_form_notice() {
+	if ( ! isset( $_GET['assoc_status'] ) ) {
+		return null;
+	}
+
+	$status = sanitize_key( wp_unslash( $_GET['assoc_status'] ) );
+	$forma  = isset( $_GET['assoc_form'] ) ? sanitize_key( wp_unslash( $_GET['assoc_form'] ) ) : '';
+
+	$mensagens = array(
+		'ok'       => array(
+			'tipo' => 'sucesso',
+			'texto' => 'Mensagem enviada com sucesso. Em breve nossa equipe entrará em contato.',
+		),
+		'throttle' => array(
+			'tipo' => 'erro',
+			'texto' => 'Aguarde alguns instantes antes de enviar uma nova mensagem.',
+		),
+		'campos'   => array(
+			'tipo' => 'erro',
+			'texto' => 'Verifique os campos obrigatórios e tente novamente.',
+		),
+		'erro'     => array(
+			'tipo' => 'erro',
+			'texto' => 'Não foi possível enviar sua mensagem agora. Tente novamente em alguns minutos.',
+		),
+	);
+
+	if ( ! isset( $mensagens[ $status ] ) || ! in_array( $forma, array( 'juridico', 'fale-conosco' ), true ) ) {
+		return null;
+	}
+
+	return array(
+		'forma'  => $forma,
+		'tipo'   => $mensagens[ $status ]['tipo'],
+		'texto'  => $mensagens[ $status ]['texto'],
+	);
+}
+
+/**
+ * Processa o envio dos formularios (admin-post.php) e volta para a
+ * pagina do perfil com status na query string.
+ *
+ * @param string $contexto 'juridico' ou 'fale-conosco'.
+ */
+function setceb_associado_process_form( $contexto ) {
+	$perfil_url = setceb_associado_perfil_url();
+
+	if ( ! is_user_logged_in() ) {
+		wp_safe_redirect( wp_login_url( $perfil_url ) );
+		exit;
+	}
+
+	if ( ! setceb_is_associado() && ! current_user_can( 'manage_options' ) ) {
+		wp_safe_redirect( $perfil_url );
+		exit;
+	}
+
+	$redirect = wp_get_referer();
+
+	if ( ! $redirect || false === strpos( $redirect, home_url() ) ) {
+		$redirect = $perfil_url;
+	}
+
+	$redirect = remove_query_arg( array( 'assoc_status', 'assoc_form' ), $redirect );
+
+	$voltar = static function ( $status ) use ( $contexto, $redirect ) {
+		$url = add_query_arg(
+			array(
+				'assoc_status' => $status,
+				'assoc_form'   => $contexto,
+			),
+			$redirect
+		);
+
+		wp_safe_redirect( $url . '#panel-' . $contexto );
+		exit;
+	};
+
+	// Honeypot: bots que preenchem o campo escondido sao descartados como sucesso.
+	if ( ! empty( $_POST['setceb_website'] ) ) {
+		$voltar( 'ok' );
+		return;
+	}
+
+	if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'setceb_form_' . $contexto ) ) {
+		$voltar( 'erro' );
+		return;
+	}
+
+	$throttle_key = 'setceb_form_' . get_current_user_id();
+
+	if ( get_transient( $throttle_key ) ) {
+		$voltar( 'throttle' );
+		return;
+	}
+
+	$nome     = isset( $_POST['setceb_nome'] ) ? sanitize_text_field( wp_unslash( $_POST['setceb_nome'] ) ) : '';
+	$email    = isset( $_POST['setceb_email'] ) ? sanitize_email( wp_unslash( $_POST['setceb_email'] ) ) : '';
+	$telefone = isset( $_POST['setceb_telefone'] ) ? sanitize_text_field( wp_unslash( $_POST['setceb_telefone'] ) ) : '';
+	$empresa  = isset( $_POST['setceb_empresa'] ) ? sanitize_text_field( wp_unslash( $_POST['setceb_empresa'] ) ) : '';
+	$mensagem = isset( $_POST['setceb_mensagem'] ) ? sanitize_textarea_field( wp_unslash( $_POST['setceb_mensagem'] ) ) : '';
+
+	$assunto_rotulo = '';
+
+	if ( 'fale-conosco' === $contexto ) {
+		$assuntos       = setceb_contato_assuntos();
+		$assunto_slug   = isset( $_POST['setceb_assunto'] ) ? sanitize_key( wp_unslash( $_POST['setceb_assunto'] ) ) : '';
+		$assunto_valido = isset( $assuntos[ $assunto_slug ] ) ? $assunto_slug : '';
+
+		if ( '' !== $assunto_valido ) {
+			$assunto_rotulo = $assuntos[ $assunto_valido ];
+		}
+	}
+
+	if ( '' === $nome || '' === $mensagem || ! is_email( $email ) || ( 'fale-conosco' === $contexto && '' === $assunto_rotulo ) ) {
+		$voltar( 'campos' );
+		return;
+	}
+
+	$servicos = array(
+		'juridico'     => 'Assessoria Jurídica',
+		'fale-conosco' => 'Fale Conosco',
+	);
+
+	$user = wp_get_current_user();
+	$ip   = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+
+	$linhas = array(
+		'Nova mensagem enviada pela Área do Associado.',
+		'',
+		'Serviço: ' . $servicos[ $contexto ],
+		'Assunto: ' . ( '' !== $assunto_rotulo ? $assunto_rotulo : '-' ),
+		'Nome: ' . $nome,
+		'E-mail: ' . $email,
+		'' !== $telefone ? 'Telefone: ' . $telefone : null,
+		'' !== $empresa ? 'Empresa: ' . $empresa : null,
+		'Usuário: ' . $user->user_login,
+		'IP: ' . $ip,
+		'',
+		'Mensagem:',
+		$mensagem,
+	);
+
+	$corpo = implode(
+		"\n",
+		array_values(
+			array_filter(
+				$linhas,
+				static function ( $linha ) {
+					return null !== $linha;
+				}
+			)
+		)
+	);
+
+	$headers = array(
+		'Reply-To: ' . $nome . ' <' . $email . '>',
+		'Content-Type: text/plain; charset=UTF-8',
+	);
+
+	$enviado = wp_mail(
+		setceb_form_recipient( $contexto ),
+		sprintf( '[%s] Área do Associado - %s', wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ), $servicos[ $contexto ] ),
+		$corpo,
+		$headers
+	);
+
+	if ( ! $enviado ) {
+		$voltar( 'erro' );
+		return;
+	}
+
+	set_transient( $throttle_key, 1, 30 );
+	$voltar( 'ok' );
+}
+
+function setceb_associado_process_juridico() {
+	setceb_associado_process_form( 'juridico' );
+}
+
+function setceb_associado_process_fale_conosco() {
+	setceb_associado_process_form( 'fale-conosco' );
+}
+add_action( 'admin_post_setceb_juridico', 'setceb_associado_process_juridico' );
+add_action( 'admin_post_nopriv_setceb_juridico', 'setceb_associado_process_juridico' );
+add_action( 'admin_post_setceb_fale_conosco', 'setceb_associado_process_fale_conosco' );
+add_action( 'admin_post_nopriv_setceb_fale_conosco', 'setceb_associado_process_fale_conosco' );
+
 /**
  * Retorna o SVG de um icone usado na area do associado.
  *
