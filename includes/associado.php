@@ -357,9 +357,10 @@ function setceb_associado_anos() {
 /**
  * Planilhas disponibilizadas ao associado.
  *
- * Cada item: array com 'titulo', 'url' e opcionalmente 'descricao' e
- * 'ano'. Popule via filtro setceb_planilhas ou integre a uma fonte de
- * dados quando existir.
+ * Cada item: array com 'titulo', 'url' e opcionalmente 'descricao',
+ * 'ano' e 'categoria' (slug de setceb_associado_categorias - usado
+ * pelo filtro do menu lateral). Popule via filtro setceb_planilhas
+ * ou integre a uma fonte de dados quando existir.
  *
  * @return array[]
  */

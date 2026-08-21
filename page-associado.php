@@ -122,7 +122,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 							Categorias
 							<span class="dashicons dashicons-arrow-down-alt2 assoc-side__chevron" aria-hidden="true"></span>
 						</button>
-						<nav id="assoc-cats" class="assoc-cats" aria-label="Categorias de documentos">
+						<nav id="assoc-cats" class="assoc-cats" aria-label="Categorias de planilhas">
 							<ul class="assoc-cats__list">
 								<?php foreach ( $categorias as $cat_slug => $cat_label ) : ?>
 									<li>
@@ -170,21 +170,39 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 							<!-- PLANILHAS -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'planilhas', $active_panel, 'class' ) ) ); ?>" id="panel-planilhas" role="tabpanel" aria-labelledby="tab-planilhas" tabindex="0">
 								<h2 class="assoc-panel__title">Planilhas</h2>
-								<p class="assoc-panel__intro">Arquivos e ferramentas de apoio disponibilizados pela entidade.</p>
+								<p class="assoc-panel__intro">Arquivos e ferramentas de apoio organizados por categoria de transporte. Use o menu lateral para filtrar.</p>
 
 								<?php if ( ! empty( $planilhas ) ) : ?>
+									<div class="assoc-filter" data-filter hidden>
+										<span>Categoria: <strong data-filter-label></strong></span>
+										<button type="button" class="assoc-filter__clear" data-filter-clear>
+											<span class="dashicons dashicons-dismiss" aria-hidden="true"></span>
+											Remover filtro
+										</button>
+									</div>
+
 									<div class="assoc-docs">
 										<?php foreach ( $planilhas as $item ) : ?>
 											<?php
 											if ( empty( $item['titulo'] ) || empty( $item['url'] ) ) {
 												continue;
 											}
+
+											$plan_meta = array();
+
+											if ( ! empty( $item['categoria'] ) ) {
+												$plan_meta[] = isset( $categorias[ $item['categoria'] ] ) ? $categorias[ $item['categoria'] ] : $item['categoria'];
+											}
+
+											if ( ! empty( $item['ano'] ) ) {
+												$plan_meta[] = $item['ano'];
+											}
 											?>
-											<article class="assoc-doc"<?php echo isset( $item['ano'] ) ? ' data-ano="' . esc_attr( $item['ano'] ) . '"' : ''; ?>>
+											<article class="assoc-doc"<?php echo ! empty( $item['categoria'] ) ? ' data-categoria="' . esc_attr( $item['categoria'] ) . '"' : ''; ?><?php echo ! empty( $item['ano'] ) ? ' data-ano="' . esc_attr( $item['ano'] ) . '"' : ''; ?>>
 												<span class="dashicons dashicons-media-spreadsheet assoc-doc__icon" aria-hidden="true"></span>
 												<h3 class="assoc-doc__titulo"><?php echo esc_html( $item['titulo'] ); ?></h3>
-												<?php if ( ! empty( $item['descricao'] ) ) : ?>
-													<p class="assoc-doc__meta"><?php echo esc_html( $item['descricao'] ); ?></p>
+												<?php if ( ! empty( $plan_meta ) ) : ?>
+													<p class="assoc-doc__meta"><?php echo esc_html( implode( ' · ', $plan_meta ) ); ?></p>
 												<?php endif; ?>
 												<a class="assoc-doc__link" href="<?php echo esc_url( $item['url'] ); ?>" target="_blank" rel="noopener noreferrer">
 													Abrir documento
@@ -192,6 +210,11 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 												</a>
 											</article>
 										<?php endforeach; ?>
+									</div>
+
+									<div class="assoc-empty" data-planilhas-empty hidden>
+										<span class="dashicons dashicons-media-spreadsheet assoc-empty__icon" aria-hidden="true"></span>
+										<p data-planilhas-empty-text>Nenhuma planilha disponível para o filtro selecionado.</p>
 									</div>
 								<?php else : ?>
 									<div class="assoc-empty">
@@ -204,15 +227,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 							<!-- RELATORIOS -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'relatorios', $active_panel, 'class' ) ) ); ?>" id="panel-relatorios" role="tabpanel" aria-labelledby="tab-relatorios" tabindex="0">
 								<h2 class="assoc-panel__title">Relatórios</h2>
-								<p class="assoc-panel__intro">Relatórios mensais por categoria de transporte. Use as categorias do menu lateral e o seletor de ano para filtrar.</p>
-
-								<div class="assoc-filter" data-filter hidden>
-									<span>Categoria: <strong data-filter-label></strong></span>
-									<button type="button" class="assoc-filter__clear" data-filter-clear>
-										<span class="dashicons dashicons-dismiss" aria-hidden="true"></span>
-										Remover filtro
-									</button>
-								</div>
+								<p class="assoc-panel__intro">Relatórios mensais por categoria de transporte. Use o seletor de ano para filtrar.</p>
 
 								<?php if ( ! empty( $relatorios ) ) : ?>
 									<div class="assoc-docs">
