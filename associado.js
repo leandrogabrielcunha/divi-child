@@ -105,60 +105,11 @@
 	}
 
 	/* ============================================================
-	 * Menu lateral de categorias (recollivel no mobile)
-	 * ============================================================ */
-	var sideToggle = root.querySelector('.assoc-side__toggle');
-	var catsNav = root.querySelector('.assoc-cats');
-
-	function isMobileNav() {
-		return window.innerWidth < 1024;
-	}
-
-	function closeCats() {
-		if (!sideToggle || !catsNav) {
-			return;
-		}
-		catsNav.classList.add('is-closed');
-		sideToggle.setAttribute('aria-expanded', 'false');
-	}
-
-	function openCats() {
-		if (!sideToggle || !catsNav) {
-			return;
-		}
-		catsNav.classList.remove('is-closed');
-		sideToggle.setAttribute('aria-expanded', 'true');
-	}
-
-	if (sideToggle && catsNav) {
-		if (isMobileNav()) {
-			closeCats();
-		}
-
-		sideToggle.addEventListener('click', function () {
-			if (catsNav.classList.contains('is-closed')) {
-				openCats();
-			} else {
-				closeCats();
-			}
-		});
-
-		window.addEventListener('resize', function () {
-			if (!isMobileNav()) {
-				openCats();
-			}
-		});
-	}
-
-	/* ============================================================
-	 * Filtro por categoria (documentos dos paineis)
+	 * Filtros por categoria (internos do painel de planilhas)
 	 * ============================================================ */
 	var currentYear = null;
 	var currentCategory = '';
-	var catButtons = qsa('.assoc-cats__item');
-	var filterChip = root.querySelector('[data-filter]');
-	var filterLabel = root.querySelector('[data-filter-label]');
-	var filterClear = root.querySelector('[data-filter-clear]');
+	var catButtons = qsa('.assoc-filter-btn');
 
 	function categoryButton(slug) {
 		return catButtons.filter(function (btn) {
@@ -223,51 +174,21 @@
 		/* Categorias filtram planilhas; ano filtra planilhas e relatorios. */
 		refreshEmptyPanel('#panel-planilhas', '[data-planilhas-empty]', '[data-planilhas-empty-text]', 'Nenhuma planilha disponível', true);
 		refreshEmptyPanel('#panel-relatorios', '[data-relatorios-empty]', '[data-empty-text]', 'Nenhum relatório disponível', false);
-
-		/* Chip do filtro ativo (painel de planilhas) */
-		if (filterChip && filterLabel) {
-			var btn = currentCategory ? categoryButton(currentCategory) : null;
-			filterChip.hidden = !btn;
-			if (btn) {
-				filterLabel.textContent = btn.textContent.trim();
-			}
-		}
 	}
 
 	catButtons.forEach(function (button) {
 		button.addEventListener('click', function () {
-			var slug = button.getAttribute('data-categoria');
-			var wasActive = button.getAttribute('aria-pressed') === 'true';
+			currentCategory = button.getAttribute('data-categoria') || '';
 
 			catButtons.forEach(function (other) {
-				other.setAttribute('aria-pressed', 'false');
-				other.classList.remove('is-active');
+				var isActive = other === button;
+				other.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+				other.classList.toggle('is-active', isActive);
 			});
 
-			if (wasActive) {
-				currentCategory = '';
-			} else {
-				currentCategory = slug;
-				button.setAttribute('aria-pressed', 'true');
-				button.classList.add('is-active');
-			}
-
-			activatePanel('planilhas', { silent: wasActive });
-			closeCats();
 			applyDocFilters();
 		});
 	});
-
-	if (filterClear) {
-		filterClear.addEventListener('click', function () {
-			currentCategory = '';
-			catButtons.forEach(function (other) {
-				other.setAttribute('aria-pressed', 'false');
-				other.classList.remove('is-active');
-			});
-			applyDocFilters();
-		});
-	}
 
 	/* ============================================================
 	 * Seletor de ano (listbox acessivel)

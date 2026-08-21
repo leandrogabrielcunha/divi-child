@@ -102,6 +102,13 @@ associado (perfil). Ver includes/associado.php
 require_once get_stylesheet_directory() . '/includes/associado.php';
 
 /*================================================
+#SETCEB - Documentos do associado (CPTs)
+Planilhas, relatorios e convencoes cadastrados
+pelo admin. Ver includes/documentos.php
+================================================*/
+require_once get_stylesheet_directory() . '/includes/documentos.php';
+
+/*================================================
 #SETCEB - Header global customizado
 Estrutura do cabecalho e menu principal.
 Ver includes/setceb-header.php

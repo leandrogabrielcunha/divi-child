@@ -357,40 +357,45 @@ function setceb_associado_anos() {
 /**
  * Planilhas disponibilizadas ao associado.
  *
- * Cada item: array com 'titulo', 'url' e opcionalmente 'descricao',
- * 'ano' e 'categoria' (slug de setceb_associado_categorias - usado
- * pelo filtro do menu lateral). Popule via filtro setceb_planilhas
- * ou integre a uma fonte de dados quando existir.
+ * Fonte: itens do CPT "setceb_planilha" (menu Planilhas no painel).
+ * Cada item: 'titulo', 'url' e opcionalmente 'descricao', 'ano' e
+ * 'categoria' (slug da taxonomia setceb_cat_doc). Pode ser
+ * estendido/alterado via filtro setceb_planilhas.
  *
  * @return array[]
  */
 function setceb_planilhas() {
-	return apply_filters( 'setceb_planilhas', array() );
+	$itens = function_exists( 'setceb_documentos_query' ) ? setceb_documentos_query( 'setceb_planilha' ) : array();
+
+	return apply_filters( 'setceb_planilhas', $itens );
 }
 
 /**
  * Relatorios disponibilizados ao associado.
  *
- * Cada item: array com 'titulo', 'categoria' (slug de
- * setceb_associado_categorias), 'ano', 'url' e opcionalmente
- * 'destaque' => true para receber o card em evidencia.
+ * Fonte: itens do CPT "setceb_relatorio" (menu Relatorios no painel).
+ * Itens marcados como destaque recebem o card em evidencia.
  *
  * @return array[]
  */
 function setceb_relatorios() {
-	return apply_filters( 'setceb_relatorios', array() );
+	$itens = function_exists( 'setceb_documentos_query' ) ? setceb_documentos_query( 'setceb_relatorio' ) : array();
+
+	return apply_filters( 'setceb_relatorios', $itens );
 }
 
 /**
  * Convencoes coletivas disponibilizadas ao associado.
  *
- * Cada item: array com 'titulo', 'url' e opcionalmente 'ano' e
- * 'descricao'.
+ * Fonte: itens do CPT "setceb_convencoes" (menu Conveções Coletivas
+ * no painel).
  *
  * @return array[]
  */
 function setceb_convencoes() {
-	return apply_filters( 'setceb_convencoes', array() );
+	$itens = function_exists( 'setceb_documentos_query' ) ? setceb_documentos_query( 'setceb_convencoes' ) : array();
+
+	return apply_filters( 'setceb_convencoes', $itens );
 }
 
 /**

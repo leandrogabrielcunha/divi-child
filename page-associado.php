@@ -113,30 +113,8 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 
 			<?php else : ?>
 
-				<div class="assoc-layout">
-
-					<!-- Menu lateral de categorias -->
-					<aside class="assoc-side">
-						<button type="button" class="assoc-side__toggle" aria-expanded="false" aria-controls="assoc-cats">
-							<span class="dashicons dashicons-menu-alt3" aria-hidden="true"></span>
-							Categorias
-							<span class="dashicons dashicons-arrow-down-alt2 assoc-side__chevron" aria-hidden="true"></span>
-						</button>
-						<nav id="assoc-cats" class="assoc-cats" aria-label="Categorias de planilhas">
-							<ul class="assoc-cats__list">
-								<?php foreach ( $categorias as $cat_slug => $cat_label ) : ?>
-									<li>
-										<button type="button" class="assoc-cats__item" data-categoria="<?php echo esc_attr( $cat_slug ); ?>" aria-pressed="false"><?php echo esc_html( $cat_label ); ?></button>
-									</li>
-								<?php endforeach; ?>
-							</ul>
-						</nav>
-					</aside>
-
-					<div class="assoc-main">
-
-						<!-- Seletor de ano + emissao de boletos -->
-						<div class="assoc-toolbar">
+				<!-- Seletor de ano + emissao de boletos -->
+				<div class="assoc-toolbar">
 							<div class="assoc-year">
 								<button type="button" class="assoc-year__btn" aria-haspopup="listbox" aria-expanded="false" aria-label="Selecionar ano de referência">
 									<span class="dashicons dashicons-calendar-alt" aria-hidden="true"></span>
@@ -170,15 +148,14 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 							<!-- PLANILHAS -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'planilhas', $active_panel, 'class' ) ) ); ?>" id="panel-planilhas" role="tabpanel" aria-labelledby="tab-planilhas" tabindex="0">
 								<h2 class="assoc-panel__title">Planilhas</h2>
-								<p class="assoc-panel__intro">Arquivos e ferramentas de apoio organizados por categoria de transporte. Use o menu lateral para filtrar.</p>
+								<p class="assoc-panel__intro">Arquivos e ferramentas de apoio organizados por categoria de transporte. Use os filtros abaixo.</p>
 
 								<?php if ( ! empty( $planilhas ) ) : ?>
-									<div class="assoc-filter" data-filter hidden>
-										<span>Categoria: <strong data-filter-label></strong></span>
-										<button type="button" class="assoc-filter__clear" data-filter-clear>
-											<span class="dashicons dashicons-dismiss" aria-hidden="true"></span>
-											Remover filtro
-										</button>
+									<div class="assoc-filters" role="group" aria-label="Filtrar planilhas por categoria">
+										<button type="button" class="assoc-filter-btn is-active" data-categoria="" aria-pressed="true">Todas</button>
+										<?php foreach ( $categorias as $cat_slug => $cat_label ) : ?>
+											<button type="button" class="assoc-filter-btn" data-categoria="<?php echo esc_attr( $cat_slug ); ?>" aria-pressed="false"><?php echo esc_html( $cat_label ); ?></button>
+										<?php endforeach; ?>
 									</div>
 
 									<div class="assoc-docs">
@@ -233,18 +210,29 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 									<div class="assoc-docs">
 										<?php foreach ( $relatorios as $item ) : ?>
 											<?php
-											if ( empty( $item['titulo'] ) || empty( $item['url'] ) || empty( $item['categoria'] ) || empty( $item['ano'] ) ) {
+											if ( empty( $item['titulo'] ) || empty( $item['url'] ) ) {
 												continue;
 											}
-											$doc_categoria = isset( $categorias[ $item['categoria'] ] ) ? $categorias[ $item['categoria'] ] : $item['categoria'];
+
+											$doc_meta = array();
+
+											if ( ! empty( $item['categoria'] ) ) {
+												$doc_meta[] = isset( $categorias[ $item['categoria'] ] ) ? $categorias[ $item['categoria'] ] : $item['categoria'];
+											}
+
+											if ( ! empty( $item['ano'] ) ) {
+												$doc_meta[] = $item['ano'];
+											}
 											?>
-											<article class="assoc-doc<?php echo ! empty( $item['destaque'] ) ? ' assoc-doc--destaque' : ''; ?>" data-categoria="<?php echo esc_attr( $item['categoria'] ); ?>" data-ano="<?php echo esc_attr( $item['ano'] ); ?>">
+											<article class="assoc-doc<?php echo ! empty( $item['destaque'] ) ? ' assoc-doc--destaque' : ''; ?>"<?php echo ! empty( $item['categoria'] ) ? ' data-categoria="' . esc_attr( $item['categoria'] ) . '"' : ''; ?><?php echo ! empty( $item['ano'] ) ? ' data-ano="' . esc_attr( $item['ano'] ) . '"' : ''; ?>>
 												<?php if ( ! empty( $item['destaque'] ) ) : ?>
 													<span class="assoc-doc__tag">Destaque</span>
 												<?php endif; ?>
 												<span class="dashicons dashicons-chart-bar assoc-doc__icon" aria-hidden="true"></span>
 												<h3 class="assoc-doc__titulo"><?php echo esc_html( $item['titulo'] ); ?></h3>
-												<p class="assoc-doc__meta"><?php echo esc_html( $doc_categoria . ' · ' . $item['ano'] ); ?></p>
+												<?php if ( ! empty( $doc_meta ) ) : ?>
+													<p class="assoc-doc__meta"><?php echo esc_html( implode( ' · ', $doc_meta ) ); ?></p>
+												<?php endif; ?>
 												<a class="assoc-doc__link" href="<?php echo esc_url( $item['url'] ); ?>" target="_blank" rel="noopener noreferrer">
 													Abrir documento
 													<span class="dashicons dashicons-external" aria-hidden="true"></span>
@@ -439,8 +427,6 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 							</section>
 
 						</div><!-- /.assoc-panels -->
-					</div><!-- /.assoc-main -->
-				</div><!-- /.assoc-layout -->
 
 			<?php endif; ?>
 		</div>

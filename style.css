@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.12.3
+Version: 1.13.0
 Template: Divi
 */
 
@@ -1155,18 +1155,8 @@ via fonte Dashicons.
 	white-space: nowrap;
 	border: 0;
 }
-.assoc-layout {
-	display: grid;
-	grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
-	gap: 24px;
-	align-items: start;
-}
 
-.assoc-main {
-	min-width: 0;
-}
-
-/* ---------- Botao padrao (verde, flat) ---------- */
+/* ---------- Botao padrao (flat) ---------- */
 .assoc-btn {
 	display: inline-flex;
 	align-items: center;
@@ -1197,12 +1187,10 @@ via fonte Dashicons.
 }
 
 .assoc-btn:focus-visible,
-.assoc-cats__item:focus-visible,
+.assoc-filter-btn:focus-visible,
 .assoc-year__btn:focus-visible,
 .assoc-year__option:focus-visible,
-.assoc-tab:focus-visible,
-.assoc-side__toggle:focus-visible,
-.assoc-filter__clear:focus-visible {
+.assoc-tab:focus-visible {
 	outline: 3px solid rgba(18, 61, 115, 0.55);
 	outline-offset: 2px;
 }
@@ -1230,70 +1218,42 @@ via fonte Dashicons.
 	}
 }
 
-/* ---------- Menu lateral de categorias ---------- */
-.assoc-side__toggle {
-	display: none;
+/* ---------- Filtros internos (painel de planilhas) ---------- */
+.assoc-filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 16px 0 4px;
+	padding-bottom: 16px;
+	border-bottom: 1px solid var(--setceb-border);
+}
+
+.assoc-filter-btn {
+	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 8px;
-	width: 100%;
-	min-height: 48px;
-	padding: 0 16px;
-	font-size: 13px;
+	min-height: 44px;
+	padding: 8px 18px;
+	font-size: 12px;
 	font-weight: 700;
-	letter-spacing: 0.6px;
+	letter-spacing: 0.5px;
 	text-transform: uppercase;
 	color: var(--setceb-accent-deep);
 	background: var(--setceb-accent-tint);
-	border: 2px solid var(--setceb-accent);
-	border-radius: 12px;
+	border: 1.5px solid transparent;
+	border-radius: 999px;
 	cursor: pointer;
+	transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
 }
 
-.assoc-cats {
-	position: sticky;
-	top: 24px;
-	padding: 10px;
-	background: var(--setceb-accent);
-	border-radius: 14px;
+.assoc-filter-btn:hover {
+	border-color: var(--setceb-accent);
 }
 
-.assoc-cats__list {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-	display: flex;
-	flex-direction: column;
-	gap: 6px;
-}
-
-.assoc-cats__item {
-	display: block;
-	width: 100%;
-	min-height: 46px;
-	padding: 10px 14px;
-	font-size: 13px;
-	font-weight: 700;
-	letter-spacing: 0.5px;
-	text-align: left;
-	text-transform: uppercase;
+.assoc-filter-btn.is-active,
+.assoc-filter-btn[aria-pressed="true"] {
 	color: #fff;
-	background: transparent;
-	border: 0;
-	border-radius: 8px;
-	cursor: pointer;
-	transition: background 0.16s ease, color 0.16s ease;
-	word-break: break-word;
-}
-
-.assoc-cats__item:hover {
-	background: rgba(255, 255, 255, 0.16);
-}
-
-.assoc-cats__item.is-active,
-.assoc-cats__item[aria-pressed="true"] {
-	background: #fff;
-	color: var(--setceb-accent-deep);
+	background: var(--setceb-accent);
 }
 
 /* ---------- Toolbar (ano + boletos) ---------- */
@@ -1768,33 +1728,6 @@ via fonte Dashicons.
 }
 
 /* ---------- Responsivo ---------- */
-@media (max-width: 1023px) {
-	.assoc-layout {
-		grid-template-columns: 1fr;
-	}
-
-	.assoc-side__toggle {
-		display: inline-flex;
-	}
-
-	.assoc-cats {
-		position: static;
-		margin-top: 10px;
-	}
-
-	.assoc-cats.is-closed {
-		display: none;
-	}
-
-	.assoc-side__toggle[aria-expanded="true"] .assoc-side__chevron {
-		transform: rotate(180deg);
-	}
-
-	.assoc-side__chevron {
-		transition: transform 0.18s ease;
-	}
-}
-
 @media (max-width: 700px) {
 	.assoc-toolbar {
 		flex-direction: column;
