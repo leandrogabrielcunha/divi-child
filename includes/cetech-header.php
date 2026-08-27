@@ -46,21 +46,12 @@ add_action( 'wp_enqueue_scripts', 'cetech_header_enqueue_assets' );
  * ------------------------------------------------------------ */
 
 /**
- * URL do botao "2ª Via do Boleto" (CE Tech).
- *
- * @return string
- */
-function cetech_boleto_url() {
-	return apply_filters( 'cetech_boleto_url', home_url( '/' ) );
-}
-
-/**
  * URL do botao "Área do Cliente" (CE Tech).
  *
  * @return string
  */
 function cetech_cliente_url() {
-	return apply_filters( 'cetech_cliente_url', home_url( '/' ) );
+	return apply_filters( 'cetech_cliente_url', 'https://cetech.sgp.net.br/centralweb/login' );
 }
 
 /**
@@ -137,7 +128,6 @@ function cetech_header_markup() {
 				<?php cetech_header_menu(); ?>
 
 				<div class="cetech-header__mobile-actions">
-					<a class="cetech-header__btn cetech-header__btn--boleto" href="<?php echo esc_url( cetech_boleto_url() ); ?>" target="_blank" rel="noopener noreferrer">2ª Via do Boleto</a>
 					<a class="cetech-header__btn cetech-header__btn--cliente" href="<?php echo esc_url( cetech_cliente_url() ); ?>" target="_blank" rel="noopener noreferrer">Área do Cliente</a>
 					<?php if ( is_user_logged_in() ) : ?>
 						<div class="cetech-header__mobile-user">
@@ -149,7 +139,6 @@ function cetech_header_markup() {
 			</nav>
 
 			<div class="cetech-header__end">
-				<a class="cetech-header__btn cetech-header__btn--boleto" href="<?php echo esc_url( cetech_boleto_url() ); ?>" target="_blank" rel="noopener noreferrer">2ª Via do Boleto</a>
 				<a class="cetech-header__btn cetech-header__btn--cliente" href="<?php echo esc_url( cetech_cliente_url() ); ?>" target="_blank" rel="noopener noreferrer">Área do Cliente</a>
 				<?php if ( is_user_logged_in() ) : ?>
 					<div class="cetech-header__user-wrap">
