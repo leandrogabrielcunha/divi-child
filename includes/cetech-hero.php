@@ -88,11 +88,10 @@ add_action( 'init', 'cetech_hero_register_post_type' );
  * ------------------------------------------------------------ */
 function cetech_hero_columns( $columns ) {
 	$new_columns = array(
-		'cb'          => isset( $columns['cb'] ) ? $columns['cb'] : '<input type="checkbox" />',
-		'cetech_img'  => __( 'Ilustração', 'Divi' ),
-		'title'       => isset( $columns['title'] ) ? $columns['title'] : __( 'Título', 'Divi' ),
-		'cetech_ord'  => __( 'Ordem', 'Divi' ),
-		'cetech_stt'  => __( 'Status', 'Divi' ),
+		'cb'         => isset( $columns['cb'] ) ? $columns['cb'] : '<input type="checkbox" />',
+		'title'      => isset( $columns['title'] ) ? $columns['title'] : __( 'Título', 'Divi' ),
+		'cetech_ord' => __( 'Ordem', 'Divi' ),
+		'cetech_stt' => __( 'Status', 'Divi' ),
 	);
 
 	return $new_columns;
@@ -101,20 +100,6 @@ add_filter( 'manage_cetech_hero_posts_columns', 'cetech_hero_columns' );
 
 function cetech_hero_render_column( $column, $post_id ) {
 	switch ( $column ) {
-		case 'cetech_img':
-			$image_id = absint( get_post_meta( $post_id, '_cetech_hero_image', true ) );
-			if ( $image_id ) {
-				echo wp_get_attachment_image(
-					$image_id,
-					array( 80, 80 ),
-					false,
-					array( 'style' => 'width:48px;height:48px;object-fit:cover;border-radius:50%;display:block;' )
-				);
-			} else {
-				echo '<span class="dashicons dashicons-share" aria-hidden="true"></span>';
-			}
-			break;
-
 		case 'cetech_ord':
 			$order = get_post_field( 'menu_order', $post_id );
 			echo esc_html( (string) absint( $order ) );
@@ -496,9 +481,6 @@ function cetech_hero_render() {
 
 							<?php if ( $hero['btn_secondary_text'] ) : ?>
 								<a class="cetech-hero__btn cetech-hero__btn--secondary" href="<?php echo esc_url( $hero['btn_secondary_link'] ); ?>" target="_blank" rel="noopener noreferrer">
-									<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="cetech-hero__wa">
-										<path d="M12.04 2a9.9 9.9 0 0 0-8.5 14.96L2 22l5.18-1.5A9.9 9.9 0 1 0 12.04 2Zm0 1.8a8.1 8.1 0 1 1 0 16.2 8.05 8.05 0 0 1-4.13-1.13l-.3-.18-3.07.9.9-3-.2-.31a8.1 8.1 0 0 1-1.2-4.34A8.1 8.1 0 0 1 12.04 3.8Zm-3.1 4.6c-.16 0-.42.06-.64.3-.22.24-.85.83-.85 2.03 0 1.2.87 2.35 1 2.51.12.16 1.71 2.61 4.14 3.66 2.02.88 2.43.7 2.87.66.44-.05 1.41-.58 1.61-1.13.2-.56.2-1.03.14-1.13-.06-.1-.22-.16-.46-.28-.24-.12-1.41-.7-1.63-.77-.22-.08-.38-.12-.54.12-.16.24-.62.77-.76.92-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.01-.37.11-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.2-.47-.4-.4-.54-.42a9.7 9.7 0 0 0-.46-.04Z"/>
-									</svg>
 									<?php echo esc_html( $hero['btn_secondary_text'] ); ?>
 								</a>
 							<?php endif; ?>
