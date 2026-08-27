@@ -87,3 +87,8 @@ add_filter( 'login_headertext', 'cetech_login_header_title' );
 #CE Tech - Header global customizado
 ================================================*/
 require_once get_stylesheet_directory() . '/includes/cetech-header.php';
+
+/*================================================
+#CE Tech - Hero section dinâmica (home)
+================================================*/
+require_once get_stylesheet_directory() . '/includes/cetech-hero.php';
