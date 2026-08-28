@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual CE Tech, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 2.2.5
+Version: 2.2.6
 Template: Divi
 */
 
@@ -1270,19 +1270,24 @@ Identidade visual: azul (#2020EE) e verde/turquesa (#00E8A8).
 	.cetech-hero__container {
 		padding: 0 16px;
 		gap: 32px;
+		text-align: left;
+	}
+
+	.cetech-hero__text {
+		align-items: flex-start;
+	}
+
+	.cetech-hero__subtitle {
+		margin-left: 0;
+		margin-right: 0;
+	}
+
+	.cetech-hero__actions {
+		display: none;
 	}
 
 	.cetech-hero__title {
 		font-size: 32px;
-	}
-
-	.cetech-hero__actions {
-		flex-direction: column;
-		width: 100%;
-	}
-
-	.cetech-hero__btn {
-		width: 100%;
 	}
 
 	.cetech-hero__visual {
@@ -1293,6 +1298,19 @@ Identidade visual: azul (#2020EE) e verde/turquesa (#00E8A8).
 		width: 280px;
 		height: 280px;
 		transform: scale(0.85);
+	}
+
+	.cetech-hero__orbit-core {
+		width: 96px;
+		height: 96px;
+	}
+
+	.cetech-hero__orbit-logo {
+		font-size: 20px;
+	}
+
+	.cetech-hero__orbit-core-sub {
+		font-size: 9px;
 	}
 
 	.cetech-hero__node-text {
