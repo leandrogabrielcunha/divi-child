@@ -27,11 +27,50 @@
 		dots[current] && dots[current].setAttribute('aria-selected', 'true');
 	}
 
+	function showIndex(index) {
+		if (index < 0) {
+			index = slides.length - 1;
+		}
+		if (index >= slides.length) {
+			index = 0;
+		}
+		show(index);
+	}
+
 	dots.forEach(function (dot) {
 		dot.addEventListener('click', function () {
-			show(parseInt(dot.getAttribute('data-goto'), 10) || 0);
+			showIndex(parseInt(dot.getAttribute('data-goto'), 10) || 0);
+			startAutoplay();
 		});
 	});
+
+	/* ---------- Troca automática (carrossel) ---------- */
+	var timer = null;
+	var interval = 5000;
+
+	function startAutoplay() {
+		stopAutoplay();
+		if (slides.length < 2) {
+			return;
+		}
+		timer = setInterval(function () {
+			showIndex(current + 1);
+		}, interval);
+	}
+
+	function stopAutoplay() {
+		if (timer) {
+			clearInterval(timer);
+			timer = null;
+		}
+	}
+
+	startAutoplay();
+
+	hero.addEventListener('mouseenter', stopAutoplay);
+	hero.addEventListener('mouseleave', startAutoplay);
+	hero.addEventListener('focusin', stopAutoplay);
+	hero.addEventListener('focusout', startAutoplay);
 
 	/* ---------- Rotação suave do anel decorativo ---------- */
 	var ring = hero.querySelector('.cetech-hero__orbit-ring--2');
