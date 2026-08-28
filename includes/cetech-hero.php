@@ -569,7 +569,6 @@ function cetech_hero_render_illustration() {
 		</div>
 
 		<div class="cetech-hero__orbit-ring cetech-hero__orbit-ring--1"></div>
-		<div class="cetech-hero__orbit-ring cetech-hero__orbit-ring--2"></div>
 
 		<span class="cetech-hero__node cetech-hero__node--a">
 			<span class="cetech-hero__node-dot"></span>
