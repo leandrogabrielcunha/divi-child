@@ -83,6 +83,7 @@ function cetech_planos_columns( $columns ) {
 	$new_columns = array(
 		'cb'          => isset( $columns['cb'] ) ? $columns['cb'] : '<input type="checkbox" />',
 		'title'       => isset( $columns['title'] ) ? $columns['title'] : __( 'Plano', 'Divi' ),
+		'cetech_tipo' => __( 'Tipo', 'Divi' ),
 		'cetech_ord'  => __( 'Ordem', 'Divi' ),
 		'cetech_stt'  => __( 'Status', 'Divi' ),
 	);
@@ -93,6 +94,12 @@ add_filter( 'manage_' . CETECH_PLANOS_CPT . '_posts_columns', 'cetech_planos_col
 
 function cetech_planos_render_column( $column, $post_id ) {
 	switch ( $column ) {
+		case 'cetech_tipo':
+			$tipo = get_post_meta( $post_id, '_cetech_plano_tipo', true );
+			$tipo = in_array( $tipo, array( 'residencial', 'empresarial' ), true ) ? $tipo : 'residencial';
+			echo esc_html( ucfirst( $tipo ) );
+			break;
+
 		case 'cetech_ord':
 			$order = get_post_field( 'menu_order', $post_id );
 			echo esc_html( (string) absint( $order ) );
@@ -135,6 +142,7 @@ function cetech_planos_meta_box_render( $post ) {
 	wp_nonce_field( 'cetech_plano_fields', 'cetech_plano_fields_nonce' );
 
 	$speed        = get_post_meta( $post->ID, '_cetech_plano_speed', true );
+	$tipo         = get_post_meta( $post->ID, '_cetech_plano_tipo', true );
 	$price_old    = get_post_meta( $post->ID, '_cetech_plano_price_old', true );
 	$price        = get_post_meta( $post->ID, '_cetech_plano_price', true );
 	$period       = get_post_meta( $post->ID, '_cetech_plano_period', true );
@@ -155,6 +163,9 @@ function cetech_planos_meta_box_render( $post ) {
 	if ( '' === $btn_text ) {
 		$btn_text = 'Contratar';
 	}
+	if ( '' === $tipo ) {
+		$tipo = 'residencial';
+	}
 	?>
 	<div class="cetech-planos-admin">
 		<table class="form-table" role="presentation">
@@ -165,6 +176,20 @@ function cetech_planos_meta_box_render( $post ) {
 				<td>
 					<input type="text" class="regular-text" name="_cetech_plano_speed" id="cetech-plano-speed" value="<?php echo esc_attr( $speed ); ?>" placeholder="<?php esc_attr_e( 'Ex.: 250 Mega', 'Divi' ); ?>" />
 					<p class="description"><?php esc_html_e( 'Ex.: "250 Mega". O número é destacado no card.', 'Divi' ); ?></p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Tipo de plano', 'Divi' ); ?></th>
+				<td>
+					<label for="cetech-plano-tipo-residencial" style="margin-right:12px;">
+						<input type="radio" name="_cetech_plano_tipo" id="cetech-plano-tipo-residencial" value="residencial" <?php checked( 'residencial', $tipo ); ?> />
+						<?php esc_html_e( 'Residencial', 'Divi' ); ?>
+					</label>
+					<label for="cetech-plano-tipo-empresarial">
+						<input type="radio" name="_cetech_plano_tipo" id="cetech-plano-tipo-empresarial" value="empresarial" <?php checked( 'empresarial', $tipo ); ?> />
+						<?php esc_html_e( 'Empresarial', 'Divi' ); ?>
+					</label>
+					<p class="description"><?php esc_html_e( 'Use o filtro "tipo" no shortcode para exibir apenas planos residenciais ou empresariais.', 'Divi' ); ?></p>
 				</td>
 			</tr>
 			<tr>
@@ -322,6 +347,10 @@ function cetech_planos_meta_box_save( $post_id ) {
 		update_post_meta( $post_id, '_cetech_plano_btn_link', $btn_link );
 	}
 
+	$tipo = isset( $_POST['_cetech_plano_tipo'] ) ? sanitize_key( wp_unslash( $_POST['_cetech_plano_tipo'] ) ) : 'residencial';
+	$tipo = in_array( $tipo, array( 'residencial', 'empresarial' ), true ) ? $tipo : 'residencial';
+	update_post_meta( $post_id, '_cetech_plano_tipo', $tipo );
+
 	$desc = sanitize_textarea_field( isset( $_POST['_cetech_plano_desc'] ) ? wp_unslash( $_POST['_cetech_plano_desc'] ) : '' );
 	$desc = trim( $desc );
 	if ( '' === $desc ) {
@@ -477,6 +506,7 @@ function cetech_planos_seed() {
 		}
 
 		update_post_meta( $post_id, '_cetech_plano_speed', $plan['speed'] );
+		update_post_meta( $post_id, '_cetech_plano_tipo', 'residencial' );
 		update_post_meta( $post_id, '_cetech_plano_price_old', $plan['old'] );
 		update_post_meta( $post_id, '_cetech_plano_price', $plan['current'] );
 		update_post_meta( $post_id, '_cetech_plano_period', '/mês' );
@@ -492,10 +522,55 @@ function cetech_planos_seed() {
 }
 add_action( 'init', 'cetech_planos_seed', 20 );
 
+/**
+ * Backfill: garante que planos ja existentes sem tipo sejam
+ * classificados como residencial (valor padrao).
+ */
+function cetech_planos_backfill_tipo() {
+	$plans = get_posts(
+		array(
+			'post_type'      => CETECH_PLANOS_CPT,
+			'post_status'    => 'any',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'meta_query'     => array(
+				'relation' => 'OR',
+				array(
+					'key'     => '_cetech_plano_tipo',
+					'compare' => 'NOT EXISTS',
+				),
+				array(
+					'key'   => '_cetech_plano_tipo',
+					'value' => '',
+				),
+			),
+		)
+	);
+
+	foreach ( $plans as $post_id ) {
+		update_post_meta( $post_id, '_cetech_plano_tipo', 'residencial' );
+	}
+}
+add_action( 'init', 'cetech_planos_backfill_tipo', 25 );
+
 /* ------------------------------------------------------------
  * 7. Consulta dos planos ativos ordenados
  * ------------------------------------------------------------ */
-function cetech_planos_get_items() {
+function cetech_planos_get_items( $tipo = '' ) {
+	$meta_query = array(
+		array(
+			'key'   => '_cetech_plano_active',
+			'value' => '1',
+		),
+	);
+
+	if ( in_array( $tipo, array( 'residencial', 'empresarial' ), true ) ) {
+		$meta_query[] = array(
+			'key'   => '_cetech_plano_tipo',
+			'value' => $tipo,
+		);
+	}
+
 	$query = new WP_Query(
 		array(
 			'post_type'           => CETECH_PLANOS_CPT,
@@ -507,13 +582,8 @@ function cetech_planos_get_items() {
 				'menu_order' => 'ASC',
 				'ID'         => 'ASC',
 			),
-			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- CPT pequeno, busca simples por status ativo.
-			'meta_query'          => array(
-				array(
-					'key'   => '_cetech_plano_active',
-					'value' => '1',
-				),
-			),
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- CPT pequeno, busca simples por status ativo/tipo.
+			'meta_query'          => $meta_query,
 		)
 	);
 
@@ -527,12 +597,14 @@ function cetech_planos_shortcode( $atts ) {
 	$atts = shortcode_atts(
 		array(
 			'colunas' => 0,
+			'tipo'    => '',
 		),
 		$atts,
 		'planos'
 	);
 
-	$plans = cetech_planos_get_items();
+	$tipo  = sanitize_key( (string) $atts['tipo'] );
+	$plans = cetech_planos_get_items( $tipo );
 
 	if ( empty( $plans ) ) {
 		return '';
