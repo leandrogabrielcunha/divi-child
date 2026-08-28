@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual CE Tech, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 2.2.7
+Version: 2.2.8
 Template: Divi
 */
 
@@ -752,8 +752,8 @@ Identidade visual: azul (#2020EE) e turquesa/verde (#00E8A8).
 
 @media (max-width: 1023px) {
 	.cetech-header {
-		position: relative;
-		top: 0;
+		position: sticky;
+		top: 8px;
 		width: 100%;
 		max-width: 100%;
 		padding-left: 5%;
@@ -762,7 +762,7 @@ Identidade visual: azul (#2020EE) e turquesa/verde (#00E8A8).
 	}
 
 	.cetech-header.scrolled {
-		top: 0;
+		top: 4px;
 	}
 
 	.cetech-header__box {
@@ -1322,4 +1322,31 @@ Identidade visual: azul (#2020EE) e verde/turquesa (#00E8A8).
 
 	.cetech-hero__node--b .cetech-hero__node-text { max-width: 90px; }
 	.cetech-hero__node--d .cetech-hero__node-text { max-width: 90px; }
+}
+
+/*============================================================
+Barra de rolagem da página (azul)
+============================================================*/
+html {
+	scrollbar-color: #2020ee #eef0ff;
+	scrollbar-width: auto;
+}
+
+::-webkit-scrollbar {
+	width: 12px;
+	height: 12px;
+}
+
+::-webkit-scrollbar-track {
+	background: #eef0ff;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #2020ee;
+	border-radius: 6px;
+	border: 2px solid #eef0ff;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #2a2af0;
 }
