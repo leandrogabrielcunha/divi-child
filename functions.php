@@ -92,3 +92,8 @@ require_once get_stylesheet_directory() . '/includes/cetech-header.php';
 #CE Tech - Hero section dinâmica (home)
 ================================================*/
 require_once get_stylesheet_directory() . '/includes/cetech-hero.php';
+
+/*================================================
+#CE Tech - Planos (cards via shortcode [planos])
+================================================*/
+require_once get_stylesheet_directory() . '/includes/cetech-planos.php';

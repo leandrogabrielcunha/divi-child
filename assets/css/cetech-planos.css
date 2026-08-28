@@ -1,0 +1,310 @@
+/*============================================================
+CE TECH - Cards de Planos (shortcode [planos])
+CSS isolado com prefixo .cetech-planos para nao afetar outros
+componentes do site. Baseado no design dos cards da referencia.
+============================================================*/
+.cetech-planos {
+	font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	--cetech-p-blue: #2020EE;
+	--cetech-p-blue-dark: #1515C0;
+	--cetech-p-green: #00E8A8;
+	--cetech-p-green-dark: #00C48E;
+	--cetech-p-lavender: #EEEEFF;
+	--cetech-p-mint: #E6FFF8;
+	--cetech-p-ink: #0D0D1A;
+	--cetech-p-cols: 4;
+	--cetech-p-border: #E0E0EE;
+	--cetech-p-muted: #666666;
+}
+
+.cetech-planos *,
+.cetech-planos *::before,
+.cetech-planos *::after {
+	box-sizing: border-box;
+}
+
+.cetech-planos a {
+	text-decoration: none;
+}
+
+/* ---------- Grid ---------- */
+.cetech-planos__grid {
+	display: grid;
+	grid-template-columns: repeat(var(--cetech-p-cols), 1fr);
+	gap: 20px;
+}
+
+/* ---------- Card ---------- */
+.cetech-planos__card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	padding: 28px 22px;
+	border-radius: 16px;
+	background: #fff;
+	border: 1.5px solid var(--cetech-p-border);
+	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+	transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.cetech-planos__card:hover {
+	transform: translateY(-4px);
+	border-color: var(--cetech-p-blue);
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.cetech-planos__card--featured {
+	background: var(--cetech-p-blue);
+	border-color: var(--cetech-p-blue);
+	box-shadow: 0 16px 48px rgba(32, 32, 238, 0.25);
+	transform: none;
+}
+
+.cetech-planos__card--featured:hover {
+	transform: translateY(-4px);
+	border-color: var(--cetech-p-blue);
+	box-shadow: 0 20px 52px rgba(32, 32, 238, 0.32);
+}
+
+/* ---------- Badge de destaque ---------- */
+.cetech-planos__badge {
+	position: absolute;
+	top: -12px;
+	left: 50%;
+	transform: translateX(-50%);
+	background: var(--cetech-p-green);
+	color: #fff;
+	font-size: 11px;
+	font-weight: 700;
+	padding: 4px 14px;
+	border-radius: 999px;
+	white-space: nowrap;
+	letter-spacing: 0.2px;
+}
+
+/* ---------- Cabeçalho ---------- */
+.cetech-planos__head {
+	display: flex;
+	flex-direction: column;
+}
+
+.cetech-planos__speed {
+	display: flex;
+	align-items: baseline;
+	gap: 3px;
+	margin-bottom: 2px;
+}
+
+.cetech-planos__speed-num {
+	font-family: "Outfit", "Inter", sans-serif;
+	font-weight: 900;
+	font-size: 52px;
+	line-height: 1;
+	color: var(--cetech-p-blue);
+}
+
+.cetech-planos__card--featured .cetech-planos__speed-num {
+	color: var(--cetech-p-green);
+}
+
+.cetech-planos__speed-label {
+	font-family: "Outfit", "Inter", sans-serif;
+	font-weight: 800;
+	font-size: 20px;
+	color: #555555;
+}
+
+.cetech-planos__card--featured .cetech-planos__speed-label {
+	color: rgba(255, 255, 255, 0.75);
+}
+
+.cetech-planos__vel {
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	color: #bbbbbb;
+	margin-bottom: 12px;
+}
+
+.cetech-planos__card--featured .cetech-planos__vel {
+	color: rgba(255, 255, 255, 0.45);
+}
+
+/* ---------- Preço ---------- */
+.cetech-planos__price {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+.cetech-planos__price-old {
+	font-size: 13px;
+	font-weight: 500;
+	color: #888888;
+	text-decoration: line-through;
+	margin-bottom: 3px;
+}
+
+.cetech-planos__card--featured .cetech-planos__price-old {
+	color: rgba(255, 255, 255, 0.5);
+}
+
+.cetech-planos__price-current {
+	display: inline-flex;
+	align-items: flex-end;
+	line-height: 1;
+}
+
+.cetech-planos__cifrao {
+	font-size: 13px;
+	font-weight: 500;
+	color: #888888;
+	padding-bottom: 4px;
+}
+
+.cetech-planos__card--featured .cetech-planos__cifrao {
+	color: rgba(255, 255, 255, 0.6);
+}
+
+.cetech-planos__price-int {
+	font-family: "Outfit", "Inter", sans-serif;
+	font-weight: 800;
+	font-size: 32px;
+	line-height: 1;
+	color: var(--cetech-p-ink);
+}
+
+.cetech-planos__card--featured .cetech-planos__price-int {
+	color: #fff;
+}
+
+.cetech-planos__price-dec {
+	font-size: 16px;
+	font-weight: 700;
+	padding-bottom: 2px;
+	color: #666666;
+}
+
+.cetech-planos__card--featured .cetech-planos__price-dec {
+	color: rgba(255, 255, 255, 0.7);
+}
+
+.cetech-planos__period {
+	font-size: 11px;
+	color: #bbbbbb;
+	margin-top: 2px;
+}
+
+.cetech-planos__card--featured .cetech-planos__period {
+	color: rgba(255, 255, 255, 0.4);
+}
+
+/* ---------- Descrição ---------- */
+.cetech-planos__desc {
+	margin: 0;
+	font-size: 13.5px;
+	line-height: 1.6;
+	color: var(--cetech-p-muted);
+}
+
+.cetech-planos__card--featured .cetech-planos__desc {
+	color: rgba(255, 255, 255, 0.8);
+}
+
+/* ---------- Benefícios ---------- */
+.cetech-planos__benefits {
+	list-style: none;
+	margin: 0;
+	padding: 14px 0 0;
+	border-top: 1px solid #ebebf5;
+	display: flex;
+	flex-direction: column;
+	gap: 9px;
+}
+
+.cetech-planos__card--featured .cetech-planos__benefits {
+	border-top-color: rgba(255, 255, 255, 0.15);
+}
+
+.cetech-planos__benefit {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 13px;
+	color: #555555;
+	line-height: 1.4;
+}
+
+.cetech-planos__card--featured .cetech-planos__benefit {
+	color: rgba(255, 255, 255, 0.85);
+}
+
+.cetech-planos__check {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 20px;
+	height: 20px;
+	border-radius: 6px;
+	background: var(--cetech-p-mint);
+	color: var(--cetech-p-green-dark);
+}
+
+.cetech-planos__card--featured .cetech-planos__check {
+	background: rgba(255, 255, 255, 0.16);
+	color: var(--cetech-p-green);
+}
+
+/* ---------- Botão ---------- */
+.cetech-planos__btn {
+	display: block;
+	text-align: center;
+	padding: 12px 16px;
+	border-radius: 9px;
+	font-weight: 700;
+	font-size: 14px;
+	margin-top: auto;
+	background: var(--cetech-p-lavender);
+	color: var(--cetech-p-blue);
+	border: 1.5px solid rgba(32, 32, 238, 0.13);
+	transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cetech-planos__btn:hover {
+	background: var(--cetech-p-blue);
+	color: #fff;
+	transform: translateY(-1px);
+}
+
+.cetech-planos__card--featured .cetech-planos__btn {
+	background: var(--cetech-p-green);
+	color: #fff;
+	border-color: var(--cetech-p-green);
+	box-shadow: 0 4px 14px rgba(0, 232, 168, 0.35);
+}
+
+.cetech-planos__card--featured .cetech-planos__btn:hover {
+	background: var(--cetech-p-green-dark);
+	border-color: var(--cetech-p-green-dark);
+}
+
+.cetech-planos__btn:focus-visible {
+	outline: 3px solid rgba(32, 32, 238, 0.35);
+	outline-offset: 2px;
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 1023px) {
+	.cetech-planos__grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (max-width: 640px) {
+	.cetech-planos__grid {
+		grid-template-columns: 1fr;
+	}
+}
