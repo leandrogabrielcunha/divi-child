@@ -258,7 +258,6 @@ function setceb_eventos_render_shortcode( $atts = array() ) {
 			'id'          => $evento->ID,
 			'titulo'      => get_the_title( $evento ),
 			'descricao'   => wp_strip_all_tags( has_excerpt( $evento ) ? get_the_excerpt( $evento ) : get_the_content( null, false, $evento ) ),
-			'link'        => get_permalink( $evento ),
 			'data'        => $dados,
 			'data_label'  => setceb_evento_data_label( $dados['ts'] ),
 			'imagem'      => get_the_post_thumbnail( $evento, 'medium_large', array( 'class' => 'setceb-eventos__img', 'loading' => 'lazy' ) ),
@@ -345,7 +344,7 @@ function setceb_eventos_render_card( $item ) {
 	}
 	?>
 	<li class="setceb-eventos__item"<?php echo $data_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-		<a class="setceb-eventos__card" href="<?php echo esc_url( $item['link'] ); ?>">
+		<div class="setceb-eventos__card">
 			<div class="setceb-eventos__media">
 				<?php if ( $item['imagem'] ) : ?>
 					<?php echo $item['imagem']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -362,7 +361,7 @@ function setceb_eventos_render_card( $item ) {
 					<p class="setceb-eventos__descricao"><?php echo esc_html( $item['descricao'] ); ?></p>
 				<?php endif; ?>
 			</div>
-		</a>
+		</div>
 	</li>
 	<?php
 }

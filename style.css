@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.23.0
+Version: 1.24.0
 Template: Divi
 */
 
@@ -2219,12 +2219,21 @@ ou fallback com icon (dashicon) sobre cor solida, sem gradiente.
 	grid-template-columns: 1fr;
 	gap: 18px;
 	margin: 0;
-	padding: 0;
-	list-style: none;
+	padding: 0 !important;
+	list-style: none !important;
 }
 
+.setceb-eventos__lista li,
 .setceb-eventos__item {
 	margin: 0;
+	padding-left: 0 !important;
+	list-style: none !important;
+}
+
+.setceb-eventos__lista li::before,
+.setceb-eventos__item::before,
+.setceb-eventos__lista li::marker {
+	content: none !important;
 }
 
 .setceb-eventos__item[hidden] {
@@ -2346,13 +2355,12 @@ ou fallback com icon (dashicon) sobre cor solida, sem gradiente.
 	.setceb-eventos__filtro-field {
 		flex: 1 1 100%;
 	}
-	.setceb-eventos__card {
-		flex-direction: column;
-	}
 	.setceb-eventos__media {
-		flex: 0 0 auto;
-		width: 100%;
-		min-height: 0;
-		aspect-ratio: 16 / 9;
+		flex: 0 0 130px;
+		width: 130px;
+		min-height: 100%;
+	}
+	.setceb-eventos__body {
+		padding: 14px 16px;
 	}
 }
