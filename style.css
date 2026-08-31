@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.26.0
+Version: 1.27.0
 Template: Divi
 */
 
@@ -2462,30 +2462,33 @@ visual SETCEB, substituindo o estilo feio do Divi.
 	outline-offset: 2px;
 }
 
-/* Paginacao classica do Divi: "Older/Next Entries" (.pagination.clearfix) */
+/* Paginacao numerada do Divi (substitui "Older/Next Entries") */
 .pagination.clearfix {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
-	gap: 12px;
+	justify-content: center;
 	margin: 28px 0 0;
 	clear: both;
 }
 
-.pagination.clearfix .alignleft,
-.pagination.clearfix .alignright {
-	float: none;
+.setceb-numeric-pagination {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 6px;
 }
 
-.pagination.clearfix .alignleft a,
-.pagination.clearfix .alignright a {
+.setceb-numeric-pagination .page-numbers {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	min-height: 42px;
-	padding: 0 18px;
+	min-width: 40px;
+	min-height: 40px;
+	padding: 0 13px;
 	font-size: 14px;
 	font-weight: 700;
+	line-height: 1;
 	color: var(--setceb-accent-deep, #085a6d);
 	background: var(--setceb-accent-tint, #e8f4f6);
 	border: 1.5px solid transparent;
@@ -2495,32 +2498,31 @@ visual SETCEB, substituindo o estilo feio do Divi.
 	transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
 }
 
-.pagination.clearfix .alignleft a:hover,
-.pagination.clearfix .alignright a:hover {
+.setceb-numeric-pagination .page-numbers:not(.current):hover {
 	color: var(--setceb-accent, #0d8199);
 	background: #fff;
 	border-color: var(--setceb-accent, #0d8199);
 }
 
-.pagination.clearfix .alignleft a:focus-visible,
-.pagination.clearfix .alignright a:focus-visible {
+.setceb-numeric-pagination .page-numbers.current {
+	color: #fff;
+	background: var(--setceb-accent, #0d8199);
+	border-color: var(--setceb-accent, #0d8199);
+	cursor: default;
+}
+
+.setceb-numeric-pagination .page-numbers.dots {
+	min-width: auto;
+	color: var(--setceb-muted, #64748b);
+	background: transparent;
+	border-color: transparent;
+}
+
+.setceb-numeric-pagination .page-numbers:focus-visible {
 	outline: 3px solid rgba(18, 61, 115, 0.55);
 	outline-offset: 2px;
 }
 
-@media (max-width: 480px) {
-	.pagination.clearfix {
-		flex-direction: column;
-		align-items: stretch;
-	}
-	.pagination.clearfix .alignleft,
-	.pagination.clearfix .alignright {
-		width: 100%;
-	}
-	.pagination.clearfix .alignleft a,
-	.pagination.clearfix .alignright a {
-		width: 100%;
-	}
-}
+
 
 
