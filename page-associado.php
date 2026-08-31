@@ -161,7 +161,6 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'planilhas', $active_panel, 'class' ) ) ); ?>" id="panel-planilhas" role="tabpanel" aria-labelledby="tab-planilhas" tabindex="0">
 								<div class="assoc-panel__header">
 									<h2 class="assoc-panel__title">Planilhas</h2>
-									<nav class="assoc-pagination" data-planilhas-pagination aria-label="Paginação de planilhas" hidden></nav>
 								</div>
 								<p class="assoc-panel__intro">Arquivos e ferramentas de apoio organizados por categoria de transporte. Use os filtros abaixo.</p>
 
@@ -209,6 +208,8 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 											</li>
 										<?php endforeach; ?>
 									</ul>
+
+									<nav class="assoc-pagination" data-planilhas-pagination aria-label="Paginação de planilhas" hidden></nav>
 
 									<div class="assoc-empty" data-planilhas-empty hidden>
 										<span class="dashicons dashicons-media-spreadsheet assoc-empty__icon" aria-hidden="true"></span>
