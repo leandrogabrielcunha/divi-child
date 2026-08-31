@@ -149,18 +149,26 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 
 							<!-- PLANILHAS -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'planilhas', $active_panel, 'class' ) ) ); ?>" id="panel-planilhas" role="tabpanel" aria-labelledby="tab-planilhas" tabindex="0">
-								<h2 class="assoc-panel__title">Planilhas</h2>
+								<div class="assoc-panel__header">
+									<h2 class="assoc-panel__title">Planilhas</h2>
+									<nav class="assoc-pagination" data-planilhas-pagination aria-label="Paginação de planilhas" hidden></nav>
+								</div>
 								<p class="assoc-panel__intro">Arquivos e ferramentas de apoio organizados por categoria de transporte. Use os filtros abaixo.</p>
 
 								<?php if ( ! empty( $planilhas ) ) : ?>
 									<div class="assoc-filters" role="group" aria-label="Filtrar planilhas por categoria">
-										<button type="button" class="assoc-filter-btn is-active" data-categoria="" aria-pressed="true">Todas</button>
-										<?php foreach ( $categorias as $cat_slug => $cat_label ) : ?>
-											<button type="button" class="assoc-filter-btn" data-categoria="<?php echo esc_attr( $cat_slug ); ?>" aria-pressed="false"><?php echo esc_html( $cat_label ); ?></button>
-										<?php endforeach; ?>
+										<label class="assoc-cat-select" for="assoc-cat-filter">
+											<span class="assoc-cat-select__label">Categoria</span>
+											<select id="assoc-cat-filter" name="assoc_cat_filter" data-categoria-select>
+												<option value="">Todas</option>
+												<?php foreach ( $categorias as $cat_slug => $cat_label ) : ?>
+													<option value="<?php echo esc_attr( $cat_slug ); ?>"><?php echo esc_html( $cat_label ); ?></option>
+												<?php endforeach; ?>
+											</select>
+										</label>
 									</div>
 
-									<ul class="assoc-list">
+									<ul class="assoc-list" data-planilhas-list data-per-page="20">
 										<?php foreach ( $planilhas as $item ) : ?>
 											<?php
 											if ( empty( $item['titulo'] ) || empty( $item['url'] ) ) {

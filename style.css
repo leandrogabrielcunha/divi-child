@@ -1187,7 +1187,6 @@ via fonte Dashicons.
 }
 
 .assoc-btn:focus-visible,
-.assoc-filter-btn:focus-visible,
 .assoc-year__btn:focus-visible,
 .assoc-year__option:focus-visible,
 .assoc-tab:focus-visible {
@@ -1222,38 +1221,53 @@ via fonte Dashicons.
 .assoc-filters {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 8px;
+	align-items: center;
+	gap: 12px;
 	margin: 16px 0 4px;
 	padding-bottom: 16px;
 	border-bottom: 1px solid var(--setceb-border);
 }
 
-.assoc-filter-btn {
+.assoc-cat-select {
 	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	min-height: 44px;
-	padding: 8px 18px;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.assoc-cat-select__label {
 	font-size: 12px;
 	font-weight: 700;
 	letter-spacing: 0.5px;
 	text-transform: uppercase;
-	color: var(--setceb-accent-deep);
-	background: var(--setceb-accent-tint);
-	border: 1.5px solid transparent;
-	border-radius: 999px;
-	cursor: pointer;
-	transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+	color: var(--setceb-muted);
 }
 
-.assoc-filter-btn:hover {
+.assoc-cat-select select {
+	appearance: none;
+	-webkit-appearance: none;
+	min-height: 44px;
+	padding: 8px 40px 8px 14px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--setceb-ink, var(--setceb-blue));
+	background-color: #fff;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24'%3E%3Cpath fill='%23123D73' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 14px center;
+	border: 1.5px solid var(--setceb-border);
+	border-radius: 10px;
+	cursor: pointer;
+	transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.assoc-cat-select select:hover {
 	border-color: var(--setceb-accent);
 }
 
-.assoc-filter-btn.is-active,
-.assoc-filter-btn[aria-pressed="true"] {
-	color: #fff;
-	background: var(--setceb-accent);
+.assoc-cat-select select:focus-visible {
+	outline: 3px solid rgba(18, 61, 115, 0.55);
+	outline-offset: 2px;
+	border-color: var(--setceb-accent);
 }
 
 /* ---------- Toolbar (ano + boletos) ---------- */
@@ -1406,6 +1420,73 @@ via fonte Dashicons.
 	margin: 0 0 8px;
 	font-size: 21px;
 	color: var(--setceb-blue);
+}
+
+.assoc-panel__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 14px;
+	flex-wrap: wrap;
+}
+
+.assoc-panel__header .assoc-panel__title {
+	margin-bottom: 0;
+}
+
+/* ---------- Paginacao (painel de planilhas) ---------- */
+.assoc-pagination {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	flex-wrap: wrap;
+}
+
+.assoc-pagination__btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 34px;
+	min-height: 34px;
+	padding: 0 8px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--setceb-accent-deep);
+	background: var(--setceb-accent-tint);
+	border: 1.5px solid transparent;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.assoc-pagination__btn:hover:not(:disabled):not(.is-current) {
+	border-color: var(--setceb-accent);
+	background: #fff;
+}
+
+.assoc-pagination__btn.is-current,
+.assoc-pagination__btn[aria-current="page"] {
+	color: #fff;
+	background: var(--setceb-accent);
+	border-color: var(--setceb-accent);
+	cursor: default;
+}
+
+.assoc-pagination__btn:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+.assoc-pagination__btn:focus-visible {
+	outline: 3px solid rgba(18, 61, 115, 0.55);
+	outline-offset: 2px;
+}
+
+.assoc-pagination__dots {
+	padding: 0 2px;
+	color: var(--setceb-muted);
+	font-size: 14px;
+	line-height: 1;
 }
 
 .assoc-panel__subtitle {

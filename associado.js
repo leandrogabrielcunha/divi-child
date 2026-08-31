@@ -105,17 +105,16 @@
 	}
 
 	/* ============================================================
-	 * Filtros por categoria (internos do painel de planilhas)
+	 * Filtros por categoria (painel de planilhas) + paginacao
 	 * ============================================================ */
 	var currentYear = null;
 	var currentCategory = '';
-	var catButtons = qsa('.assoc-filter-btn');
-
-	function categoryButton(slug) {
-		return catButtons.filter(function (btn) {
-			return btn.getAttribute('data-categoria') === slug;
-		})[0] || null;
-	}
+	var planilhasPanel = root.querySelector('#panel-planilhas');
+	var catSelect = planilhasPanel ? planilhasPanel.querySelector('[data-categoria-select]') : null;
+	var planilhasList = planilhasPanel ? planilhasPanel.querySelector('[data-planilhas-list]') : null;
+	var planilhasPage = planilhasPanel ? planilhasPanel.querySelector('[data-planilhas-pagination]') : null;
+	var perPage = planilhasList ? parseInt(planilhasList.getAttribute('data-per-page') || '20', 10) || 20 : 20;
+	var currentPage = 1;
 
 	function refreshEmptyPanel(panelSel, emptySel, textSel, baseMsg, includeCategory) {
 		var panel = root.querySelector(panelSel);
@@ -142,10 +141,10 @@
 
 			if (textEl) {
 				var bits = [];
-				var activeBtn = currentCategory ? categoryButton(currentCategory) : null;
+				var activeCat = currentCategory ? (catSelect ? catSelect.options[catSelect.selectedIndex] : null) : null;
 
-				if (includeCategory && activeBtn) {
-					bits.push('para a categoria "' + activeBtn.textContent.trim() + '"');
+				if (includeCategory && activeCat && activeCat.value) {
+					bits.push('para a categoria "' + activeCat.textContent.trim() + '"');
 				}
 				if (currentYear) {
 					bits.push('em ' + currentYear);
@@ -174,21 +173,159 @@
 		/* Categorias filtram planilhas; ano filtra planilhas e relatorios. */
 		refreshEmptyPanel('#panel-planilhas', '[data-planilhas-empty]', '[data-planilhas-empty-text]', 'Nenhuma planilha disponível', true);
 		refreshEmptyPanel('#panel-relatorios', '[data-relatorios-empty]', '[data-empty-text]', 'Nenhum relatório disponível', false);
+
+		paginatePlanilhas();
 	}
 
-	catButtons.forEach(function (button) {
-		button.addEventListener('click', function () {
-			currentCategory = button.getAttribute('data-categoria') || '';
+	/* --- Paginacao do painel de planilhas (20 por pagina) --- */
+	function paginatePlanilhas() {
+		if (!planilhasList || !planilhasPage) {
+			return;
+		}
 
-			catButtons.forEach(function (other) {
-				var isActive = other === button;
-				other.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-				other.classList.toggle('is-active', isActive);
-			});
-
-			applyDocFilters();
+		var itens = qsa('.assoc-list__item', planilhasList).filter(function (item) {
+			return !item.hidden;
 		});
-	});
+
+		var totalPaginas = Math.max(1, Math.ceil(itens.length / perPage));
+
+		if (currentPage > totalPaginas) {
+			currentPage = totalPaginas;
+		}
+		if (currentPage < 1) {
+			currentPage = 1;
+		}
+
+		itens.forEach(function (item, index) {
+			var pos = index + 1;
+			var inPage = pos > (currentPage - 1) * perPage && pos <= currentPage * perPage;
+			item.hidden = !inPage;
+		});
+
+		renderPlanilhasPagination(itens.length, totalPaginas);
+	}
+
+	function renderPlanilhasPagination(totalItens, totalPaginas) {
+		if (!planilhasPage) {
+			return;
+		}
+
+		if (totalPaginas <= 1) {
+			planilhasPage.hidden = true;
+			planilhasPage.innerHTML = '';
+			return;
+		}
+
+		planilhasPage.hidden = false;
+
+		var frag = document.createDocumentFragment();
+		var build = function (type, data, label, extra) {
+			var target = this || {};
+			var b = document.createElement('button');
+			b.type = 'button';
+			var cls = 'assoc-pagination__btn' + (extra || '');
+			if (target.page === data) {
+				cls += ' is-current';
+				b.setAttribute('aria-current', 'page');
+			}
+			b.className = cls;
+			b.textContent = label;
+			b.setAttribute('data-page', data);
+			b.setAttribute('data-type', type);
+			var page = typeof data === 'number' ? data : currentPage;
+			if (type === 'prev') {
+				b.disabled = currentPage <= 1;
+				b.setAttribute('aria-label', 'Página anterior');
+			} else if (type === 'next') {
+				b.disabled = currentPage >= totalPaginas;
+				b.setAttribute('aria-label', 'Próxima página');
+			} else if (type === 'page') {
+				if (data === currentPage) {
+					b.setAttribute('aria-current', 'page');
+				}
+			}
+			return b;
+		};
+
+		/* Prev */
+		frag.appendChild(build.bind(planilhasPage)('prev', Math.max(1, currentPage - 1), '‹'));
+
+		/* Paginas numeradas (janela com elipses) */
+		var pages = [];
+		var i;
+		for (i = 1; i <= totalPaginas; i++) {
+			if (i === 1 || i === totalPaginas || Math.abs(i - currentPage) <= 1) {
+				pages.push(i);
+			} else if (pages[pages.length - 1] !== '…') {
+				pages.push('…');
+			}
+		}
+
+		pages.forEach(function (pg) {
+			if (pg === '…') {
+				var dot = document.createElement('span');
+				dot.className = 'assoc-pagination__dots';
+				dot.textContent = '…';
+				frag.appendChild(dot);
+				return;
+			}
+			frag.appendChild(build.bind(planilhasPage)('page', pg, String(pg)));
+		});
+
+		/* Next */
+		frag.appendChild(build.bind(planilhasPage)('next', Math.min(totalPaginas, currentPage + 1), '›'));
+
+		planilhasPage.innerHTML = '';
+		planilhasPage.appendChild(frag);
+	}
+
+	function onPlanilhasNavegacao(event) {
+		var btn = event.target.closest ? event.target.closest('button[data-page]') : null;
+		var type;
+		var page;
+
+		if (!btn) {
+			return;
+		}
+
+		type = btn.getAttribute('data-type');
+		page = parseInt(btn.getAttribute('data-page'), 10);
+
+		if (type === 'prev') {
+			currentPage = Math.max(1, currentPage - 1);
+		} else if (type === 'next') {
+			currentPage = Math.min(Math.ceil(qsa('.assoc-list__item', planilhasList).filter(function (i) { return !i.hidden; }).length / perPage), currentPage + 1);
+		} else if (type === 'page' && !isNaN(page)) {
+			currentPage = page;
+		}
+
+		paginatePlanilhas();
+	}
+
+	if (catSelect) {
+		catSelect.addEventListener('change', function () {
+			currentCategory = catSelect.value || '';
+			currentPage = 1;
+			applyDocFilters();
+			paginatePlanilhas();
+		});
+	}
+
+	if (planilhasPage) {
+		planilhasPage.addEventListener('click', onPlanilhasNavegacao);
+	}
+
+	/* Aplica filtro + paginacao inicial (mantem o grid da pagina atual). */
+	if (planilhasList) {
+		applyDocFilters();
+		paginatePlanilhas();
+	}
+
+	if (planilhasPage) {
+		window.addEventListener('hashchange', function () {
+			window.setTimeout(paginatePlanilhas, 0);
+		});
+	}
 
 	/* ============================================================
 	 * Seletor de ano (listbox acessivel)

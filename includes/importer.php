@@ -398,6 +398,229 @@ function setceb_importer_page() {
 	}
 
 	// -------------------------------------------------------
+	// ACAO: Upload por categoria - Escanear (preview)
+	// -------------------------------------------------------
+	if ( 'cat-scan' === $action && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'setceb_cat_upload' ) ) {
+
+		if ( empty( $_FILES['cat_zip']['tmp_name'] ) || ! is_uploaded_file( $_FILES['cat_zip']['tmp_name'] ) ) {
+			echo '<div class="wrap"><div class="notice notice-error"><p>Selecione um arquivo .zip para enviar.</p></div>';
+			echo '<p><a href="' . esc_url( admin_url( 'tools.php?page=setceb-importar-planilhas' ) ) . '" class="button">Voltar</a></p></div>';
+			return;
+		}
+
+		$tmp_file = $_FILES['cat_zip']['tmp_name'];
+
+		$cat_slug = isset( $_POST['cat_slug'] ) ? sanitize_key( $_POST['cat_slug'] ) : '';
+		$term     = $cat_slug ? get_term_by( 'slug', $cat_slug, 'setceb_cat_doc' ) : false;
+
+		if ( ! $term ) {
+			echo '<div class="wrap"><div class="notice notice-error"><p>Selecione uma categoria valida.</p></div>';
+			echo '<p><a href="' . esc_url( admin_url( 'tools.php?page=setceb-importar-planilhas' ) ) . '" class="button">Voltar</a></p></div>';
+			return;
+		}
+
+		$ext = strtolower( pathinfo( $_FILES['cat_zip']['name'], PATHINFO_EXTENSION ) );
+		if ( 'zip' !== $ext ) {
+			echo '<div class="wrap"><div class="notice notice-error"><p>Envie um arquivo .zip</p></div>';
+			echo '<p><a href="' . esc_url( admin_url( 'tools.php?page=setceb-importar-planilhas' ) ) . '" class="button">Voltar</a></p></div>';
+			return;
+		}
+
+		$scan = setceb_importer_scan_single_zip( $tmp_file );
+
+		if ( isset( $scan['error'] ) ) {
+			echo '<div class="wrap"><div class="notice notice-error"><p>' . esc_html( $scan['error'] ) . '</p></div>';
+			echo '<p><a href="' . esc_url( admin_url( 'tools.php?page=setceb-importar-planilhas' ) ) . '" class="button">Voltar</a></p></div>';
+			return;
+		}
+
+		if ( empty( $scan['pdfs'] ) ) {
+			echo '<div class="wrap"><div class="notice notice-warning"><p>Nenhum arquivo PDF encontrado no .zip.</p></div>';
+			echo '<p><a href="' . esc_url( admin_url( 'tools.php?page=setceb-importar-planilhas' ) ) . '" class="button">Voltar</a></p></div>';
+			return;
+		}
+
+		// Prepara a lista marcando duplicatas.
+		$cat_scan = array(
+			'root'     => $scan['root'],
+			'cat_slug' => $term->slug,
+			'cat_name' => $term->name,
+			'term_id'  => $term->term_id,
+			'files'    => array(),
+		);
+
+		$novos    = 0;
+		$duplic   = 0;
+
+		foreach ( $scan['pdfs'] as $file ) {
+			$bn       = basename( $file );
+			$is_dup   = setceb_importer_duplicate_check( $bn, $term->term_id );
+			$cat_scan['files'][] = array(
+				'path'   => $file,
+				'name'   => $bn,
+				'dup'    => $is_dup,
+			);
+			$is_dup ? $duplic++ : $novos++;
+		}
+
+		set_transient( 'setceb_importer_cat_scan', $cat_scan, 300 );
+
+		?>
+		<div class="wrap">
+			<h1>Importar para Categoria — Confirmar</h1>
+
+			<p>Destino: <strong><?php echo esc_html( $term->name ); ?></strong></p>
+			<p>Total de PDFs: <strong><?php echo count( $cat_scan['files'] ); ?></strong>
+				&#183; Novos: <strong style="color:#46b450"><?php echo $novos; ?></strong>
+				&#183; Ja existentes (serao ignorados): <strong style="color:#dc3232"><?php echo $duplic; ?></strong></p>
+
+			<table class="widefat striped" style="max-width:700px;">
+				<thead>
+					<tr>
+						<th>Arquivo</th>
+						<th>Status</th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ( $cat_scan['files'] as $f ) : ?>
+						<tr>
+							<td><?php echo esc_html( $f['name'] ); ?></td>
+							<td>
+								<?php if ( $f['dup'] ) : ?>
+									<span style="color:#dc3232">Ja existe</span>
+								<?php else : ?>
+									<span style="color:#46b450">Novo</span>
+								<?php endif; ?>
+							</td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+
+			<?php if ( $novos > 0 ) : ?>
+				<form method="post" action="<?php echo esc_url( admin_url( 'tools.php?page=setceb-importar-planilhas&action=cat-import' ) ); ?>" style="margin-top:20px;" onsubmit="return confirm('Importar <?php echo $novos; ?> arquivo(s) para <?php echo esc_js( $term->name ); ?>?')">
+					<?php wp_nonce_field( 'setceb_cat_import' ); ?>
+					<?php submit_button( 'Importar ' . $novos . ' Novo(s)', 'primary large' ); ?>
+				</form>
+			<?php else : ?>
+				<div class="notice notice-success" style="margin-top:20px;"><p>Nenhum arquivo novo. Todos os PDFs do .zip ja existem nesta categoria.</p></div>
+			<?php endif; ?>
+
+			<p><a href="<?php echo esc_url( admin_url( 'tools.php?page=setceb-importar-planilhas' ) ); ?>">Cancelar e enviar outro arquivo</a></p>
+		</div>
+		<?php
+		return;
+	}
+
+	// -------------------------------------------------------
+	// ACAO: Upload por categoria - Importar
+	// -------------------------------------------------------
+	if ( 'cat-import' === $action && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'setceb_cat_import' ) ) {
+
+		set_time_limit( 600 );
+		ini_set( 'memory_limit', '512M' );
+
+		$cat_scan = get_transient( 'setceb_importer_cat_scan' );
+
+		if ( empty( $cat_scan ) || empty( $cat_scan['files'] ) ) {
+			echo '<div class="wrap"><div class="notice notice-error"><p>Dados do arquivo expirados. Faca o upload novamente.</p></div>';
+			echo '<p><a href="' . esc_url( admin_url( 'tools.php?page=setceb-importar-planilhas' ) ) . '" class="button">Voltar</a></p></div>';
+			return;
+		}
+
+		$term = get_term_by( 'id', $cat_scan['term_id'], 'setceb_cat_doc' );
+
+		if ( ! $term ) {
+			echo '<div class="wrap"><div class="notice notice-error"><p>Categoria invalida.</p></div>';
+			echo '<p><a href="' . esc_url( admin_url( 'tools.php?page=setceb-importar-planilhas' ) ) . '" class="button">Voltar</a></p></div>';
+			return;
+		}
+
+		echo '<div class="wrap"><h1>Importando para ' . esc_html( $term->name ) . '...</h1>';
+		echo '<div id="import-log" style="background:#fff;padding:15px;border:1px solid #ccc;border-radius:4px;max-height:500px;overflow-y:auto;font-family:monospace;font-size:13px;">';
+
+		$total  = 0;
+		$puladas = 0;
+		$erros   = array();
+
+		foreach ( $cat_scan['files'] as $f ) {
+			$file = $f['path'];
+			$bn   = $f['name'];
+
+			if ( $f['dup'] || ! file_exists( $file ) ) {
+				$puladas++;
+				if ( $f['dup'] ) {
+					echo '<p style="color:#999;margin:2px 0;">IGNORADO (ja existe): ' . esc_html( $bn ) . '</p>';
+				}
+				continue;
+			}
+
+			// Re-checa duplicidade (pode ter sido importado antes).
+			if ( setceb_importer_duplicate_check( $bn, $term->term_id ) ) {
+				$puladas++;
+				echo '<p style="color:#999;margin:2px 0;">IGNORADO (ja existe): ' . esc_html( $bn ) . '</p>';
+				continue;
+			}
+
+			$ano = setceb_importer_extract_year( $bn );
+			$tit = setceb_importer_extract_title( $bn );
+			$att = setceb_importer_upload( $file );
+
+			if ( ! $att ) {
+				$erros[] = $bn . ' (upload)';
+				echo '<p style="color:#e74c3c;margin:2px 0;">ERRO: ' . esc_html( $bn ) . '</p>';
+				continue;
+			}
+
+			$url = wp_get_attachment_url( $att );
+			$pid = wp_insert_post( array(
+				'post_type'    => 'setceb_planilha',
+				'post_title'   => $tit,
+				'post_status'  => 'publish',
+				'post_content' => '',
+			) );
+
+			if ( is_wp_error( $pid ) || 0 === $pid ) {
+				$erros[] = $bn . ' (post)';
+				wp_delete_attachment( $att, true );
+				echo '<p style="color:#e74c3c;margin:2px 0;">ERRO POST: ' . esc_html( $bn ) . '</p>';
+				continue;
+			}
+
+			update_post_meta( $pid, '_setceb_doc_url', $url );
+			update_post_meta( $pid, '_setceb_doc_ano', $ano );
+			wp_set_post_terms( $pid, array( $term->term_id ), 'setceb_cat_doc' );
+
+			$total++;
+			echo '<p style="color:#46b450;margin:2px 0;">OK: ' . esc_html( $bn ) . '</p>';
+		}
+
+		echo '</div>';
+
+		rrmdir( $cat_scan['root'] );
+		delete_transient( 'setceb_importer_cat_scan' );
+
+		echo '<div class="notice notice-success"><p><strong>' . $total . ' arquivo(s)</strong> importado(s) para ' . esc_html( $term->name ) . '. <span style="color:#999">(' . $puladas . ' ignorado(s) como duplicado)</span>';
+
+		if ( $erros ) {
+			echo ' <span style="color:#e74c3c">(' . count( $erros ) . ' erros)</span>';
+		}
+
+		echo '</p></div>';
+
+		if ( $erros ) {
+			echo '<div style="background:#fff;padding:15px;border:1px solid #ccc;border-radius:4px;font-family:monospace;font-size:12px;margin-top:10px;">';
+			echo '<p><strong>Arquivos com erro:</strong></p>';
+			echo '<pre>' . esc_html( implode( "\n", $erros ) ) . '</pre>';
+			echo '</div>';
+		}
+
+		echo '<p><a href="' . esc_url( admin_url( 'tools.php?page=setceb-importar-planilhas' ) ) . '" class="button">Nova Importacao</a></p>';
+		echo '</div>';
+		return;
+	}
+
+	// -------------------------------------------------------
 	// ACAO: Escanear (preview)
 	// -------------------------------------------------------
 	if ( 'scan' === $action && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'setceb_upload' ) ) {
@@ -513,6 +736,36 @@ function setceb_importer_page() {
 		</div>
 
 		<div class="card" style="max-width:600px;padding:20px;margin-top:15px;">
+			<h2>Adicionar arquivos a uma categoria</h2>
+			<p>Envie um <strong>.zip</strong> com PDFs e escolha a categoria de destino. Arquivos que ja existirem na categoria serao ignorados (sem duplicidade).</p>
+
+			<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'tools.php?page=setceb-importar-planilhas&action=cat-scan' ) ); ?>">
+				<?php wp_nonce_field( 'setceb_cat_upload' ); ?>
+				<table class="form-table">
+					<tr>
+						<th scope="row"><label for="cat_slug">Categoria</label></th>
+						<td>
+							<select name="cat_slug" id="cat_slug" required style="font-size:14px;min-width:220px;">
+								<option value="">— Selecionar categoria —</option>
+								<?php foreach ( setceb_importer_categorias_ui() as $slug => $label ) : ?>
+									<option value="<?php echo esc_attr( $slug ); ?>"><?php echo esc_html( $label ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="cat_zip">Arquivo .zip</label></th>
+						<td>
+							<input type="file" name="cat_zip" id="cat_zip" accept=".zip" required style="font-size:14px;">
+							<p class="description">Somente PDFs serao considerados (qualquer pasta dentro do .zip).</p>
+						</td>
+					</tr>
+				</table>
+				<?php submit_button( 'Enviar e Visualizar', 'secondary large' ); ?>
+			</form>
+		</div>
+
+		<div class="card" style="max-width:600px;padding:20px;margin-top:15px;">
 			<h2>Mapeamento de Categorias</h2>
 			<table class="widefat" style="margin-top:10px;">
 				<thead>
@@ -533,6 +786,143 @@ function setceb_importer_page() {
 		</div>
 	</div>
 	<?php
+}
+
+/**
+ * Retorna a lista de categorias disponiveis (slug => rotulo) para uso
+ * no seletor de upload por categoria.
+ *
+ * @return array slug => rotulo
+ */
+function setceb_importer_categorias_ui() {
+	$categorias = array();
+
+	if ( taxonomy_exists( 'setceb_cat_doc' ) ) {
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'setceb_cat_doc',
+				'hide_empty' => false,
+				'orderby'    => 'name',
+			)
+		);
+
+		if ( ! is_wp_error( $terms ) ) {
+			foreach ( $terms as $term ) {
+				$categorias[ $term->slug ] = $term->name;
+			}
+		}
+	}
+
+	// Fallback caso a taxonomia ainda nao tenha termos.
+	if ( empty( $categorias ) && function_exists( 'setceb_associado_categorias' ) ) {
+		$categorias = setceb_associado_categorias();
+	}
+
+	return $categorias;
+}
+
+/**
+ * Verifica se ja existe um documento da categoria com o mesmo arquivo.
+ *
+ * O arquivo importado e copiado para a midia com o nome original; o
+ * post guarda a URL em _setceb_doc_url. Comparamos pelo basename.
+ *
+ * @param string $basename Nome do arquivo (ex.: "2024.pdf").
+ * @param int    $term_id  ID do termo da categoria.
+ * @return bool True se ja existe.
+ */
+function setceb_importer_duplicate_check( $basename, $term_id ) {
+	$basename = trim( $basename );
+
+	if ( '' === $basename || ! $term_id ) {
+		return false;
+	}
+
+	$q = new WP_Query(
+		array(
+			'post_type'      => 'setceb_planilha',
+			'post_status'    => 'any',
+			'fields'         => 'ids',
+			'posts_per_page' => 1,
+			'suppress_filters' => false,
+			'meta_query'     => array(
+				array(
+					'key'     => '_setceb_doc_url',
+					'value'   => $basename,
+					'compare' => 'LIKE',
+				),
+			),
+			'tax_query'      => array(
+				array(
+					'taxonomy' => 'setceb_cat_doc',
+					'field'    => 'term_id',
+					'terms'    => $term_id,
+				),
+			),
+		)
+	);
+
+	return $q->have_posts();
+}
+
+/**
+ * Extrai recursivamente todos os PDFs de um diretorio (qualquer
+ * profundidade), para o upload por categoria.
+ *
+ * @param string $dir Diretorio a varrer.
+ * @return string[] Caminhos completos dos PDFs.
+ */
+function setceb_importer_find_pdfs_recursive( $dir ) {
+	$found = array();
+
+	if ( ! is_dir( $dir ) ) {
+		return $found;
+	}
+
+	$items = array_diff( scandir( $dir ), array( '.', '..', '.DS_Store', '__MACOSX' ) );
+
+	foreach ( $items as $item ) {
+		$path = $dir . '/' . $item;
+
+		if ( is_dir( $path ) ) {
+			$found = array_merge( $found, setceb_importer_find_pdfs_recursive( $path ) );
+		} elseif ( preg_match( '/\.pdf$/i', $item ) ) {
+			$found[] = $path;
+		}
+	}
+
+	return $found;
+}
+
+/**
+ * Extrai um .zip e devolve todos os PDFs contidos nele (recursivo
+ * e independente do nome das pastas). Usado pelo upload por categoria.
+ *
+ * @param string $tmp_file Caminho do .zip temporario.
+ * @return array(array) list|false| Contem 'root', 'pdfs' e 'error'.
+ */
+function setceb_importer_scan_single_zip( $tmp_file ) {
+	$tmp_dir = setceb_importer_tmp_dir();
+
+	if ( is_dir( $tmp_dir ) ) {
+		rrmdir( $tmp_dir );
+	}
+	wp_mkdir_p( $tmp_dir );
+
+	$zip = new ZipArchive();
+	$res = $zip->open( $tmp_file );
+
+	if ( true !== $res ) {
+		return array( 'error' => 'Falha ao abrir o ZIP (erro #' . $res . ').' );
+	}
+
+	$zip->extractTo( $tmp_dir );
+	$zip->close();
+
+	return array(
+		'root' => $tmp_dir,
+		'pdfs' => setceb_importer_find_pdfs_recursive( $tmp_dir ),
+	);
 }
 
 /**
