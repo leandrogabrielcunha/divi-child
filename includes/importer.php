@@ -28,6 +28,72 @@ function setceb_importer_menu() {
 add_action( 'admin_menu', 'setceb_importer_menu' );
 
 /**
+ * Assets da pagina do importador (loader de processamento).
+ *
+ * @param string $hook Hook suffix da pagina admin.
+ */
+function setceb_importer_enqueue_assets( $hook ) {
+	if ( 'tools_page_setceb-importar-planilhas' !== $hook ) {
+		return;
+	}
+
+	$theme = wp_get_theme();
+
+	wp_enqueue_script(
+		'setceb-importer',
+		get_stylesheet_directory_uri() . '/importer.js',
+		array(),
+		$theme->get( 'Version' ),
+		true
+	);
+
+	wp_add_inline_style(
+		'wp-admin',
+		'
+.setceb-importer-loader {
+	position: fixed;
+	inset: 0;
+	z-index: 999999;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	gap: 16px;
+	background: rgba(15, 23, 42, 0.82);
+	color: #fff;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.setceb-importer-loader.is-visible {
+	display: flex;
+}
+.setceb-importer-loader__spinner {
+	width: 48px;
+	height: 48px;
+	border: 4px solid rgba(255, 255, 255, 0.3);
+	border-top-color: #fff;
+	border-radius: 50%;
+	animation: setceb-importer-spin 0.8s linear infinite;
+}
+.setceb-importer-loader__text {
+	font-size: 16px;
+	font-weight: 600;
+	text-align: center;
+	line-height: 1.5;
+	max-width: 360px;
+}
+.setceb-importer-loader__hint {
+	font-size: 13px;
+	opacity: 0.8;
+}
+@keyframes setceb-importer-spin {
+	to { transform: rotate(360deg); }
+}
+'
+	);
+}
+add_action( 'admin_enqueue_scripts', 'setceb_importer_enqueue_assets' );
+
+/**
  * Diretorio temporario para extrair o .zip.
  */
 function setceb_importer_tmp_dir() {
@@ -290,6 +356,13 @@ function setceb_importer_page() {
 	}
 
 	$action = isset( $_GET['action'] ) ? sanitize_key( $_GET['action'] ) : 'form';
+	?>
+	<div class="setceb-importer-loader" data-importer-loader role="status" aria-live="polite" aria-hidden="true">
+		<div class="setceb-importer-loader__spinner" aria-hidden="true"></div>
+		<div class="setceb-importer-loader__text" data-importer-loader-text>Processando…</div>
+		<div class="setceb-importer-loader__hint">N&atilde;o feche ou atualize esta p&aacute;gina.</div>
+	</div>
+	<?php
 
 	// -------------------------------------------------------
 	// ACAO: Importar
