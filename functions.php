@@ -116,6 +116,14 @@ importacao automatica. Ver includes/importer.php
 require_once get_stylesheet_directory() . '/includes/importer.php';
 
 /*================================================
+#SETCEB - Importacao de Associados
+Ferramentas > Importar Associados: cadastra usuarios
+com perfil associado a partir de um .csv (NOME,E-MAIL,SENHA).
+Ver includes/associados-import.php
+===============================================*/
+require_once get_stylesheet_directory() . '/includes/associados-import.php';
+
+/*================================================
 #SETCEB - Formulario de contato (shortcode)
 Formulario de contato geral do site via shortcode
 [formulario_contato_setceb]. Envio via wp_mail.
