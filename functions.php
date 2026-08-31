@@ -116,6 +116,14 @@ importacao automatica. Ver includes/importer.php
 require_once get_stylesheet_directory() . '/includes/importer.php';
 
 /*================================================
+#SETCEB - Formulario de contato (shortcode)
+Formulario de contato geral do site via shortcode
+[formulario_contato_setceb]. Envio via wp_mail.
+Ver includes/contato.php
+===============================================*/
+require_once get_stylesheet_directory() . '/includes/contato.php';
+
+/*================================================
 #SETCEB - Header global customizado
 Estrutura do cabecalho e menu principal.
 Ver includes/setceb-header.php
