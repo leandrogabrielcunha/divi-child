@@ -219,41 +219,37 @@
 		planilhasPage.hidden = false;
 
 		var frag = document.createDocumentFragment();
-		var build = function (type, data, label, extra) {
-			var target = this || {};
+		var mkBtn = function (type, page, label, disabled) {
 			var b = document.createElement('button');
 			b.type = 'button';
-			var cls = 'assoc-pagination__btn' + (extra || '');
-			if (target.page === data) {
-				cls += ' is-current';
-				b.setAttribute('aria-current', 'page');
-			}
-			b.className = cls;
+			b.className = 'assoc-pagination__btn';
 			b.textContent = label;
-			b.setAttribute('data-page', data);
+			b.setAttribute('data-page', page);
 			b.setAttribute('data-type', type);
-			var page = typeof data === 'number' ? data : currentPage;
+			if (disabled) {
+				b.disabled = true;
+			}
 			if (type === 'prev') {
-				b.disabled = currentPage <= 1;
 				b.setAttribute('aria-label', 'Página anterior');
-			} else if (type === 'next') {
-				b.disabled = currentPage >= totalPaginas;
-				b.setAttribute('aria-label', 'Próxima página');
-			} else if (type === 'page') {
-				if (data === currentPage) {
-					b.setAttribute('aria-current', 'page');
+				if (currentPage <= 1) {
+					b.disabled = true;
 				}
+			} else if (type === 'next') {
+				b.setAttribute('aria-label', 'Próxima página');
+				if (currentPage >= totalPaginas) {
+					b.disabled = true;
+				}
+			} else if (type === 'page' && page === currentPage) {
+				b.classList.add('is-current');
+				b.setAttribute('aria-current', 'page');
 			}
 			return b;
 		};
 
-		/* Prev */
-		frag.appendChild(build.bind(planilhasPage)('prev', Math.max(1, currentPage - 1), '‹'));
+		frag.appendChild(mkBtn('prev', Math.max(1, currentPage - 1), '‹'));
 
-		/* Paginas numeradas (janela com elipses) */
 		var pages = [];
-		var i;
-		for (i = 1; i <= totalPaginas; i++) {
+		for (var i = 1; i <= totalPaginas; i++) {
 			if (i === 1 || i === totalPaginas || Math.abs(i - currentPage) <= 1) {
 				pages.push(i);
 			} else if (pages[pages.length - 1] !== '…') {
@@ -269,11 +265,10 @@
 				frag.appendChild(dot);
 				return;
 			}
-			frag.appendChild(build.bind(planilhasPage)('page', pg, String(pg)));
+			frag.appendChild(mkBtn('page', pg, String(pg)));
 		});
 
-		/* Next */
-		frag.appendChild(build.bind(planilhasPage)('next', Math.min(totalPaginas, currentPage + 1), '›'));
+		frag.appendChild(mkBtn('next', Math.min(totalPaginas, currentPage + 1), '›'));
 
 		planilhasPage.innerHTML = '';
 		planilhasPage.appendChild(frag);

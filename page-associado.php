@@ -45,6 +45,16 @@ $categorias   = setceb_associado_categorias();
 $anos         = setceb_associado_anos();
 $ano_atual    = ! empty( $anos ) ? (string) $anos[0] : (string) gmdate( 'Y' );
 $planilhas    = setceb_planilhas();
+/* Categorias efetivamente presentes nas planilhas cadastradas. */
+$categorias_planilhas = array();
+foreach ( $planilhas as $plan_item ) {
+	if ( ! empty( $plan_item['categoria'] ) ) {
+		$cat_slug = $plan_item['categoria'];
+		if ( ! isset( $categorias_planilhas[ $cat_slug ] ) ) {
+			$categorias_planilhas[ $cat_slug ] = isset( $categorias[ $cat_slug ] ) ? $categorias[ $cat_slug ] : $cat_slug;
+		}
+	}
+}
 $relatorios   = setceb_relatorios();
 $convencoes   = setceb_convencoes();
 $outros_materiais = setceb_outros_materiais();
@@ -161,7 +171,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 											<span class="assoc-cat-select__label">Categoria</span>
 											<select id="assoc-cat-filter" name="assoc_cat_filter" data-categoria-select>
 												<option value="">Todas</option>
-												<?php foreach ( $categorias as $cat_slug => $cat_label ) : ?>
+												<?php foreach ( $categorias_planilhas as $cat_slug => $cat_label ) : ?>
 													<option value="<?php echo esc_attr( $cat_slug ); ?>"><?php echo esc_html( $cat_label ); ?></option>
 												<?php endforeach; ?>
 											</select>
