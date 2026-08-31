@@ -179,25 +179,28 @@
 		refreshEmptyPanel('#panel-planilhas', '[data-planilhas-empty]', '[data-planilhas-empty-text]', 'Nenhuma planilha disponível', true);
 		refreshEmptyPanel('#panel-relatorios', '[data-relatorios-empty]', '[data-empty-text]', 'Nenhum relatório disponível', false);
 
+		/* Paginacao recomputada do zero aqui (candidatos = categoria ativa),
+		   para que qualquer filtro/ano/categoria mantenha a paginacao correto. */
 		paginatePlanilhas();
 	}
 
-	/* --- Paginacao do painel de planilhas (20 por pagina) --- */
+	/* --- Paginacao do painel de planilhas (10 por pagina) --- */
 	function paginatePlanilhas() {
 		console.log('[DEBUG] paginatePlanilhas()', { hasList: !!planilhasList, hasPage: !!planilhasPage, perPage: perPage, currentPage: currentPage, currentCategory: currentCategory });
 		if (!planilhasList || !planilhasPage) {
 			return;
 		}
 
-		var all = qsa('.assoc-list__item', planilhasList);
-		console.log('[DEBUG] total li no ul:', all.length, '| total visiveis antes do corte:', all.filter(function (i) { return !i.hidden; }).length);
-
+		/* Candidatos = todos os itens da categoria ativa (independentemente do
+		   estado hidden atual, que mistura filtro + corte de pagina). Assim a
+		   paginacao e recomputada do zero e nunca depende de uma chamada previa. */
 		var itens = qsa('.assoc-list__item', planilhasList).filter(function (item) {
-			return !item.hidden;
+			var docCat = item.getAttribute('data-categoria');
+			return docCat && currentCategory && docCat === currentCategory;
 		});
 
 		var totalPaginas = Math.max(1, Math.ceil(itens.length / perPage));
-		console.log('[DEBUG] itens.visiveis =', itens.length, '| perPage =', perPage, '| totalPaginas =', totalPaginas);
+		console.log('[DEBUG] itens.da-categoria =', itens.length, '| perPage =', perPage, '| totalPaginas =', totalPaginas);
 
 		if (currentPage > totalPaginas) {
 			currentPage = totalPaginas;
@@ -316,7 +319,6 @@
 			currentCategory = catSelect.value || '';
 			currentPage = 1;
 			applyDocFilters();
-			paginatePlanilhas();
 		});
 	}
 
@@ -327,7 +329,6 @@
 	/* Aplica filtro + paginacao inicial (mantem o grid da pagina atual). */
 	if (planilhasList) {
 		applyDocFilters();
-		paginatePlanilhas();
 	}
 
 	if (planilhasPage) {
