@@ -107,7 +107,7 @@
 	/* ============================================================
 	 * Filtros por categoria (painel de planilhas) + paginacao
 	 * ============================================================ */
-	var currentYear = null;
+	var currentYear = (window.SETCEB_ASSOC && window.SETCEB_ASSOC.anoAtual) ? String(window.SETCEB_ASSOC.anoAtual) : null;
 	var currentCategory = '';
 	var planilhasPanel = root.querySelector('#panel-planilhas');
 	var catSelect = planilhasPanel ? planilhasPanel.querySelector('[data-categoria-select]') : null;
@@ -354,6 +354,7 @@
 		}
 
 		currentYear = option.getAttribute('data-ano');
+		currentPage = 1;
 		closeYear();
 		yearBtn.focus();
 		applyDocFilters();

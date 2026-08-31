@@ -319,6 +319,14 @@ function setceb_associado_enqueue_assets() {
 		$theme->get( 'Version' ),
 		true
 	);
+
+	wp_localize_script(
+		'setceb-associado',
+		'SETCEB_ASSOC',
+		array(
+			'anoAtual' => (string) gmdate( 'Y' ),
+		)
+	);
 }
 add_action( 'wp_enqueue_scripts', 'setceb_associado_enqueue_assets' );
 
