@@ -108,9 +108,9 @@
 	 * Filtros por categoria (painel de planilhas) + paginacao
 	 * ============================================================ */
 	var currentYear = (window.SETCEB_ASSOC && window.SETCEB_ASSOC.anoAtual) ? String(window.SETCEB_ASSOC.anoAtual) : null;
-	var currentCategory = '';
 	var planilhasPanel = root.querySelector('#panel-planilhas');
 	var catSelect = planilhasPanel ? planilhasPanel.querySelector('[data-categoria-select]') : null;
+	var currentCategory = (catSelect && catSelect.options && catSelect.options[catSelect.selectedIndex]) ? String(catSelect.options[catSelect.selectedIndex].value) : '';
 	var planilhasList = planilhasPanel ? planilhasPanel.querySelector('[data-planilhas-list]') : null;
 	var planilhasPage = planilhasPanel ? planilhasPanel.querySelector('[data-planilhas-pagination]') : null;
 	var perPage = planilhasList ? parseInt(planilhasList.getAttribute('data-per-page') || '20', 10) || 20 : 20;

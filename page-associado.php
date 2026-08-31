@@ -170,15 +170,14 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 										<label class="assoc-cat-select" for="assoc-cat-filter">
 											<span class="assoc-cat-select__label">Categoria</span>
 											<select id="assoc-cat-filter" name="assoc_cat_filter" data-categoria-select>
-												<option value="">Todas</option>
 												<?php foreach ( $categorias_planilhas as $cat_slug => $cat_label ) : ?>
-													<option value="<?php echo esc_attr( $cat_slug ); ?>"><?php echo esc_html( $cat_label ); ?></option>
+													<option value="<?php echo esc_attr( $cat_slug ); ?>"<?php echo $cat_slug === array_key_first( $categorias_planilhas ) ? ' selected' : ''; ?>><?php echo esc_html( $cat_label ); ?></option>
 												<?php endforeach; ?>
 											</select>
 										</label>
 									</div>
 
-									<ul class="assoc-list" data-planilhas-list data-per-page="20">
+									<ul class="assoc-list" data-planilhas-list data-per-page="10">
 										<?php foreach ( $planilhas as $item ) : ?>
 											<?php
 											if ( empty( $item['titulo'] ) || empty( $item['url'] ) ) {
