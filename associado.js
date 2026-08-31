@@ -158,13 +158,18 @@
 	function applyDocFilters() {
 		qsa('.assoc-list__item').forEach(function (doc) {
 			var show = true;
+			var isPlanilha = doc.closest('[data-planilhas-list]') !== null;
 			var docCat = doc.getAttribute('data-categoria');
 			var docYear = doc.getAttribute('data-ano');
 
 			if (docCat && currentCategory && docCat !== currentCategory) {
 				show = false;
 			}
-			if (docYear && currentYear && String(docYear) !== String(currentYear)) {
+
+			/* Planilhas paginam por categoria apenas (sem filtro de ano), para
+				a paginacao aparecer sempre. O filtro de ano (currentYear) se
+				aplica aos demais documentos (relatorios, convencoes etc.). */
+			if (!isPlanilha && docYear && currentYear && String(docYear) !== String(currentYear)) {
 				show = false;
 			}
 			doc.hidden = !show;
