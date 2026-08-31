@@ -442,14 +442,6 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'fale-conosco', $active_panel, 'class' ) ) ); ?>" id="panel-fale-conosco" role="tabpanel" aria-labelledby="tab-fale-conosco" tabindex="0">
 								<h2 class="assoc-panel__title">Fale Conosco</h2>
 
-								<div class="assoc-callout">
-									<span class="dashicons dashicons-email-alt assoc-callout__icon" aria-hidden="true"></span>
-									<div>
-										<h3>Como podemos ajudar?</h3>
-										<p>Escolha o assunto, informe sua dúvida e envie sua mensagem. Nossa equipe responderá o mais breve possível.</p>
-									</div>
-								</div>
-
 								<?php if ( $notice && 'fale-conosco' === $notice['forma'] ) : ?>
 									<div class="assoc-notice assoc-notice--<?php echo esc_attr( $notice['tipo'] ); ?>" role="<?php echo 'sucesso' === $notice['tipo'] ? 'status' : 'alert'; ?>">
 										<span class="dashicons <?php echo 'sucesso' === $notice['tipo'] ? 'dashicons-yes-alt' : 'dashicons-warning'; ?>" aria-hidden="true"></span>
