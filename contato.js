@@ -117,6 +117,69 @@
 	root.querySelectorAll('[data-mask-cep]').forEach(maskCep);
 
 	/* ============================================================
+	 * Auto-preenchimento do endereco a partir do CEP (ViaCEP)
+	 * ============================================================ */
+	var cepInput = root.querySelector('[data-cep-input]');
+	var cepStatus = root.querySelector('[data-cep-status]');
+
+	if (cepInput) {
+		function setCepStatus(msg, isError) {
+			if (!cepStatus) {
+				return;
+			}
+			cepStatus.textContent = msg || '';
+			cepStatus.classList.toggle('is-error', !!isError);
+		}
+
+		function consultarCep() {
+			var cep = (cepInput.value || '').replace(/\D/g, '');
+			if (cep.length !== 8) {
+				setCepStatus('');
+				return;
+			}
+
+			setCepStatus('Consultando CEP…', false);
+
+			fetch('https://viacep.com.br/ws/' + cep + '/json/', {
+				credentials: 'omit'
+			})
+				.then(function (response) {
+					if (!response.ok) {
+						throw new Error('http');
+					}
+					return response.json();
+				})
+				.then(function (data) {
+					if (data.erro) {
+						setCepStatus('CEP não encontrado.', true);
+						return;
+					}
+
+					var rua = root.querySelector('[name="setceb_rua"]');
+					var cidade = root.querySelector('[name="setceb_cidade"]');
+					var estado = root.querySelector('[name="setceb_estado"]');
+
+					if (rua && data.logradouro) {
+						rua.value = data.logradouro;
+					}
+					if (cidade && data.localidade) {
+						cidade.value = data.localidade;
+					}
+					if (estado && data.uf) {
+						estado.value = data.uf;
+					}
+
+					setCepStatus('');
+				})
+				.catch(function () {
+					setCepStatus('Não foi possível consultar o CEP.', true);
+				});
+		}
+
+		cepInput.addEventListener('blur', consultarCep);
+	}
+
+	/* ============================================================
 	 * Contador de caracteres
 	 * ============================================================ */
 	var charInput = root.querySelector('[data-char-input]');

@@ -159,6 +159,12 @@ function setceb_contato_render_shortcode( $atts = array() ) {
 			</div>
 
 			<div class="setceb-contact-form__field">
+				<label for="setceb-cf-cep">CEP / Código Postal</label>
+				<input type="text" id="setceb-cf-cep" name="setceb_cep" autocomplete="postal-code" data-mask-cep data-cep-input placeholder="00000-000" maxlength="9">
+				<span class="setceb-contact-form__cep-status" data-cep-status role="status" aria-live="polite"></span>
+			</div>
+
+			<div class="setceb-contact-form__field">
 				<label for="setceb-cf-rua">Nome da Rua</label>
 				<input type="text" id="setceb-cf-rua" name="setceb_rua" autocomplete="street-address" maxlength="150">
 			</div>
@@ -177,11 +183,6 @@ function setceb_contato_render_shortcode( $atts = array() ) {
 					<label for="setceb-cf-estado">Estado/Província</label>
 					<input type="text" id="setceb-cf-estado" name="setceb_estado" autocomplete="address-level1" maxlength="60">
 				</div>
-			</div>
-
-			<div class="setceb-contact-form__field">
-				<label for="setceb-cf-cep">CEP / Código Postal</label>
-				<input type="text" id="setceb-cf-cep" name="setceb_cep" autocomplete="postal-code" data-mask-cep placeholder="00000-000" maxlength="9">
 			</div>
 
 			<div class="setceb-contact-form__row setceb-contact-form__row--2">
