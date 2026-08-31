@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.24.0
+Version: 1.25.0
 Template: Divi
 */
 
@@ -2364,3 +2364,101 @@ ou fallback com icon (dashicon) sobre cor solida, sem gradiente.
 		padding: 14px 16px;
 	}
 }
+
+/*============================================================
+SETCEB - Paginação padrão (Divi Builder / WordPress)
+Normaliza as paginacoes nativas (posts-navigation, wp-pagenavi,
+et_pb_pagination e paginate_links) em botoes "pill" no padrao
+visual SETCEB, substituindo o estilo feio do Divi.
+============================================================*/
+.et_pb_pagination,
+.navigation.posts-navigation .nav-links,
+.wp-pagenavi,
+.pagination .nav-links {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 28px 0 0;
+	text-align: center;
+}
+
+/* Itens de pagina em botoes pill */
+.et_pb_pagination .page-numbers,
+.navigation.posts-navigation .nav-links a,
+.navigation.posts-navigation .nav-links .page-numbers,
+.navigation.posts-navigation .nav-links .current,
+.wp-pagenavi a,
+.wp-pagenavi span,
+.pagination .nav-links .page-numbers {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 40px;
+	min-height: 40px;
+	padding: 0 13px;
+	margin: 0;
+	font-size: 14px;
+	font-weight: 700;
+	line-height: 1;
+	color: var(--setceb-accent-deep, #085a6d);
+	background: var(--setceb-accent-tint, #e8f4f6);
+	border: 1.5px solid transparent;
+	border-radius: 10px;
+	box-shadow: none;
+	text-decoration: none !important;
+	transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+/* Hover (exceto a pagina atual) */
+.et_pb_pagination .page-numbers:not(.current):hover,
+.navigation.posts-navigation .nav-links a:hover,
+.navigation.posts-navigation .nav-links .page-numbers:not(.current):hover,
+.wp-pagenavi a:hover,
+.pagination .nav-links a.page-numbers:hover {
+	color: var(--setceb-accent, #0d8199);
+	background: #fff;
+	border-color: var(--setceb-accent, #0d8199);
+}
+
+/* Pagina atual em destaque */
+.et_pb_pagination .page-numbers.current,
+.navigation.posts-navigation .nav-links .current,
+.wp-pagenavi span.current,
+.pagination .nav-links .page-numbers.current {
+	color: #fff;
+	background: var(--setceb-accent, #0d8199);
+	border-color: var(--setceb-accent, #0d8199);
+	cursor: default;
+}
+
+/* Separador de reticencias "..." */
+.et_pb_pagination .page-numbers.dots,
+.navigation.posts-navigation .nav-links .dots,
+.wp-pagenavi span.extend,
+.pagination .nav-links .page-numbers.dots {
+	min-width: auto;
+	color: var(--setceb-muted, #64748b);
+	background: transparent;
+	border-color: transparent;
+}
+
+/* Rotulo "Pagina X de Y" do WP-PageNavi como texto simples */
+.wp-pagenavi span.pages {
+	min-width: auto;
+	color: var(--setceb-muted, #64748b);
+	background: transparent;
+	border-color: transparent;
+	padding: 0 8px;
+}
+
+/* Foco acessivel */
+.et_pb_pagination .page-numbers:focus-visible,
+.navigation.posts-navigation .nav-links a:focus-visible,
+.wp-pagenavi a:focus-visible,
+.pagination .nav-links .page-numbers:focus-visible {
+	outline: 3px solid rgba(18, 61, 115, 0.55);
+	outline-offset: 2px;
+}
+
