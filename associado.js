@@ -125,7 +125,7 @@
 			return;
 		}
 
-		var docs = qsa('.assoc-doc', panel);
+		var docs = qsa('.assoc-list__item', panel);
 
 		if (!docs.length) {
 			return; /* Sem conteudo: estado vazio estatico do servidor. */
@@ -157,7 +157,7 @@
 	}
 
 	function applyDocFilters() {
-		qsa('.assoc-doc').forEach(function (doc) {
+		qsa('.assoc-list__item').forEach(function (doc) {
 			var show = true;
 			var docCat = doc.getAttribute('data-categoria');
 			var docYear = doc.getAttribute('data-ano');

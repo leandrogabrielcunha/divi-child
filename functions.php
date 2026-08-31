@@ -109,6 +109,13 @@ pelo admin. Ver includes/documentos.php
 require_once get_stylesheet_directory() . '/includes/documentos.php';
 
 /*================================================
+#SETCEB - Ferramenta de importacao de planilhas
+Upload de .zip com pastas de categorias e
+importacao automatica. Ver includes/importer.php
+===============================================*/
+require_once get_stylesheet_directory() . '/includes/importer.php';
+
+/*================================================
 #SETCEB - Header global customizado
 Estrutura do cabecalho e menu principal.
 Ver includes/setceb-header.php

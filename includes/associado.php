@@ -399,6 +399,20 @@ function setceb_convencoes() {
 }
 
 /**
+ * Outros materiais disponibilizados ao associado.
+ *
+ * Fonte: itens do CPT "setceb_outros_materiais" (menu Outros Materiais
+ * no painel).
+ *
+ * @return array[]
+ */
+function setceb_outros_materiais() {
+	$itens = function_exists( 'setceb_documentos_query' ) ? setceb_documentos_query( 'setceb_outros_materiais' ) : array();
+
+	return apply_filters( 'setceb_outros_materiais', $itens );
+}
+
+/**
  * Assuntos do formulario Fale Conosco.
  *
  * @return array slug => rotulo

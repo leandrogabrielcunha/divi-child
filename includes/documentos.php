@@ -8,6 +8,7 @@
  * - Planilhas              (setceb_planilha)
  * - Relatorios             (setceb_relatorio)
  * - Convencoes Coletivas   (setceb_convencoes)
+ * - Outros Materiais       (setceb_outros_materiais)
  *
  * Cada item possui: titulo, arquivo (URL da biblioteca de midia ou
  * link externo), categoria (taxonomia compartilhada, ja populada
@@ -28,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string[]
  */
 function setceb_documento_post_types() {
-	return array( 'setceb_planilha', 'setceb_relatorio', 'setceb_convencoes' );
+	return array( 'setceb_planilha', 'setceb_relatorio', 'setceb_convencoes', 'setceb_outros_materiais' );
 }
 
 /**
@@ -54,9 +55,10 @@ function setceb_documentos_register() {
 	);
 
 	$tipos = array(
-		'setceb_planilha'   => array( 'Planilhas', 'Planilha', 'dashicons-media-spreadsheet' ),
-		'setceb_relatorio'  => array( 'Relatórios', 'Relatório', 'dashicons-chart-bar' ),
-		'setceb_convencoes' => array( 'Convenções Coletivas', 'Convenção Coletiva', 'dashicons-media-document' ),
+		'setceb_planilha'         => array( 'Planilhas', 'Planilha', 'dashicons-media-spreadsheet' ),
+		'setceb_relatorio'        => array( 'Relatórios', 'Relatório', 'dashicons-chart-bar' ),
+		'setceb_convencoes'       => array( 'Convenções Coletivas', 'Convenção Coletiva', 'dashicons-media-document' ),
+		'setceb_outros_materiais' => array( 'Outros Materiais', 'Outro Material', 'dashicons-portfolio' ),
 	);
 
 	foreach ( $tipos as $slug => $info ) {

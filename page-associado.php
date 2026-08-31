@@ -47,18 +47,20 @@ $ano_atual    = ! empty( $anos ) ? (string) $anos[0] : (string) gmdate( 'Y' );
 $planilhas    = setceb_planilhas();
 $relatorios   = setceb_relatorios();
 $convencoes   = setceb_convencoes();
+$outros_materiais = setceb_outros_materiais();
 $boletos      = setceb_boletos();
 $assuntos     = setceb_contato_assuntos();
 $notice       = setceb_associado_form_notice();
 $active_panel = $notice ? $notice['forma'] : 'planilhas';
 
 $atalhos = array(
-	'planilhas'    => 'Planilhas',
-	'relatorios'   => 'Relatórios',
-	'convencoes'   => 'Convenções Coletivas',
-	'juridico'     => 'Jurídico',
-	'financeiro'   => 'Financeiro',
-	'fale-conosco' => 'Fale Conosco',
+	'planilhas'        => 'Planilhas',
+	'relatorios'       => 'Relatórios',
+	'convencoes'       => 'Convenções Coletivas',
+	'outros-materiais' => 'Outros Materiais',
+	'juridico'         => 'Jurídico',
+	'financeiro'       => 'Financeiro',
+	'fale-conosco'     => 'Fale Conosco',
 );
 
 $boleto_icons = array(
@@ -158,7 +160,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 										<?php endforeach; ?>
 									</div>
 
-									<div class="assoc-docs">
+									<ul class="assoc-list">
 										<?php foreach ( $planilhas as $item ) : ?>
 											<?php
 											if ( empty( $item['titulo'] ) || empty( $item['url'] ) ) {
@@ -175,19 +177,21 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 												$plan_meta[] = $item['ano'];
 											}
 											?>
-											<article class="assoc-doc"<?php echo ! empty( $item['categoria'] ) ? ' data-categoria="' . esc_attr( $item['categoria'] ) . '"' : ''; ?><?php echo ! empty( $item['ano'] ) ? ' data-ano="' . esc_attr( $item['ano'] ) . '"' : ''; ?>>
-												<span class="dashicons dashicons-media-spreadsheet assoc-doc__icon" aria-hidden="true"></span>
-												<h3 class="assoc-doc__titulo"><?php echo esc_html( $item['titulo'] ); ?></h3>
-												<?php if ( ! empty( $plan_meta ) ) : ?>
-													<p class="assoc-doc__meta"><?php echo esc_html( implode( ' · ', $plan_meta ) ); ?></p>
-												<?php endif; ?>
-												<a class="assoc-doc__link" href="<?php echo esc_url( $item['url'] ); ?>" target="_blank" rel="noopener noreferrer">
-													Abrir documento
+											<li class="assoc-list__item"<?php echo ! empty( $item['categoria'] ) ? ' data-categoria="' . esc_attr( $item['categoria'] ) . '"' : ''; ?><?php echo ! empty( $item['ano'] ) ? ' data-ano="' . esc_attr( $item['ano'] ) . '"' : ''; ?>>
+												<span class="assoc-list__icon"><span class="dashicons dashicons-media-spreadsheet" aria-hidden="true"></span></span>
+												<div class="assoc-list__info">
+													<h3 class="assoc-list__title"><?php echo esc_html( $item['titulo'] ); ?></h3>
+													<?php if ( ! empty( $plan_meta ) ) : ?>
+														<span class="assoc-list__meta"><?php echo esc_html( implode( ' · ', $plan_meta ) ); ?></span>
+													<?php endif; ?>
+												</div>
+												<a class="assoc-list__link" href="<?php echo esc_url( $item['url'] ); ?>" target="_blank" rel="noopener noreferrer">
+													Abrir
 													<span class="dashicons dashicons-download" aria-hidden="true"></span>
 												</a>
-											</article>
+											</li>
 										<?php endforeach; ?>
-									</div>
+									</ul>
 
 									<div class="assoc-empty" data-planilhas-empty hidden>
 										<span class="dashicons dashicons-media-spreadsheet assoc-empty__icon" aria-hidden="true"></span>
@@ -207,7 +211,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 								<p class="assoc-panel__intro">Relatórios mensais por categoria de transporte. Use o seletor de ano para filtrar.</p>
 
 								<?php if ( ! empty( $relatorios ) ) : ?>
-									<div class="assoc-docs">
+									<ul class="assoc-list">
 										<?php foreach ( $relatorios as $item ) : ?>
 											<?php
 											if ( empty( $item['titulo'] ) || empty( $item['url'] ) ) {
@@ -224,22 +228,24 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 												$doc_meta[] = $item['ano'];
 											}
 											?>
-											<article class="assoc-doc<?php echo ! empty( $item['destaque'] ) ? ' assoc-doc--destaque' : ''; ?>"<?php echo ! empty( $item['categoria'] ) ? ' data-categoria="' . esc_attr( $item['categoria'] ) . '"' : ''; ?><?php echo ! empty( $item['ano'] ) ? ' data-ano="' . esc_attr( $item['ano'] ) . '"' : ''; ?>>
+											<li class="assoc-list__item<?php echo ! empty( $item['destaque'] ) ? ' assoc-list__item--destaque' : ''; ?>"<?php echo ! empty( $item['categoria'] ) ? ' data-categoria="' . esc_attr( $item['categoria'] ) . '"' : ''; ?><?php echo ! empty( $item['ano'] ) ? ' data-ano="' . esc_attr( $item['ano'] ) . '"' : ''; ?>>
 												<?php if ( ! empty( $item['destaque'] ) ) : ?>
-													<span class="assoc-doc__tag">Destaque</span>
+													<span class="assoc-list__tag">Destaque</span>
 												<?php endif; ?>
-												<span class="dashicons dashicons-chart-bar assoc-doc__icon" aria-hidden="true"></span>
-												<h3 class="assoc-doc__titulo"><?php echo esc_html( $item['titulo'] ); ?></h3>
-												<?php if ( ! empty( $doc_meta ) ) : ?>
-													<p class="assoc-doc__meta"><?php echo esc_html( implode( ' · ', $doc_meta ) ); ?></p>
-												<?php endif; ?>
-												<a class="assoc-doc__link" href="<?php echo esc_url( $item['url'] ); ?>" target="_blank" rel="noopener noreferrer">
-													Abrir documento
+												<span class="assoc-list__icon"><span class="dashicons dashicons-chart-bar" aria-hidden="true"></span></span>
+												<div class="assoc-list__info">
+													<h3 class="assoc-list__title"><?php echo esc_html( $item['titulo'] ); ?></h3>
+													<?php if ( ! empty( $doc_meta ) ) : ?>
+														<span class="assoc-list__meta"><?php echo esc_html( implode( ' · ', $doc_meta ) ); ?></span>
+													<?php endif; ?>
+												</div>
+												<a class="assoc-list__link" href="<?php echo esc_url( $item['url'] ); ?>" target="_blank" rel="noopener noreferrer">
+													Abrir
 													<span class="dashicons dashicons-external" aria-hidden="true"></span>
 												</a>
-											</article>
+											</li>
 										<?php endforeach; ?>
-									</div>
+									</ul>
 									<div class="assoc-empty" data-relatorios-empty hidden>
 										<span class="dashicons dashicons-chart-bar assoc-empty__icon" aria-hidden="true"></span>
 										<p data-empty-text>Nenhum relatório disponível para o período selecionado.</p>
@@ -258,30 +264,78 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 								<p class="assoc-panel__intro">Documentos oficiais das convenções coletivas da categoria.</p>
 
 								<?php if ( ! empty( $convencoes ) ) : ?>
-									<div class="assoc-docs">
+									<ul class="assoc-list">
 										<?php foreach ( $convencoes as $item ) : ?>
 											<?php
 											if ( empty( $item['titulo'] ) || empty( $item['url'] ) ) {
 												continue;
 											}
 											?>
-											<article class="assoc-doc"<?php echo isset( $item['ano'] ) ? ' data-ano="' . esc_attr( $item['ano'] ) . '"' : ''; ?>>
-												<span class="dashicons dashicons-media-document assoc-doc__icon" aria-hidden="true"></span>
-												<h3 class="assoc-doc__titulo"><?php echo esc_html( $item['titulo'] ); ?></h3>
-												<?php if ( ! empty( $item['descricao'] ) ) : ?>
-													<p class="assoc-doc__meta"><?php echo esc_html( $item['descricao'] ); ?></p>
-												<?php endif; ?>
-												<a class="assoc-doc__link" href="<?php echo esc_url( $item['url'] ); ?>" target="_blank" rel="noopener noreferrer">
-													Abrir documento
+											<li class="assoc-list__item"<?php echo isset( $item['ano'] ) ? ' data-ano="' . esc_attr( $item['ano'] ) . '"' : ''; ?>>
+												<span class="assoc-list__icon"><span class="dashicons dashicons-media-document" aria-hidden="true"></span></span>
+												<div class="assoc-list__info">
+													<h3 class="assoc-list__title"><?php echo esc_html( $item['titulo'] ); ?></h3>
+													<?php if ( ! empty( $item['descricao'] ) ) : ?>
+														<span class="assoc-list__meta"><?php echo esc_html( $item['descricao'] ); ?></span>
+													<?php endif; ?>
+												</div>
+												<a class="assoc-list__link" href="<?php echo esc_url( $item['url'] ); ?>" target="_blank" rel="noopener noreferrer">
+													Abrir
 													<span class="dashicons dashicons-external" aria-hidden="true"></span>
 												</a>
-											</article>
+											</li>
 										<?php endforeach; ?>
-									</div>
+									</ul>
 								<?php else : ?>
 									<div class="assoc-empty">
 										<span class="dashicons dashicons-media-document assoc-empty__icon" aria-hidden="true"></span>
 										<p>Nenhuma convenção coletiva publicada no momento.</p>
+									</div>
+								<?php endif; ?>
+							</section>
+
+							<!-- OUTROS MATERIAIS -->
+							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'outros-materiais', $active_panel, 'class' ) ) ); ?>" id="panel-outros-materiais" role="tabpanel" aria-labelledby="tab-outros-materiais" tabindex="0">
+								<h2 class="assoc-panel__title">Outros Materiais</h2>
+								<p class="assoc-panel__intro">Materiais complementares e documentos diversos disponibilizados para os associados.</p>
+
+								<?php if ( ! empty( $outros_materiais ) ) : ?>
+									<ul class="assoc-list">
+										<?php foreach ( $outros_materiais as $item ) : ?>
+											<?php
+											if ( empty( $item['titulo'] ) || empty( $item['url'] ) ) {
+												continue;
+											}
+
+											$om_meta = array();
+
+											if ( ! empty( $item['categoria'] ) ) {
+												$om_meta[] = isset( $categorias[ $item['categoria'] ] ) ? $categorias[ $item['categoria'] ] : $item['categoria'];
+											}
+
+											if ( ! empty( $item['ano'] ) ) {
+												$om_meta[] = $item['ano'];
+											}
+											?>
+											<li class="assoc-list__item"<?php echo ! empty( $item['categoria'] ) ? ' data-categoria="' . esc_attr( $item['categoria'] ) . '"' : ''; ?><?php echo ! empty( $item['ano'] ) ? ' data-ano="' . esc_attr( $item['ano'] ) . '"' : ''; ?>>
+												<span class="assoc-list__icon"><span class="dashicons dashicons-portfolio" aria-hidden="true"></span></span>
+												<div class="assoc-list__info">
+													<h3 class="assoc-list__title"><?php echo esc_html( $item['titulo'] ); ?></h3>
+													<?php if ( ! empty( $om_meta ) ) : ?>
+														<span class="assoc-list__meta"><?php echo esc_html( implode( ' · ', $om_meta ) ); ?></span>
+													<?php endif; ?>
+												</div>
+												<a class="assoc-list__link" href="<?php echo esc_url( $item['url'] ); ?>" target="_blank" rel="noopener noreferrer">
+													Abrir
+													<span class="dashicons dashicons-download" aria-hidden="true"></span>
+												</a>
+											</li>
+										<?php endforeach; ?>
+									</ul>
+								<?php else : ?>
+									<div class="assoc-empty">
+										<span class="dashicons dashicons-portfolio assoc-empty__icon" aria-hidden="true"></span>
+										<p>Nenhum material disponível no momento.</p>
 									</div>
 								<?php endif; ?>
 							</section>
