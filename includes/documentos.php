@@ -123,7 +123,7 @@ function setceb_documentos_query( $post_type ) {
 		array(
 			'post_type'        => $post_type,
 			'post_status'      => 'publish',
-			'posts_per_page'   => 100,
+			'posts_per_page'   => -1,
 			'orderby'          => 'date',
 			'order'            => 'DESC',
 			'suppress_filters' => false,
