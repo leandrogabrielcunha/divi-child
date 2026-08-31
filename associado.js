@@ -186,7 +186,6 @@
 
 	/* --- Paginacao do painel de planilhas (10 por pagina) --- */
 	function paginatePlanilhas() {
-		console.log('[DEBUG] paginatePlanilhas()', { hasList: !!planilhasList, hasPage: !!planilhasPage, perPage: perPage, currentPage: currentPage, currentCategory: currentCategory });
 		if (!planilhasList || !planilhasPage) {
 			return;
 		}
@@ -200,7 +199,6 @@
 		});
 
 		var totalPaginas = Math.max(1, Math.ceil(itens.length / perPage));
-		console.log('[DEBUG] itens.da-categoria =', itens.length, '| perPage =', perPage, '| totalPaginas =', totalPaginas);
 
 		if (currentPage > totalPaginas) {
 			currentPage = totalPaginas;
@@ -215,12 +213,10 @@
 			item.hidden = !inPage;
 		});
 
-		console.log('[DEBUG] apos corte, visiveis =', qsa('.assoc-list__item', planilhasList).filter(function (i) { return !i.hidden; }).length);
 		renderPlanilhasPagination(itens.length, totalPaginas);
 	}
 
 	function renderPlanilhasPagination(totalItens, totalPaginas) {
-		console.log('[DEBUG] renderPlanilhasPagination()', { totalItens: totalItens, totalPaginas: totalPaginas, hasPage: !!planilhasPage });
 		if (!planilhasPage) {
 			return;
 		}
@@ -228,7 +224,6 @@
 		if (totalPaginas <= 1) {
 			planilhasPage.hidden = true;
 			planilhasPage.innerHTML = '';
-			console.log('[DEBUG] totalPaginas <= 1 => nav oculto e vazio');
 			return;
 		}
 
@@ -288,7 +283,6 @@
 
 		planilhasPage.innerHTML = '';
 		planilhasPage.appendChild(frag);
-		console.log('[DEBUG] nav preenchido. hidden =', planilhasPage.hidden, '| botoes:', qsa('[data-page]', planilhasPage).length, '| HTML:', planilhasPage.outerHTML);
 	}
 
 	function onPlanilhasNavegacao(event) {
