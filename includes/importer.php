@@ -116,6 +116,99 @@ function setceb_importer_upload( $src ) {
 }
 
 /**
+ * Encontra a pasta raiz que contem as pastas de categorias.
+ *
+ * O .zip pode chegar de varias formas:
+ * - Direto: CONTEINER/, FRACIONADA/, ...
+ * - Com wrapper: SETCEB/CONTEINER/, SETCEB/FRACIONADA/, ...
+ * - Com wrapper aninhado e/ou nivel extra.
+ *
+ * Haus estamos procurando o diretorio em cujos subdiretorios estao
+ * (ou as categorias mapeadas, ou pastas contendo PDFs). Descemos
+ * recursivamente pelas pastas que NAO sao categorias.
+ *
+ * @param string $dir Diretorio a inspecionar.
+ * @param array $cat_map Mapa pasta => slug.
+ * @return string Caminho da raiz encontrada (ou $dir se nao achar).
+ */
+function setceb_importer_find_root( $dir, $cat_map ) {
+	$entries = array_values( array_diff( scandir( $dir ), array( '.', '..', '.DS_Store', '__MACOSX' ) ) );
+
+	// Sem entradas: retorna proprio dir.
+	if ( empty( $entries ) ) {
+		return $dir;
+	}
+
+	$dirs = array();
+
+	foreach ( $entries as $entry ) {
+		$full = $dir . '/' . $entry;
+
+		if ( is_dir( $full ) ) {
+			$dirs[] = array( 'name' => $entry, 'path' => $full );
+		}
+	}
+
+	if ( empty( $dirs ) ) {
+		return $dir;
+	}
+
+	// Se este nivel ja e o nivel de categorias (subpastas mapeadas ou com PDFs).
+	foreach ( $dirs as $d ) {
+		$upper = strtoupper( $d['name'] );
+
+		if ( isset( $cat_map[ $upper ] ) ) {
+			return $dir; // Este e o nivel raiz das categorias.
+		}
+	}
+
+	// Se nenhuma subpasta e categoria, verifica se alguma contem PDFs diretamente.
+	$has_pdf_child = false;
+
+	foreach ( $dirs as $d ) {
+		$pdfs = array_merge( glob( $d['path'] . '/*.pdf' ), glob( $d['path'] . '/*.PDF' ) );
+		if ( ! empty( $pdfs ) ) {
+			$has_pdf_child = true;
+			break;
+		}
+	}
+
+	if ( $has_pdf_child ) {
+		return $dir;
+	}
+
+	// Se so existe uma pasta, desce nela (wrapper).
+	if ( 1 === count( $dirs ) ) {
+		return setceb_importer_find_root( $dirs[0]['path'], $cat_map );
+	}
+
+	// Multiplas pastas que nao sao categorias nem tem PDF: desce na primeira que seja wrapper
+	// ou tiver subpastas mais internas. Tenta todas procurando categorias.
+	foreach ( $dirs as $d ) {
+		$inner = setceb_importer_find_root( $d['path'], $cat_map );
+
+		// Verifica se o inner achou categorias (subpastas mapeadas).
+		$inner_entries = array_values( array_diff( scandir( $inner ), array( '.', '..', '.DS_Store', '__MACOSX' ) ) );
+		foreach ( $inner_entries as $ie ) {
+			if ( isset( $cat_map[ strtoupper( $ie ) ] ) ) {
+				return $inner;
+			}
+		}
+
+		$inner_dirs = array_filter( $inner_entries, function ( $ie ) use ( $inner ) {
+			return is_dir( $inner . '/' . $ie );
+		} );
+
+		if ( ! empty( $inner_dirs ) ) {
+			return $inner;
+		}
+	}
+
+	// fallback: diretorio original.
+	return $dir;
+}
+
+/**
  * Processa o upload do .zip e escaneia as pastas.
  *
  * @param string $tmp_file Caminho do .zip temporario.
@@ -141,16 +234,10 @@ function setceb_importer_scan_zip( $tmp_file ) {
 	$zip->extractTo( $tmp_dir );
 	$zip->close();
 
-	// Encontra a pasta raiz (pode ter uma pasta wrapper ou ir direto).
-	$entries = array_diff( scandir( $tmp_dir ), array( '.', '..', '.DS_Store', '__MACOSX' ) );
-	$root    = $tmp_dir;
+	// Encontra a pasta raiz (com suporte a wrapper e níveis extras).
+	$cat_map = setceb_importer_categoria_map();
+	$root    = setceb_importer_find_root( $tmp_dir, $cat_map );
 
-	// Se so tem uma pasta e nada mais, entra nela.
-	if ( 1 === count( $entries ) && is_dir( $tmp_dir . '/' . $entries[0] ) ) {
-		$root = $tmp_dir . '/' . $entries[0];
-	}
-
-	$cat_map    = setceb_importer_categoria_map();
 	$pastas     = array();
 	$total_files = 0;
 
@@ -183,7 +270,7 @@ function setceb_importer_scan_zip( $tmp_file ) {
 			'cat_label' => $cat_label,
 			'count'     => $count,
 			'path'      => $full,
-			' mapped'   => '' !== $slug_cat,
+			'mapeada'   => '' !== $slug_cat,
 		);
 	}
 
@@ -219,16 +306,12 @@ function setceb_importer_page() {
 			return;
 		}
 
-		// Encontra a pasta raiz.
-		$entries = array_diff( scandir( $tmp_dir ), array( '.', '..', '.DS_Store', '__MACOSX' ) );
-		$root    = $tmp_dir;
-		if ( 1 === count( $entries ) && is_dir( $tmp_dir . '/' . $entries[0] ) ) {
-			$root = $tmp_dir . '/' . $entries[0];
-		}
+		// Encontra a pasta raiz (mesma logica do scan).
+		$cat_map = setceb_importer_categoria_map();
+		$root    = setceb_importer_find_root( $tmp_dir, $cat_map );
 
-		$cat_map    = setceb_importer_categoria_map();
-		$total      = 0;
-		$erros      = array();
+		$total = 0;
+		$erros = array();
 
 		$subentries = array_diff( scandir( $root ), array( '.', '..', '.DS_Store', '__MACOSX' ) );
 
