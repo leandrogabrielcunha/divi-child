@@ -124,6 +124,13 @@ Ver includes/contato.php
 require_once get_stylesheet_directory() . '/includes/contato.php';
 
 /*================================================
+#SETCEB - Eventos (CPT)
+Listagem de eventos com filtro por ano/mes via
+shortcode [setceb_eventos]. Ver includes/eventos.php
+===============================================*/
+require_once get_stylesheet_directory() . '/includes/eventos.php';
+
+/*================================================
 #SETCEB - Header global customizado
 Estrutura do cabecalho e menu principal.
 Ver includes/setceb-header.php
