@@ -52,7 +52,7 @@ add_action( 'init', 'setceb_eventos_register' );
 /**
  * Consulta os eventos publicados.
  *
- * @return WP_Post[] Eventos ordenados pela data do evento (mais proximos primeiro).
+ * @return WP_Post[] Eventos ordenados pela data do evento (mais recente primeiro).
  */
 function setceb_eventos_query() {
 	$posts = get_posts(
@@ -62,7 +62,7 @@ function setceb_eventos_query() {
 			'posts_per_page'   => -1,
 			'orderby'          => 'meta_value',
 			'meta_key'         => '_setceb_evento_data',
-			'order'            => 'ASC',
+			'order'            => 'DESC',
 			'suppress_filters' => false,
 		)
 	);
