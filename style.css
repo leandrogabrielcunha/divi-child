@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.31.0
+Version: 1.31.1
 Template: Divi
 */
 
@@ -731,17 +731,23 @@ O header nativo do Divi e ocultado abaixo.
 .setceb-header__area {
 	display: inline-flex;
 	align-items: center;
+	justify-content: center;
 	gap: 8px;
 	min-height: 44px;
-	padding: 0 18px;
+	padding: 0 16px;
 	font-size: 12.5px;
 	font-weight: 700;
 	letter-spacing: 0.5px;
 	text-transform: uppercase;
 	color: #fff;
 	background: #163459;
+	border: 0;
 	border-radius: 10px;
+	text-decoration: none;
+	font-family: inherit;
+	cursor: pointer;
 	transition: background 0.18s ease, transform 0.18s ease;
+	white-space: nowrap;
 }
 
 .setceb-header__area:hover {
@@ -749,47 +755,50 @@ O header nativo do Divi e ocultado abaixo.
 	transform: translateY(-1px);
 }
 
-.setceb-header__area--user {
-	text-transform: none;
-	font-size: 13.5px;
-	letter-spacing: 0.2px;
+.setceb-header__area:focus-visible {
+	outline: 2px solid var(--setceb-accent);
+	outline-offset: 2px;
 }
 
-.setceb-header__user {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 44px;
-	height: 44px;
-	padding: 0;
-	border: 0;
-	color: #fff;
-	background: #163459;
-	border-radius: 10px;
-	cursor: pointer;
-	transition: background 0.18s ease;
+.setceb-header__area svg {
+	width: 19px;
+	height: 19px;
+	flex: 0 0 auto;
 }
 
-.setceb-header__user:hover {
-	background: #123159;
-}
-
-.setceb-header__user svg {
-	width: 20px;
-	height: 20px;
-}
-
-/* Dropdown do icone de usuario (menu Sair) */
-.setceb-header__user-wrap {
+/* Conta do associado (autenticado) — botao "Minha conta" + dropdown */
+.setceb-header__account {
 	position: relative;
 }
 
+.setceb-header__account-toggle {
+	text-transform: none;
+	font-size: 13px;
+	letter-spacing: 0.2px;
+	font-weight: 700;
+}
+
+.setceb-header__account-caret {
+	width: 15px !important;
+	height: 15px !important;
+	transition: transform 0.18s ease;
+}
+
+.setceb-header__account.is-open .setceb-header__account-caret {
+	transform: rotate(180deg);
+}
+
+.setceb-header__account.is-open .setceb-header__account-toggle {
+	background: #123159;
+}
+
+/* Dropdown da conta do associado */
 .setceb-header__user-menu {
 	position: absolute;
 	top: calc(100% + 10px);
 	right: 0;
-	min-width: 190px;
-	padding: 8px;
+	min-width: 230px;
+	padding: 6px;
 	background: #fff;
 	border: 1px solid #eceff4;
 	border-radius: 12px;
@@ -801,19 +810,55 @@ O header nativo do Divi e ocultado abaixo.
 	z-index: 30;
 }
 
-.setceb-header__user-wrap.is-open .setceb-header__user-menu {
+.setceb-header__account.is-open .setceb-header__user-menu {
 	opacity: 1;
 	visibility: visible;
 	transform: none;
 }
 
-.setceb-header__user-name {
-	display: block;
-	padding: 8px 10px;
-	font-size: 13px;
+/* Identificacao do usuario dentro do dropdown */
+.setceb-header__account-id {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 10px 12px;
+	border-bottom: 1px solid #eef1f5;
+	margin-bottom: 6px;
+}
+
+.setceb-header__account-id > svg {
+	width: 22px;
+	height: 22px;
+	flex: 0 0 auto;
+	color: #123159;
+}
+
+.setceb-header__account-id-text {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	line-height: 1.3;
+}
+
+.setceb-header__account-name {
+	font-size: 13.5px;
 	font-weight: 700;
 	color: #123159;
 	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.setceb-header__account-role {
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--setceb-accent, #0d8199);
+}
+
+.setceb-header__account-links {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
 }
 
 .setceb-header__user-menu a {
@@ -834,9 +879,15 @@ O header nativo do Divi e ocultado abaixo.
 	color: #0d8199;
 }
 
+.setceb-header__user-menu a:focus-visible {
+	outline: 2px solid var(--setceb-accent);
+	outline-offset: -2px;
+}
+
 .setceb-header__user-menu a svg {
 	width: 17px;
 	height: 17px;
+	flex: 0 0 auto;
 }
 
 /* Botao hamburguer (mobile) */
@@ -1015,11 +1066,6 @@ O header nativo do Divi e ocultado abaixo.
 
 .setceb-header__mobile-btn--area {
 	background: #163459;
-}
-
-.setceb-header__mobile-btn--area.setceb-header__area--user {
-	text-transform: none;
-	letter-spacing: 0.2px;
 }
 
 .setceb-header__mobile-btn--associe {

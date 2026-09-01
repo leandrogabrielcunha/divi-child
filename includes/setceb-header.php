@@ -88,15 +88,21 @@ function setceb_header_markup() {
 	$logo   = get_stylesheet_directory_uri() . '/logo-cor-02.png';
 	$perfil = setceb_associado_perfil_url();
 
-	if ( is_user_logged_in() ) {
-		$user       = wp_get_current_user();
-		$first_name = trim( (string) $user->first_name ) !== '' ? $user->first_name : $user->display_name;
-		$label      = sprintf( 'Olá, %s', $first_name );
-	} else {
-		$label = 'Area do Associado';
+	$logged_in = is_user_logged_in();
+
+	if ( $logged_in ) {
+		$user      = wp_get_current_user();
+		$full_name = trim( (string) $user->display_name );
+		if ( '' === $full_name ) {
+			$full_name = trim( (string) $user->first_name . ' ' . (string) $user->last_name );
+		}
+		if ( '' === $full_name ) {
+			$full_name = $user->user_login;
+		}
 	}
 
-	$user_class = is_user_logged_in() ? ' setceb-header__area--user' : '';
+	// Icone de usuario (mesmo padrao SVG ja usado pelo header).
+	$user_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"></path></svg>';
 
 	ob_start();
 	?>
@@ -118,25 +124,42 @@ function setceb_header_markup() {
 				</form>
 
 				<div class="setceb-header__actions">
-					<a class="setceb-header__area<?php echo esc_attr( $user_class ); ?>" href="<?php echo esc_url( $perfil ); ?>"><?php echo esc_html( $label ); ?></a>
-					<?php if ( is_user_logged_in() ) : ?>
-						<div class="setceb-header__user-wrap">
-							<button class="setceb-header__user" type="button" aria-expanded="false" aria-haspopup="true" aria-label="Menu do usuário">
-								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"></path></svg>
+					<?php if ( $logged_in ) : ?>
+						<div class="setceb-header__account" data-setceb-account>
+							<button class="setceb-header__area setceb-header__account-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="setceb-header-account-menu">
+								<?php echo $user_icon; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+								<span>Minha conta</span>
+								<svg class="setceb-header__account-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
 							</button>
-							<div class="setceb-header__user-menu" role="menu">
-								<span class="setceb-header__user-name"><?php echo esc_html( $label ); ?></span>
-								<a href="<?php echo esc_url( wp_logout_url( $home ) ); ?>" role="menuitem">
-									<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>
-									Sair
-								</a>
+
+							<div class="setceb-header__user-menu" id="setceb-header-account-menu" data-setceb-account-menu role="menu" aria-label="Menu da conta">
+								<div class="setceb-header__account-id">
+									<?php echo $user_icon; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+									<div class="setceb-header__account-id-text">
+										<span class="setceb-header__account-name"><?php echo esc_html( $full_name ); ?></span>
+										<span class="setceb-header__account-role">Associado</span>
+									</div>
+								</div>
+
+								<div class="setceb-header__account-links">
+									<a href="<?php echo esc_url( $perfil ); ?>" role="menuitem">
+										<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"></path></svg>
+										Meu perfil
+									</a>
+									<a href="<?php echo esc_url( wp_logout_url( $home ) ); ?>" role="menuitem">
+										<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>
+										Sair
+									</a>
+								</div>
 							</div>
 						</div>
 					<?php else : ?>
-						<a class="setceb-header__user" href="<?php echo esc_url( $perfil ); ?>" aria-label="<?php echo esc_attr( $label ); ?>">
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"></path></svg>
+						<a class="setceb-header__area" href="<?php echo esc_url( $perfil ); ?>">
+							<?php echo $user_icon; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+							<span>Área do Associado</span>
 						</a>
 					<?php endif; ?>
+
 					<button class="setceb-header__burger" type="button" aria-expanded="false" aria-controls="setceb-header-menu" aria-label="Abrir menu">
 						<svg class="setceb-header__burger-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M3 12h18"></path><path d="M3 18h18"></path></svg>
 					</button>
@@ -147,8 +170,10 @@ function setceb_header_markup() {
 		<nav class="setceb-header__nav" id="setceb-header-menu" aria-label="Menu principal">
 			<?php setceb_header_menu(); ?>
 			<div class="setceb-header__mobile-actions">
-				<a class="setceb-header__mobile-btn setceb-header__mobile-btn--area<?php echo esc_attr( $user_class ); ?>" href="<?php echo esc_url( $perfil ); ?>"><?php echo esc_html( $label ); ?></a>
-				<?php if ( ! is_user_logged_in() ) : ?>
+				<?php if ( $logged_in ) : ?>
+					<a class="setceb-header__mobile-btn setceb-header__mobile-btn--area" href="<?php echo esc_url( $perfil ); ?>">Minha conta</a>
+				<?php else : ?>
+					<a class="setceb-header__mobile-btn setceb-header__mobile-btn--area" href="<?php echo esc_url( $perfil ); ?>">Área do Associado</a>
 					<a class="setceb-header__mobile-btn setceb-header__mobile-btn--associe" href="<?php echo esc_url( setceb_associe_url() ); ?>">Associe-se</a>
 				<?php endif; ?>
 			</div>
