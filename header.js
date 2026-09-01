@@ -12,6 +12,57 @@
 		return;
 	}
 
+	// Barra principal fixa no topo ao rolar + menu oculto (desktop).
+	var mainBar = header.querySelector('.setceb-header__main');
+	var mainSpacer = header.querySelector('[data-setceb-main-spacer]');
+	var topStrip = header.querySelector('.setceb-header__top');
+	var stripH = topStrip ? topStrip.offsetHeight : 0;
+	var stickyAt = 0;
+	var isSticky = false;
+	var raf = null;
+
+	function updateStickyAt() {
+		var rect = header.getBoundingClientRect();
+		stickyAt = rect.top + window.scrollY + stripH;
+	}
+
+	function applySticky(state) {
+		if (state === isSticky) {
+			return;
+		}
+		isSticky = state;
+		header.classList.toggle('is-sticky', isSticky);
+		if (mainBar && mainSpacer) {
+			mainSpacer.style.height = isSticky ? mainBar.offsetHeight + 'px' : '';
+		}
+	}
+
+	function onScroll() {
+		if (raf) {
+			return;
+		}
+		raf = window.requestAnimationFrame(function () {
+			raf = null;
+			if (window.innerWidth >= 1024) {
+				applySticky(window.scrollY >= stickyAt);
+			}
+		});
+	}
+
+	if (mainBar) {
+		updateStickyAt();
+		window.addEventListener('scroll', onScroll, { passive: true });
+		window.addEventListener('resize', function () {
+			updateStickyAt();
+			if (window.innerWidth >= 1024) {
+				applySticky(window.scrollY >= stickyAt);
+			} else {
+				applySticky(false);
+			}
+		});
+		applySticky(window.innerWidth >= 1024 && window.scrollY >= stickyAt);
+	}
+
 	function closeMenu() {
 		nav.classList.remove('is-open');
 		toggle.classList.remove('is-open');
