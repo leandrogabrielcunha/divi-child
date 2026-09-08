@@ -445,7 +445,7 @@ function setceb_contato_assuntos() {
  * @return string
  */
 function setceb_form_recipient( $contexto ) {
-	return apply_filters( 'setceb_form_recipient', get_option( 'admin_email' ), $contexto );
+	return apply_filters( 'setceb_form_recipient', 'administrativo@setceb.com.br', $contexto );
 }
 
 /**
