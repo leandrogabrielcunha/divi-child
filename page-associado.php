@@ -57,7 +57,7 @@ foreach ( $planilhas as $plan_item ) {
 }
 $relatorios   = setceb_relatorios();
 $convencoes   = setceb_convencoes();
-$outros_materiais = setceb_outros_materiais();
+$outros_materiais = setceb_outros_mat();
 $recentes     = setceb_conteudos_recentes( 8 );
 $boletos      = setceb_boletos();
 $assuntos     = setceb_contato_assuntos();

@@ -8,7 +8,7 @@
  * - Planilhas              (setceb_planilha)
  * - Relatorios             (setceb_relatorio)
  * - Convencoes Coletivas   (setceb_convencoes)
- * - Outros Materiais       (setceb_outros_materiais)
+ * - Outros Materiais       (setceb_outros_mat)
  *
  * Cada item possui: titulo, arquivo (URL da biblioteca de midia ou
  * link externo), categoria (taxonomia compartilhada, ja populada
@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string[]
  */
 function setceb_documento_post_types() {
-	return array( 'setceb_planilha', 'setceb_relatorio', 'setceb_convencoes', 'setceb_outros_materiais' );
+	return array( 'setceb_planilha', 'setceb_relatorio', 'setceb_convencoes', 'setceb_outros_mat' );
 }
 
 /**
@@ -58,7 +58,7 @@ function setceb_documentos_register() {
 		'setceb_planilha'         => array( 'Planilhas', 'Planilha', 'dashicons-media-spreadsheet', 30 ),
 		'setceb_relatorio'        => array( 'Relatórios', 'Relatório', 'dashicons-chart-bar', 31 ),
 		'setceb_convencoes'       => array( 'Convenções Coletivas', 'Convenção Coletiva', 'dashicons-media-document', 32 ),
-		'setceb_outros_materiais' => array( 'Outros Materiais', 'Outro Material', 'dashicons-portfolio', 33 ),
+		'setceb_outros_mat' => array( 'Outros Materiais', 'Outro Material', 'dashicons-portfolio', 33 ),
 	);
 
 	foreach ( $tipos as $slug => $info ) {
@@ -103,12 +103,12 @@ function setceb_documentos_ensure_outros_materiais_menu() {
 	global $menu;
 
 	foreach ( (array) $menu as $item ) {
-		if ( ! empty( $item[2] ) && 'edit.php?post_type=setceb_outros_materiais' === $item[2] ) {
+		if ( ! empty( $item[2] ) && 'edit.php?post_type=setceb_outros_mat' === $item[2] ) {
 			return;
 		}
 	}
 
-	$obj = get_post_type_object( 'setceb_outros_materiais' );
+	$obj = get_post_type_object( 'setceb_outros_mat' );
 
 	if ( ! $obj || ! current_user_can( $obj->cap->edit_posts ) ) {
 		return;
@@ -118,26 +118,26 @@ function setceb_documentos_ensure_outros_materiais_menu() {
 		$obj->labels->name,
 		$obj->labels->menu_name,
 		$obj->cap->edit_posts,
-		'edit.php?post_type=setceb_outros_materiais',
+		'edit.php?post_type=setceb_outros_mat',
 		'',
 		$obj->menu_icon ? $obj->menu_icon : 'dashicons-portfolio',
 		33
 	);
 
 	add_submenu_page(
-		'edit.php?post_type=setceb_outros_materiais',
+		'edit.php?post_type=setceb_outros_mat',
 		$obj->labels->all_items,
 		$obj->labels->all_items,
 		$obj->cap->edit_posts,
-		'edit.php?post_type=setceb_outros_materiais'
+		'edit.php?post_type=setceb_outros_mat'
 	);
 
 	add_submenu_page(
-		'edit.php?post_type=setceb_outros_materiais',
+		'edit.php?post_type=setceb_outros_mat',
 		$obj->labels->add_new_item,
 		$obj->labels->add_new,
 		$obj->cap->create_posts,
-		'post-new.php?post_type=setceb_outros_materiais'
+		'post-new.php?post_type=setceb_outros_mat'
 	);
 }
 add_action( 'admin_menu', 'setceb_documentos_ensure_outros_materiais_menu', 99 );

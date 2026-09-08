@@ -409,15 +409,15 @@ function setceb_convencoes() {
 /**
  * Outros materiais disponibilizados ao associado.
  *
- * Fonte: itens do CPT "setceb_outros_materiais" (menu Outros Materiais
+ * Fonte: itens do CPT "setceb_outros_mat" (menu Outros Materiais
  * no painel).
  *
  * @return array[]
  */
-function setceb_outros_materiais() {
-	$itens = function_exists( 'setceb_documentos_query' ) ? setceb_documentos_query( 'setceb_outros_materiais' ) : array();
+function setceb_outros_mat() {
+	$itens = function_exists( 'setceb_documentos_query' ) ? setceb_documentos_query( 'setceb_outros_mat' ) : array();
 
-	return apply_filters( 'setceb_outros_materiais', $itens );
+	return apply_filters( 'setceb_outros_mat', $itens );
 }
 
 /**
@@ -439,7 +439,7 @@ function setceb_conteudos_recentes( $limite = 8 ) {
 		'setceb_planilha'         => array( 'Planilhas', 'dashicons-media-spreadsheet' ),
 		'setceb_relatorio'        => array( 'Relatórios', 'dashicons-chart-bar' ),
 		'setceb_convencoes'       => array( 'Convenções Coletivas', 'dashicons-media-document' ),
-		'setceb_outros_materiais' => array( 'Outros Materiais', 'dashicons-portfolio' ),
+		'setceb_outros_mat' => array( 'Outros Materiais', 'dashicons-portfolio' ),
 	);
 
 	$posts = get_posts(
