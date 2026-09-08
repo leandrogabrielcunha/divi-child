@@ -55,10 +55,10 @@ function setceb_documentos_register() {
 	);
 
 	$tipos = array(
-		'setceb_planilha'         => array( 'Planilhas', 'Planilha', 'dashicons-media-spreadsheet', 26 ),
-		'setceb_relatorio'        => array( 'Relatórios', 'Relatório', 'dashicons-chart-bar', 27 ),
-		'setceb_convencoes'       => array( 'Convenções Coletivas', 'Convenção Coletiva', 'dashicons-media-document', 28 ),
-		'setceb_outros_materiais' => array( 'Outros Materiais', 'Outro Material', 'dashicons-portfolio', 29 ),
+		'setceb_planilha'         => array( 'Planilhas', 'Planilha', 'dashicons-media-spreadsheet', 30 ),
+		'setceb_relatorio'        => array( 'Relatórios', 'Relatório', 'dashicons-chart-bar', 31 ),
+		'setceb_convencoes'       => array( 'Convenções Coletivas', 'Convenção Coletiva', 'dashicons-media-document', 32 ),
+		'setceb_outros_materiais' => array( 'Outros Materiais', 'Outro Material', 'dashicons-portfolio', 33 ),
 	);
 
 	foreach ( $tipos as $slug => $info ) {
