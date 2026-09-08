@@ -158,7 +158,6 @@
 	function applyDocFilters() {
 		qsa('.assoc-list__item').forEach(function (doc) {
 			var show = true;
-			var isPlanilha = doc.closest('[data-planilhas-list]') !== null;
 			var docCat = doc.getAttribute('data-categoria');
 			var docYear = doc.getAttribute('data-ano');
 
@@ -166,22 +165,39 @@
 				show = false;
 			}
 
-			/* Planilhas paginam por categoria apenas (sem filtro de ano), para
-				a paginacao aparecer sempre. O filtro de ano (currentYear) se
-				aplica aos demais documentos (relatorios, convencoes etc.). */
-			if (!isPlanilha && docYear && currentYear && String(docYear) !== String(currentYear)) {
+			/* O ano filtra todos os documentos (planilhas, relatorios etc.);
+			   itens sem ano (data-ano vazio) nao sofrem filtro. */
+			if (docYear && currentYear && String(docYear) !== String(currentYear)) {
 				show = false;
 			}
 			doc.hidden = !show;
 		});
 
-		/* Categorias filtram planilhas; ano filtra planilhas e relatorios. */
+		/* Categorias e ano filtram todos os documentos. */
 		refreshEmptyPanel('#panel-planilhas', '[data-planilhas-empty]', '[data-planilhas-empty-text]', 'Nenhuma planilha disponível', true);
 		refreshEmptyPanel('#panel-relatorios', '[data-relatorios-empty]', '[data-empty-text]', 'Nenhum relatório disponível', false);
 
-		/* Paginacao recomputada do zero aqui (candidatos = categoria ativa),
-		   para que qualquer filtro/ano/categoria mantenha a paginacao correto. */
+		/* Paginacao recomputada do zero aqui, para que qualquer
+		   filtro/ano/categoria mantenha a paginacao correto. */
 		paginatePlanilhas();
+	}
+
+	/* Itens de planilhas que passam nos filtros ativos (categoria + ano). */
+	function planilhasFilteredItens() {
+		return qsa('.assoc-list__item', planilhasList).filter(function (item) {
+			var docCat = item.getAttribute('data-categoria');
+			var docYear = item.getAttribute('data-ano');
+
+			if (docCat && currentCategory && docCat !== currentCategory) {
+				return false;
+			}
+
+			if (docYear && currentYear && String(docYear) !== String(currentYear)) {
+				return false;
+			}
+
+			return true;
+		});
 	}
 
 	/* --- Paginacao do painel de planilhas (10 por pagina) --- */
@@ -190,13 +206,10 @@
 			return;
 		}
 
-		/* Candidatos = todos os itens da categoria ativa (independentemente do
-		   estado hidden atual, que mistura filtro + corte de pagina). Assim a
-		   paginacao e recomputada do zero e nunca depende de uma chamada previa. */
-		var itens = qsa('.assoc-list__item', planilhasList).filter(function (item) {
-			var docCat = item.getAttribute('data-categoria');
-			return docCat && currentCategory && docCat === currentCategory;
-		});
+		/* Candidatos = itens que passam nos filtros (categoria + ano),
+		   independentemente do estado hidden atual (que mistura filtro +
+		   corte de pagina). Assim a paginacao e recomputada do zero. */
+		var itens = planilhasFilteredItens();
 
 		var totalPaginas = Math.max(1, Math.ceil(itens.length / perPage));
 
@@ -300,7 +313,7 @@
 		if (type === 'prev') {
 			currentPage = Math.max(1, currentPage - 1);
 		} else if (type === 'next') {
-			currentPage = Math.min(Math.ceil(qsa('.assoc-list__item', planilhasList).filter(function (i) { return !i.hidden; }).length / perPage), currentPage + 1);
+			currentPage = Math.min(Math.max(1, Math.ceil(planilhasFilteredItens().length / perPage)), currentPage + 1);
 		} else if (type === 'page' && !isNaN(page)) {
 			currentPage = page;
 		}

@@ -58,6 +58,7 @@ foreach ( $planilhas as $plan_item ) {
 $relatorios   = setceb_relatorios();
 $convencoes   = setceb_convencoes();
 $outros_materiais = setceb_outros_materiais();
+$recentes     = setceb_conteudos_recentes( 8 );
 $boletos      = setceb_boletos();
 $assuntos     = setceb_contato_assuntos();
 $notice       = setceb_associado_form_notice();
@@ -124,6 +125,48 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 				</div>
 
 			<?php else : ?>
+
+				<!-- Conteudos recentes publicados -->
+				<section class="assoc-recentes" aria-labelledby="assoc-recentes-title">
+					<div class="assoc-recentes__header">
+						<h2 class="assoc-panel__title" id="assoc-recentes-title">Conteúdos recentes</h2>
+						<p class="assoc-panel__intro">As publicações mais recentes disponibilizadas para os associados.</p>
+					</div>
+
+					<?php if ( ! empty( $recentes ) ) : ?>
+						<ul class="assoc-list assoc-list--recentes">
+							<?php foreach ( $recentes as $item ) : ?>
+								<li class="assoc-list__item">
+									<span class="assoc-list__icon"><span class="dashicons <?php echo esc_attr( $item['icone'] ); ?>" aria-hidden="true"></span></span>
+									<div class="assoc-list__info">
+										<h3 class="assoc-list__title"><?php echo esc_html( $item['titulo'] ); ?></h3>
+										<?php
+										$rec_meta = array( $item['tipo_label'] );
+
+										if ( '' !== $item['categoria'] ) {
+											$rec_meta[] = $item['categoria'];
+										}
+
+										if ( '' !== $item['ano'] ) {
+											$rec_meta[] = $item['ano'];
+										}
+										?>
+										<span class="assoc-list__meta"><?php echo esc_html( implode( ' · ', $rec_meta ) ); ?></span>
+									</div>
+									<a class="assoc-list__link" href="<?php echo esc_url( $item['url'] ); ?>" target="_blank" rel="noopener noreferrer">
+										Abrir
+										<span class="dashicons dashicons-external" aria-hidden="true"></span>
+									</a>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					<?php else : ?>
+						<div class="assoc-empty">
+							<span class="dashicons dashicons-megaphone assoc-empty__icon" aria-hidden="true"></span>
+							<p>Nenhum conteúdo publicado no momento.</p>
+						</div>
+					<?php endif; ?>
+				</section>
 
 				<!-- Seletor de ano + emissao de boletos -->
 				<div class="assoc-toolbar">

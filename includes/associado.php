@@ -421,6 +421,75 @@ function setceb_outros_materiais() {
 }
 
 /**
+ * Conteudos mais recentes publicados para o associado.
+ *
+ * Reune os itens mais recentes dos CPTs da area do associado
+ * (Planilhas, Relatorios, Convencoes e Outros Materiais), ordenados
+ * pela data de publicacao. Itens sem URL sao ignorados.
+ *
+ * @param int $limite Quantidade maxima de itens.
+ * @return array[]
+ */
+function setceb_conteudos_recentes( $limite = 8 ) {
+	if ( ! function_exists( 'setceb_documento_post_types' ) ) {
+		return array();
+	}
+
+	$rotulos = array(
+		'setceb_planilha'         => array( 'Planilhas', 'dashicons-media-spreadsheet' ),
+		'setceb_relatorio'        => array( 'Relatórios', 'dashicons-chart-bar' ),
+		'setceb_convencoes'       => array( 'Convenções Coletivas', 'dashicons-media-document' ),
+		'setceb_outros_materiais' => array( 'Outros Materiais', 'dashicons-portfolio' ),
+	);
+
+	$posts = get_posts(
+		array(
+			'post_type'        => setceb_documento_post_types(),
+			'post_status'      => 'publish',
+			'posts_per_page'   => max( 1, (int) $limite ),
+			'orderby'          => 'date',
+			'order'            => 'DESC',
+			'suppress_filters' => false,
+		)
+	);
+
+	$categorias = setceb_associado_categorias();
+	$itens      = array();
+
+	foreach ( $posts as $post ) {
+		$url = get_post_meta( $post->ID, '_setceb_doc_url', true );
+
+		if ( '' === $url ) {
+			continue;
+		}
+
+		$info = isset( $rotulos[ $post->post_type ] ) ? $rotulos[ $post->post_type ] : array( ucfirst( $post->post_type ), 'dashicons-media-document' );
+
+		$item = array(
+			'titulo'     => get_the_title( $post ),
+			'url'        => $url,
+			'tipo'       => $post->post_type,
+			'tipo_label' => $info[0],
+			'icone'      => $info[1],
+			'data'       => get_the_date( '', $post ),
+			'ano'        => (string) get_post_meta( $post->ID, '_setceb_doc_ano', true ),
+			'categoria'  => '',
+			'destaque'   => '1' === get_post_meta( $post->ID, '_setceb_doc_destaque', true ),
+		);
+
+		$termos = wp_get_post_terms( $post->ID, 'setceb_cat_doc', array( 'fields' => 'slugs' ) );
+
+		if ( ! is_wp_error( $termos ) && ! empty( $termos ) && isset( $categorias[ $termos[0] ] ) ) {
+			$item['categoria'] = $categorias[ $termos[0] ];
+		}
+
+		$itens[] = $item;
+	}
+
+	return apply_filters( 'setceb_conteudos_recentes', $itens );
+}
+
+/**
  * Assuntos do formulario Fale Conosco.
  *
  * @return array slug => rotulo
