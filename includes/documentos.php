@@ -3,8 +3,7 @@
  * SETCEB - Documentos do associado (Custom Post Types)
  *
  * O admin cadastra os conteudos da area do associado direto no
- * painel WordPress, agrupados no menu pai "Area do Associado",
- * com um submenu para cada tipo:
+ * painel WordPress, cada um no seu proprio menu:
  *
  * - Planilhas              (setceb_planilha)
  * - Relatorios             (setceb_relatorio)
@@ -56,17 +55,17 @@ function setceb_documentos_register() {
 	);
 
 	$tipos = array(
-		'setceb_planilha'         => array( 'Planilhas', 'Planilha', 'dashicons-media-spreadsheet' ),
-		'setceb_relatorio'        => array( 'Relatórios', 'Relatório', 'dashicons-chart-bar' ),
-		'setceb_convencoes'       => array( 'Convenções Coletivas', 'Convenção Coletiva', 'dashicons-media-document' ),
-		'setceb_outros_materiais' => array( 'Outros Materiais', 'Outro Material', 'dashicons-portfolio' ),
+		'setceb_planilha'         => array( 'Planilhas', 'Planilha', 'dashicons-media-spreadsheet', 26 ),
+		'setceb_relatorio'        => array( 'Relatórios', 'Relatório', 'dashicons-chart-bar', 27 ),
+		'setceb_convencoes'       => array( 'Convenções Coletivas', 'Convenção Coletiva', 'dashicons-media-document', 28 ),
+		'setceb_outros_materiais' => array( 'Outros Materiais', 'Outro Material', 'dashicons-portfolio', 29 ),
 	);
 
 	foreach ( $tipos as $slug => $info ) {
 		register_post_type(
 			$slug,
 			array(
-				'labels'       => array(
+				'labels'          => array(
 					'name'          => $info[0],
 					'singular_name' => $info[1],
 					'add_new_item'  => 'Adicionar ' . $info[1],
@@ -77,7 +76,9 @@ function setceb_documentos_register() {
 				),
 				'public'          => false,
 				'show_ui'         => true,
-				'show_in_menu'    => 'setceb-associado',
+				'show_in_menu'    => true,
+				'menu_icon'       => $info[2],
+				'menu_position'   => $info[3],
 				'capability_type' => 'post',
 				'map_meta_cap'    => true,
 				'supports'        => array( 'title' ),
@@ -89,48 +90,6 @@ function setceb_documentos_register() {
 	}
 }
 add_action( 'init', 'setceb_documentos_register' );
-
-/**
- * Menu pai "Area do Associado" e atalhos para cadastrar novos itens.
- */
-function setceb_documentos_admin_menu() {
-	add_menu_page(
-		'Área do Associado',
-		'Área do Associado',
-		'edit_posts',
-		'setceb-associado',
-		'setceb_associado_menu_page',
-		'dashicons-groups',
-		3
-	);
-
-	foreach ( setceb_documento_post_types() as $slug ) {
-		$obj = get_post_type_object( $slug );
-
-		if ( ! $obj ) {
-			continue;
-		}
-
-		add_submenu_page(
-			'setceb-associado',
-			'Adicionar ' . $obj->labels->singular_name,
-			'+ ' . $obj->labels->singular_name,
-			'edit_posts',
-			'post-new.php?post_type=' . $slug
-		);
-	}
-}
-add_action( 'admin_menu', 'setceb_documentos_admin_menu' );
-
-/**
- * Pagina inicial do menu "Area do Associado".
- */
-function setceb_associado_menu_page() {
-	echo '<div class="wrap">';
-	echo '<h1>Área do Associado</h1>';
-	echo '<p>Escolha uma seção no submenu para analisar ou cadastrar os conteúdos do associado.</p>';
-	echo '</div>';
-}
 
 /**
  * Popula a taxonomia com as categorias padrao do menu de filtros.
