@@ -11,8 +11,9 @@
  * - Outros Materiais       (setceb_outros_mat)
  *
  * Cada item possui: titulo, arquivo (URL da biblioteca de midia ou
- * link externo), categoria (taxonomia compartilhada, ja populada
- * com as categorias de transporte), ano e opcao de destaque.
+ * link externo), categoria (taxonomia "Categorias de Documentos",
+ * exclusiva das Planilhas, ja populada com as categorias de
+ * transporte), ano e opcao de destaque.
  *
  * A area do associado le estes conteudos automaticamente atraves das
  * funcoes setceb_planilhas(), setceb_relatorios() e
@@ -38,7 +39,7 @@ function setceb_documento_post_types() {
 function setceb_documentos_register() {
 	register_taxonomy(
 		'setceb_cat_doc',
-		setceb_documento_post_types(),
+		array( 'setceb_planilha' ),
 		array(
 			'labels'            => array(
 				'name'          => 'Categorias de Documentos',
