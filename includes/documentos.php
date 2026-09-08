@@ -92,6 +92,57 @@ function setceb_documentos_register() {
 add_action( 'init', 'setceb_documentos_register' );
 
 /**
+ * Garante o menu "Outros Materiais" no painel.
+ *
+ * Alguem mais (plugin com o mesmo slug, reorganizador de menus etc.) pode
+ * sobrescrever o menu deste post type. Aqui, no final do admin_menu,
+ * verificamos se ele realmente esta no menu global e, se nao estiver,
+ * recriamos o item de nivel superior e seus submenus.
+ */
+function setceb_documentos_ensure_outros_materiais_menu() {
+	global $menu;
+
+	foreach ( (array) $menu as $item ) {
+		if ( ! empty( $item[2] ) && 'edit.php?post_type=setceb_outros_materiais' === $item[2] ) {
+			return;
+		}
+	}
+
+	$obj = get_post_type_object( 'setceb_outros_materiais' );
+
+	if ( ! $obj || ! current_user_can( $obj->cap->edit_posts ) ) {
+		return;
+	}
+
+	add_menu_page(
+		$obj->labels->name,
+		$obj->labels->menu_name,
+		$obj->cap->edit_posts,
+		'edit.php?post_type=setceb_outros_materiais',
+		'',
+		$obj->menu_icon ? $obj->menu_icon : 'dashicons-portfolio',
+		33
+	);
+
+	add_submenu_page(
+		'edit.php?post_type=setceb_outros_materiais',
+		$obj->labels->all_items,
+		$obj->labels->all_items,
+		$obj->cap->edit_posts,
+		'edit.php?post_type=setceb_outros_materiais'
+	);
+
+	add_submenu_page(
+		'edit.php?post_type=setceb_outros_materiais',
+		$obj->labels->add_new_item,
+		$obj->labels->add_new,
+		$obj->cap->create_posts,
+		'post-new.php?post_type=setceb_outros_materiais'
+	);
+}
+add_action( 'admin_menu', 'setceb_documentos_ensure_outros_materiais_menu', 99 );
+
+/**
  * Popula a taxonomia com as categorias padrao do menu de filtros.
  */
 function setceb_documentos_seed_categories() {
