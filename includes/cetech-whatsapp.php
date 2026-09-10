@@ -527,6 +527,10 @@ function cetech_wa_render() {
 				<input type="hidden" name="tipo_cliente" value="" />
 
 				<div class="cetech-wa__dados" data-cetech-wa-dados>
+				<button type="button" class="cetech-wa__backicon" data-cetech-wa-back-tipo aria-label="<?php esc_attr_e( 'Voltar', 'Divi' ); ?>">
+						<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+					</button>
+
 					<div class="cetech-wa__field">
 						<label for="cetech-wa-nome"><?php esc_html_e( 'Nome', 'Divi' ); ?></label>
 						<input type="text" id="cetech-wa-nome" name="nome" required autocomplete="name" placeholder="<?php esc_attr_e( 'Seu nome', 'Divi' ); ?>" />

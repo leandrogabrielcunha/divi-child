@@ -122,7 +122,10 @@ Prefixos: .cetech-wa
 	transform: translateY(10px) scale(0.985);
 	transform-origin: bottom right;
 	transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s;
-	overflow: hidden;
+	max-height: calc(100vh - 120px);
+	max-height: calc(100dvh - 120px);
+	overflow-x: hidden;
+	overflow-y: auto;
 }
 
 .cetech-wa.is-open .cetech-wa__panel {
@@ -288,6 +291,41 @@ Prefixos: .cetech-wa
 
 .cetech-wa__dados[hidden] {
 	display: none !important;
+}
+
+.cetech-wa__backicon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	align-self: flex-start;
+	flex: none;
+	border: 1px solid var(--cetech-wa-border);
+	border-radius: 50%;
+	background: #fff;
+	color: var(--cetech-wa-ink);
+	cursor: pointer;
+	transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.cetech-wa__backicon:hover {
+	border-color: var(--cetech-wa-green);
+	color: var(--cetech-wa-green-dark);
+	background: #EAFFF5;
+	transform: translateX(-1px);
+}
+
+.cetech-wa__backicon:focus-visible {
+	outline: 3px solid rgba(37, 211, 102, 0.45);
+	outline-offset: 2px;
+}
+
+.cetech-wa__field select:disabled {
+	background: #F1F5F9;
+	color: var(--cetech-wa-muted);
+	cursor: not-allowed;
 }
 
 .cetech-wa__field {
@@ -468,5 +506,17 @@ Prefixos: .cetech-wa
 
 	.cetech-wa__head {
 		padding: 16px 14px 12px;
+	}
+
+	/* ios: evita zoom automatico ao focar campos menores que 16px */
+	.cetech-wa__field input,
+	.cetech-wa__field select,
+	.cetech-wa__field textarea {
+		font-size: 16px;
+	}
+
+	.cetech-wa__backicon {
+		width: 30px;
+		height: 30px;
 	}
 }

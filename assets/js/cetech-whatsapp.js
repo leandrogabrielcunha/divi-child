@@ -25,6 +25,7 @@
 		var finalStep = root.querySelector('[data-cetech-wa-final]');
 		var continueBtn = root.querySelector('[data-cetech-wa-continue]');
 		var backBtn = root.querySelector('[data-cetech-wa-back]');
+		var backTipoBtn = root.querySelector('[data-cetech-wa-back-tipo]');
 		var tipoCliente = '';
 
 		var isOpen = false;
@@ -43,19 +44,72 @@
 			}
 		}
 
+		function ensureComercialOption() {
+			var found = false;
+			for (var i = 0; i < setor.options.length; i++) {
+				if (setor.options[i].value.trim().toLowerCase() === 'comercial') {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				var opt = document.createElement('option');
+				opt.value = 'Comercial';
+				opt.textContent = 'Comercial';
+				setor.appendChild(opt);
+			}
+		}
+
+		function goDados() {
+			form.hidden = false;
+			tipoStep.hidden = true;
+			showStep(dadosStep);
+			var nomeInput = form.querySelector('input[name="nome"]');
+			if (nomeInput) {
+				nomeInput.focus();
+			}
+		}
+
+		function backToTipo() {
+			form.hidden = true;
+			tipoStep.hidden = false;
+			showStep(null);
+			var nomeInput = form.querySelector('input[name="nome"]');
+			if (nomeInput) {
+				nomeInput.blur();
+			}
+		}
+
 		tipoBtns.forEach(function (tipoBtn) {
 			tipoBtn.addEventListener('click', function () {
 				tipoCliente = tipoBtn.getAttribute('data-tipo');
 				hiddenTipo.value = tipoCliente;
-				tipoStep.hidden = true;
-				form.hidden = false;
-				showStep(dadosStep);
-				var nomeInput = form.querySelector('input[name="nome"]');
-				if (nomeInput) {
-					nomeInput.focus();
+
+				if ('novo' === tipoCliente) {
+					ensureComercialOption();
+					setor.disabled = true;
+					setor.value = 'Comercial';
+					isComercial = true;
+					resetComercialFields();
+					perfilWrap.hidden = false;
+				} else {
+					setor.disabled = false;
+					setor.value = '';
+					isComercial = false;
+					resetComercialFields();
 				}
+
+				goDados();
 			});
 		});
+
+		if (backTipoBtn) {
+			backTipoBtn.addEventListener('click', function () {
+				setor.disabled = false;
+				resetComercialFields();
+				backToTipo();
+			});
+		}
 
 		if (continueBtn) {
 			continueBtn.addEventListener('click', function () {
