@@ -24,12 +24,12 @@ define( 'CETECH_COBERTURA_CSS', 'cetech-cobertura' );
 define( 'CETECH_COBERTURA_FILTER_JS', 'cetech-cobertura-filter' );
 define( 'CETECH_COBERTURA_ADMIN_JS', 'cetech-cobertura-admin' );
 
-/* Limites da projecao equirretangular do mapa SVG (SP + vizinhos). */
-define( 'CETECH_MAP_LON_MIN', -58.8992 );
-define( 'CETECH_MAP_LON_MAX', -39.1240 );
-define( 'CETECH_MAP_LAT_MAX', -13.5004 );
-define( 'CETECH_MAP_LAT_MIN', -27.4492 );
-define( 'CETECH_MAP_WIDTH', 900.0 );
+/* Limites da projecao equirretangular do mapa SVG (somente SP). */
+define( 'CETECH_MAP_LON_MIN', -54.1372 );
+define( 'CETECH_MAP_LON_MAX', -43.1315 );
+define( 'CETECH_MAP_LAT_MAX', -18.7502 );
+define( 'CETECH_MAP_LAT_MIN', -26.3399 );
+define( 'CETECH_MAP_WIDTH', 760.0 );
 
 /* ------------------------------------------------------------
  * 1. Registro do CSS do front-end (mapa SVG)
@@ -547,20 +547,38 @@ function cetech_cobertura_render() {
 			</div>
 		<?php endif; ?>
 
-		<div class="cetech-cobertura__map-svg">
-			<div class="cetech-cobertura__chip" aria-hidden="true">
-				<strong>SP</strong>
-				<span><b id="cetech-cobertura-chip-count"><?php echo esc_html( count( $cities ) ); ?></b> <?php esc_html_e( 'cidades atendidas', 'Divi' ); ?></span>
+		<div class="cetech-cobertura__layout">
+			<div class="cetech-cobertura__map-svg">
+				<div class="cetech-cobertura__chip" aria-hidden="true">
+					<strong>SP</strong>
+					<span><b id="cetech-cobertura-chip-count"><?php echo esc_html( count( $cities ) ); ?></b> <?php esc_html_e( 'cidades atendidas', 'Divi' ); ?></span>
+				</div>
+				<?php if ( '' !== $svg ) : ?>
+					<?php echo $svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- SVG interno do tema. ?>
+				<?php elseif ( ! empty( $cities ) ) : ?>
+					<ul class="cetech-cobertura__noscript">
+						<?php foreach ( $cities as $cidade ) : ?>
+							<li><?php echo esc_html( $cidade['name'] ); ?></li>
+						<?php endforeach; ?>
+					</ul>
+				<?php endif; ?>
 			</div>
-			<?php if ( '' !== $svg ) : ?>
-				<?php echo $svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- SVG interno do tema. ?>
-			<?php elseif ( ! empty( $cities ) ) : ?>
-				<ul class="cetech-cobertura__noscript">
+
+			<aside class="cetech-cobertura__list" aria-label="<?php esc_attr_e( 'Cidades atendidas', 'Divi' ); ?>">
+				<div class="cetech-cobertura__list-head">
+					<span class="cetech-cobertura__list-title"><?php esc_html_e( 'Cidades', 'Divi' ); ?></span>
+					<span class="cetech-cobertura__list-count" id="cetech-cobertura-list-count"><?php echo esc_html( count( $cities ) ); ?></span>
+				</div>
+				<ul id="cetech-cobertura-list">
 					<?php foreach ( $cities as $cidade ) : ?>
-						<li><?php echo esc_html( $cidade['name'] ); ?></li>
+						<li data-name="<?php echo esc_attr( $cidade['name'] ); ?>">
+							<span class="cetech-cobertura__list-dot" aria-hidden="true"></span>
+							<span class="cetech-cobertura__list-name"><?php echo esc_html( $cidade['name'] ); ?></span>
+							<span class="cetech-cobertura__list-uf"><?php echo esc_html( $cidade['uf'] ); ?></span>
+						</li>
 					<?php endforeach; ?>
 				</ul>
-			<?php endif; ?>
+			</aside>
 		</div>
 	</div>
 	<?php
