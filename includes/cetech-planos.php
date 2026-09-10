@@ -33,7 +33,14 @@ function cetech_planos_register_assets() {
 		wp_get_theme()->get( 'Version' )
 	);
 }
+
+function cetech_planos_enqueue_assets() {
+	/* Enfileira direto no wp_enqueue_scripts (o shortcode renderiza
+	 * tarde no Divi e nao imprime style no frontend). */
+	wp_enqueue_style( CETECH_PLANOS_CSS_HANDLE );
+}
 add_action( 'wp_enqueue_scripts', 'cetech_planos_register_assets' );
+add_action( 'wp_enqueue_scripts', 'cetech_planos_enqueue_assets', 20 );
 
 /* ------------------------------------------------------------
  * 2. Registro do Custom Post Type "Planos"
@@ -609,8 +616,6 @@ function cetech_planos_shortcode( $atts ) {
 	if ( empty( $plans ) ) {
 		return '';
 	}
-
-	wp_enqueue_style( CETECH_PLANOS_CSS_HANDLE );
 
 	$colunas = absint( $atts['colunas'] );
 

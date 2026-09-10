@@ -52,7 +52,15 @@ function cetech_cobertura_register_assets() {
 		true
 	);
 }
+
+function cetech_cobertura_enqueue_assets() {
+	/* Enfileira direto no wp_enqueue_scripts (o shortcode renderiza
+	 * tarde no Divi e nao imprime style no frontend). */
+	wp_enqueue_style( CETECH_COBERTURA_CSS );
+	wp_enqueue_script( CETECH_COBERTURA_JS );
+}
 add_action( 'wp_enqueue_scripts', 'cetech_cobertura_register_assets' );
+add_action( 'wp_enqueue_scripts', 'cetech_cobertura_enqueue_assets', 20 );
 
 /* ------------------------------------------------------------
  * 2. Lista de estados (UF => nome)
@@ -603,14 +611,6 @@ function cetech_cobertura_svg() {
  * 9. Shortcode [cetech_cobertura]
  * ------------------------------------------------------------ */
 function cetech_cobertura_render() {
-	static $enqueued = false;
-
-	if ( ! $enqueued ) {
-		wp_enqueue_style( CETECH_COBERTURA_CSS );
-		wp_enqueue_script( CETECH_COBERTURA_JS );
-		$enqueued = true;
-	}
-
 	$cities = cetech_cobertura_cities();
 	$svg    = cetech_cobertura_svg();
 	$hub    = cetech_cobertura_hub_xy( $cities );
