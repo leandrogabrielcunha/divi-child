@@ -105,13 +105,14 @@ function cetech_header_markup() {
 	$home   = home_url( '/' );
 	$perfil = cetech_perfil_url();
 
-	$logo = '';
+	$logo = 'https://cetech.net.br/wp-content/uploads/2025/07/0ed00f6e-440c-4b1f-88b5-117e555dd9d0-Photoroom.png';
+
 	$custom_logo_id = get_theme_mod( 'custom_logo' );
 	if ( $custom_logo_id ) {
-		$logo = wp_get_attachment_image_url( (int) $custom_logo_id, 'full' );
-	}
-	if ( ! $logo ) {
-		$logo = 'https://cetech.net.br/wp-content/uploads/2025/07/0ed00f6e-440c-4b1f-88b5-117e555dd9d0-Photoroom.png';
+		$custom_logo_url = wp_get_attachment_image_url( (int) $custom_logo_id, 'full' );
+		if ( $custom_logo_url && false === strpos( $custom_logo_url, '01-Logo-Horizontal-Principal-2' ) ) {
+			$logo = $custom_logo_url;
+		}
 	}
 
 	if ( is_user_logged_in() ) {
