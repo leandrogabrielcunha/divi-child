@@ -549,7 +549,6 @@ function cetech_wa_render() {
 
 					<button type="button" class="cetech-wa__continue" data-cetech-wa-continue><?php esc_html_e( 'Continuar', 'Divi' ); ?></button>
 				</div>
-				</div>
 
 				<div class="cetech-wa__dados" data-cetech-wa-final hidden>
 					<div class="cetech-wa__field" data-cetech-wa-perfil hidden>
