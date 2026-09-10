@@ -483,8 +483,8 @@ function cetech_cobertura_viewbox( $cities ) {
 	/* Zoom suave: mesmo com uma unica cidade a janela mantem boa
 	 * parte do estado visivel; o aglomerado de cidades so adiciona
 	 * area quando necessario, sem recortar demais o mapa. */
-	$floor_w = CETECH_MAP_WIDTH * 0.62;
-	$floor_h = $height * 0.62;
+	$floor_w = CETECH_MAP_WIDTH * 0.60;
+	$floor_h = $height * 0.60;
 	$margin  = $span * 0.45;
 
 	$center_x = ( $min_x + $max_x ) / 2;
