@@ -16,8 +16,8 @@
 			return;
 		}
 
+		var municipios = mapWrap.querySelectorAll('.cetech-svg__mun');
 		var pins = mapWrap.querySelectorAll('.cetech-svg__pin');
-		var cells = mapWrap.querySelectorAll('.cetech-svg__cell');
 		var items = listEl ? listEl.querySelectorAll('li') : [];
 
 		function byName(collection, name) {
@@ -33,56 +33,50 @@
 			return found;
 		}
 
+		/* Marca em vermelho (linha do Google) as municipalidades atendidas. */
+		items.forEach(function (item) {
+			var mun = byName(municipios, item.getAttribute('data-name'));
+			if (mun) {
+				mun.classList.add('is-served');
+			}
+		});
+
 		function selectCity(name) {
-			var pin = byName(pins, name);
-			var cell = byName(cells, name);
 			var item = byName(items, name);
-
-			if (pin) {
-				pin.classList.add('is-pin-active');
-			}
-
-			if (cell) {
-				cell.classList.add('is-active');
-			}
+			var pin = byName(pins, name);
+			var mun = byName(municipios, name);
 
 			if (item) {
 				item.classList.add('is-active');
 			}
+			if (pin) {
+				pin.classList.add('is-pin-active');
+			}
+			if (mun) {
+				mun.classList.add('is-active');
+			}
 		}
 
 		function clearSelection() {
+			items.forEach(function (item) {
+				item.classList.remove('is-active');
+			});
+
 			pins.forEach(function (pin) {
 				pin.classList.remove('is-pin-active');
 			});
 
-			cells.forEach(function (cell) {
-				cell.classList.remove('is-active');
-			});
-
-			items.forEach(function (item) {
-				item.classList.remove('is-active');
+			municipios.forEach(function (mun) {
+				mun.classList.remove('is-active');
 			});
 		}
 
 		function toggleCity(name) {
 			var item = byName(items, name);
-			var pin = byName(pins, name);
-			var cell = byName(cells, name);
-			var isActive = (item && item.classList.contains('is-active')) ||
-				(!item && cell && cell.classList.contains('is-active')) ||
-				(!item && !cell && pin && pin.classList.contains('is-pin-active'));
+			var isActive = !!(item && item.classList.contains('is-active'));
 
 			if (isActive) {
-				if (item) {
-					item.classList.remove('is-active');
-				}
-				if (pin) {
-					pin.classList.remove('is-pin-active');
-				}
-				if (cell) {
-					cell.classList.remove('is-active');
-				}
+				clearSelection();
 			} else {
 				clearSelection();
 				selectCity(name);
@@ -102,9 +96,9 @@
 			});
 		});
 
-		cells.forEach(function (cell) {
-			cell.addEventListener('click', function () {
-				toggleCity(cell.getAttribute('data-name'));
+		municipios.forEach(function (mun) {
+			mun.addEventListener('click', function () {
+				toggleCity(mun.getAttribute('data-name'));
 			});
 		});
 	}

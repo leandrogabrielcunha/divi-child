@@ -177,73 +177,33 @@ Prefixos: .cetech-cobertura / .cetech-svg
 	color: #64748b;
 }
 
-/* ---------- Estados (fundo) ---------- */
-.cetech-svg__state {
-	fill: #cbd8e8;
-	stroke: #ffffff;
-	stroke-width: 0.7;
-	stroke-linejoin: round;
-	opacity: 0;
-	animation: cetech-cobertura-fade 0.6s ease forwards;
-	animation-delay: calc(var(--i, 0) * 24ms);
-}
-
-/* ---------- Sao Paulo (destaque + desenho da borda) ---------- */
-.cetech-svg__state--sp {
-	fill: url(#cetech-sp-grad);
-	stroke: #00C48E;
-	stroke-width: 1.6;
-	stroke-linecap: round;
-	stroke-linejoin: round;
-	stroke-dasharray: 1;
-	stroke-dashoffset: 1;
-	animation:
-		cetech-cobertura-fade 0.6s ease 0.1s forwards,
-		cetech-cobertura-draw 1.9s ease-out 0.35s forwards,
-		cetech-cobertura-glow 3.2s ease-in-out 2.8s infinite;
-}
-
-@keyframes cetech-cobertura-fade {
-	to {
-		opacity: 1;
-	}
-}
-
-@keyframes cetech-cobertura-draw {
-	to {
-		stroke-dashoffset: 0;
-	}
-}
-
-@keyframes cetech-cobertura-glow {
-	0%,
-	100% {
-		filter: drop-shadow(0 8px 12px rgba(0, 232, 168, 0.35));
-	}
-	50% {
-		filter: drop-shadow(0 12px 20px rgba(0, 196, 142, 0.55));
-	}
-}
-
-/* ---------- Celulas (linhas que separam as cidades) ---------- */
-.cetech-svg__cell {
-	fill: rgba(32, 32, 238, 0.03);
-	stroke: rgba(32, 32, 238, 0.28);
-	stroke-width: 1.2;
-	stroke-linejoin: round;
+/* ---------- Divisas municipais (todos os municipios) ---------- */
+.cetech-svg__mun {
+	fill: #ffffff;
 	fill-rule: evenodd;
-	cursor: pointer;
+	stroke: #dbe4ee;
+	stroke-width: 0.6;
+	stroke-linejoin: round;
+	opacity: 1;
 	transition: fill 0.2s ease, stroke 0.2s ease;
 }
 
-.cetech-svg__cell:hover {
-	fill: rgba(32, 32, 238, 0.06);
+/* Cidades atendidas: divisa em vermelho, como o Google. */
+.cetech-svg__mun.is-served {
+	stroke: #ff3b30;
+	stroke-width: 1.4;
+	fill: rgba(255, 59, 48, 0.06);
 }
 
-.cetech-svg__cell.is-active {
-	fill: rgba(32, 32, 238, 0.12);
-	stroke: rgba(32, 32, 238, 0.6);
-	stroke-width: 1.8;
+.cetech-svg__mun.is-served:hover {
+	fill: rgba(255, 59, 48, 0.12);
+}
+
+/* Cidade selecionada: destaque da area. */
+.cetech-svg__mun.is-active {
+	fill: rgba(255, 59, 48, 0.16);
+	stroke: #ff3b30;
+	stroke-width: 2.2;
 }
 
 /* ---------- Pins das cidades ---------- */
@@ -363,16 +323,10 @@ Prefixos: .cetech-cobertura / .cetech-svg
 		width: 26px;
 		height: 26px;
 	}
-
-	.cetech-svg__state--sp {
-		stroke-width: 1.2;
-	}
 }
 
 /* ---------- Acessibilidade ---------- */
 @media (prefers-reduced-motion: reduce) {
-	.cetech-svg__state,
-	.cetech-svg__state--sp,
 	.cetech-svg__pin,
 	.cetech-svg__pin-ring {
 		animation: none;
