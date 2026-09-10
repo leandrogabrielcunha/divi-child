@@ -303,6 +303,11 @@ Prefixos: .cetech-cobertura / .cetech-svg
 		grid-template-columns: 1fr;
 	}
 
+	/* No mobile a lista vem primeiro, o mapa depois. */
+	.cetech-cobertura__list {
+		order: -1;
+	}
+
 	.cetech-cobertura__list ul {
 		max-height: 320px;
 	}
