@@ -21,6 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * ------------------------------------------------------------ */
 define( 'CETECH_CIDADE_CPT', 'cetech_cidade' );
 define( 'CETECH_COBERTURA_CSS', 'cetech-cobertura' );
+define( 'CETECH_COBERTURA_FILTER_JS', 'cetech-cobertura-filter' );
 define( 'CETECH_COBERTURA_ADMIN_JS', 'cetech-cobertura-admin' );
 
 /* Limites da projecao equirretangular do mapa SVG (SP + vizinhos). */
@@ -34,11 +35,21 @@ define( 'CETECH_MAP_WIDTH', 900.0 );
  * 1. Registro do CSS do front-end (mapa SVG)
  * ------------------------------------------------------------ */
 function cetech_cobertura_register_assets() {
+	$theme = wp_get_theme();
+
 	wp_register_style(
 		CETECH_COBERTURA_CSS,
 		get_stylesheet_directory_uri() . '/assets/css/cetech-cobertura.css',
 		array(),
-		wp_get_theme()->get( 'Version' )
+		$theme->get( 'Version' )
+	);
+
+	wp_register_script(
+		CETECH_COBERTURA_FILTER_JS,
+		get_stylesheet_directory_uri() . '/assets/js/cetech-cobertura-filter.js',
+		array(),
+		$theme->get( 'Version' ),
+		true
 	);
 }
 add_action( 'wp_enqueue_scripts', 'cetech_cobertura_register_assets' );
@@ -465,11 +476,12 @@ function cetech_cobertura_pins_svg() {
 		}
 
 		$out .= sprintf(
-			'<g transform="translate(%1$s %2$s)"><g class="cetech-svg__pin" style="--i:%3$d">' .
+			'<g transform="translate(%1$s %2$s)"><g class="cetech-svg__pin" data-name="%3$s" style="--i:%4$d">' .
 			'<circle class="cetech-svg__pin-ring" r="9"/><circle class="cetech-svg__pin-dot" r="5.5"/>' .
-			'<title>%4$s</title></g></g>',
+			'<title>%5$s</title></g></g>',
 			number_format( $px, 1, '.', '' ),
 			number_format( $py, 1, '.', '' ),
+			esc_attr( $city['name'] ),
 			$index,
 			esc_html( $title )
 		);
@@ -506,6 +518,7 @@ function cetech_cobertura_render() {
 
 	if ( ! $enqueued ) {
 		wp_enqueue_style( CETECH_COBERTURA_CSS );
+		wp_enqueue_script( CETECH_COBERTURA_FILTER_JS );
 		$enqueued = true;
 	}
 
@@ -518,13 +531,26 @@ function cetech_cobertura_render() {
 		<div class="cetech-cobertura__head">
 			<h2 class="cetech-cobertura__title"><?php esc_html_e( 'Cidades atendidas', 'Divi' ); ?></h2>
 			<?php if ( ! empty( $cities ) ) : ?>
-				<span class="cetech-cobertura__count"><?php echo esc_html( count( $cities ) ); ?></span>
+				<span class="cetech-cobertura__count" id="cetech-cobertura-count"><?php echo esc_html( count( $cities ) ); ?></span>
 			<?php endif; ?>
 		</div>
+
+		<?php if ( ! empty( $cities ) ) : ?>
+			<div class="cetech-cobertura__filter">
+				<span class="cetech-cobertura__filter-icon" aria-hidden="true">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+				</span>
+				<input type="search" class="cetech-cobertura__filter-input" id="cetech-cobertura-filter" placeholder="<?php esc_attr_e( 'Filtrar por cidade…', 'Divi' ); ?>" autocomplete="off" aria-label="<?php esc_attr_e( 'Filtrar por cidade', 'Divi' ); ?>" />
+				<button type="button" class="cetech-cobertura__filter-clear" id="cetech-cobertura-filter-clear" aria-label="<?php esc_attr_e( 'Limpar filtro', 'Divi' ); ?>">
+					<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+				</button>
+			</div>
+		<?php endif; ?>
+
 		<div class="cetech-cobertura__map-svg">
 			<div class="cetech-cobertura__chip" aria-hidden="true">
 				<strong>SP</strong>
-				<span><?php echo esc_html( count( $cities ) ); ?> <?php esc_html_e( 'cidades atendidas', 'Divi' ); ?></span>
+				<span><b id="cetech-cobertura-chip-count"><?php echo esc_html( count( $cities ) ); ?></b> <?php esc_html_e( 'cidades atendidas', 'Divi' ); ?></span>
 			</div>
 			<?php if ( '' !== $svg ) : ?>
 				<?php echo $svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- SVG interno do tema. ?>

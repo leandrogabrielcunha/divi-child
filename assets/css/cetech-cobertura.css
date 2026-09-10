@@ -6,8 +6,7 @@ Identidade visual: azul (#2020EE) e verde/turquesa (#00E8A8).
 Prefixos: .cetech-cobertura / .cetech-svg
 ============================================================*/
 .cetech-cobertura {
-	max-width: 700px;
-	margin: 24px auto;
+	margin: 24px 0;
 }
 
 /* ---------- Cabeçalho ---------- */
@@ -39,6 +38,78 @@ Prefixos: .cetech-cobertura / .cetech-svg
 	color: #fff;
 	font-size: 13px;
 	font-weight: 800;
+}
+
+/* ---------- Filtro por cidade ---------- */
+.cetech-cobertura__filter {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 14px;
+}
+
+.cetech-cobertura__filter-icon {
+	flex: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	border-radius: 10px;
+	background: #2020EE;
+	color: #fff;
+}
+
+.cetech-cobertura__filter-icon svg {
+	width: 18px;
+	height: 18px;
+}
+
+.cetech-cobertura__filter-input {
+	flex: 1;
+	padding: 10px 14px;
+	border: 1.5px solid #e8e8f0;
+	border-radius: 10px;
+	background: #fff;
+	color: #1a1a2e;
+	font-size: 14px;
+	font-family: inherit;
+	outline: none;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cetech-cobertura__filter-input::placeholder {
+	color: #9aa7b8;
+}
+
+.cetech-cobertura__filter-input:focus {
+	border-color: #2020EE;
+	box-shadow: 0 0 0 4px rgba(32, 32, 238, 0.12);
+}
+
+.cetech-cobertura__filter-clear {
+	flex: none;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: 1.5px solid #e8e8f0;
+	border-radius: 8px;
+	background: #fff;
+	color: #555;
+	cursor: pointer;
+	transition: border-color 0.15s, color 0.15s;
+}
+
+.cetech-cobertura__filter-clear:hover {
+	border-color: #2020EE;
+	color: #2020EE;
+}
+
+.cetech-cobertura__filter-clear.is-visible {
+	display: inline-flex;
 }
 
 /* ---------- Mapa SVG ---------- */
@@ -149,18 +220,29 @@ Prefixos: .cetech-cobertura / .cetech-svg
 	will-change: transform;
 	animation: cetech-cobertura-pin-in 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
 	animation-delay: calc(var(--i, 0) * 150ms + 1100ms);
+	transition: opacity 0.3s ease;
+}
+
+.cetech-svg__pin.is-filtered-out {
+	opacity: 0.08 !important;
+	pointer-events: none;
+}
+
+.cetech-svg__pin.is-filtered-match .cetech-svg__pin-dot {
+	r: 7;
+	stroke-width: 2;
 }
 
 .cetech-svg__pin-dot {
-	fill: #00C48E;
+	fill: #2020EE;
 	stroke: #ffffff;
-	stroke-width: 1.4;
+	stroke-width: 1.6;
 }
 
 .cetech-svg__pin-ring {
 	fill: none;
-	stroke: #00E8A8;
-	stroke-width: 2;
+	stroke: #2020EE;
+	stroke-width: 2.2;
 	opacity: 0;
 	transform-box: fill-box;
 	transform-origin: center;
@@ -210,11 +292,15 @@ Prefixos: .cetech-cobertura / .cetech-svg
 /* ---------- Responsivo ---------- */
 @media (max-width: 640px) {
 	.cetech-cobertura {
-		margin: 16px auto;
+		margin: 16px 0;
 	}
 
 	.cetech-cobertura__title {
 		font-size: 20px;
+	}
+
+	.cetech-cobertura__filter {
+		margin-bottom: 12px;
 	}
 
 	.cetech-cobertura__chip {
