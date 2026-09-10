@@ -468,19 +468,22 @@ function cetech_cobertura_viewbox( $cities ) {
 	$min_y = min( $ys );
 	$max_y = max( $ys );
 
-	$span = max( $max_x - $min_x, $max_y - $min_y );
+	$span   = max( $max_x - $min_x, $max_y - $min_y );
+	$span_x = $max_x - $min_x;
+	$span_y = $max_y - $min_y;
 
-	/* Margem ao redor das cidades (zoom suave) e janela minima
-	 * para manter contexto do estado e pins sem sobreposicao. */
-	$margin = max( $span * 0.9, 90.0 );
-	$min_w  = 200.0;
-	$min_h  = 150.0;
+	/* Zoom suave: mesmo com uma unica cidade a janela mantem boa
+	 * parte do estado visivel; o aglomerado de cidades so adiciona
+	 * area quando necessario, sem recortar demais o mapa. */
+	$floor_w = CETECH_MAP_WIDTH * 0.62;
+	$floor_h = $height * 0.62;
+	$margin  = $span * 0.45;
 
 	$center_x = ( $min_x + $max_x ) / 2;
 	$center_y = ( $min_y + $max_y ) / 2;
 
-	$view_w = max( $max_x - $min_x + ( 2 * $margin ), $min_w );
-	$view_h = max( $max_y - $min_y + ( 2 * $margin ), $min_h );
+	$view_w = max( $span_x + ( 2 * $margin ), $floor_w );
+	$view_h = max( $span_y + ( 2 * $margin ), $floor_h );
 
 	/* Mantem o zoom dentro dos limites do mapa inteiro. */
 	$view_w = min( $view_w, CETECH_MAP_WIDTH );
