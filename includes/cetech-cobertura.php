@@ -4,8 +4,8 @@
  *
  * Registra o CPT "Cidades atendidas", os campos de localizacao no editor
  * (UF, latitude, longitude e bairros com busca automatica de coordenadas)
- * e expoe o shortcode [cetech_cobertura] que renderiza um mapa Leaflet
- * do Brasil focado em Sao Paulo com pins animados nas cidades atendidas.
+ * e expoe o shortcode [cetech_cobertura] que renderiza um mapa SVG de
+ * Sao Paulo com zoom nas cidades atendidas e lista lateral de cidades.
  *
  * Carregado em functions.php.
  *
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * ------------------------------------------------------------ */
 define( 'CETECH_CIDADE_CPT', 'cetech_cidade' );
 define( 'CETECH_COBERTURA_CSS', 'cetech-cobertura' );
-define( 'CETECH_COBERTURA_FILTER_JS', 'cetech-cobertura-filter' );
+define( 'CETECH_COBERTURA_JS', 'cetech-cobertura' );
 define( 'CETECH_COBERTURA_ADMIN_JS', 'cetech-cobertura-admin' );
 
 /* Limites da projecao equirretangular do mapa SVG (somente SP). */
@@ -45,8 +45,8 @@ function cetech_cobertura_register_assets() {
 	);
 
 	wp_register_script(
-		CETECH_COBERTURA_FILTER_JS,
-		get_stylesheet_directory_uri() . '/assets/js/cetech-cobertura-filter.js',
+		CETECH_COBERTURA_JS,
+		get_stylesheet_directory_uri() . '/assets/js/cetech-cobertura.js',
 		array(),
 		$theme->get( 'Version' ),
 		true
@@ -444,10 +444,49 @@ function cetech_cobertura_cities() {
 }
 
 /* ------------------------------------------------------------
- * 8. Mapa SVG (Brasil focado em Sao Paulo) + pins das cidades
+ * 8. Mapa SVG (SP) + pins das cidades, com zoom na regiao das
+ *    cidades atendidas
  * ------------------------------------------------------------ */
-function cetech_cobertura_pins_svg() {
-	$cities = cetech_cobertura_cities();
+function cetech_cobertura_viewbox( $cities ) {
+	$scale  = CETECH_MAP_WIDTH / ( CETECH_MAP_LON_MAX - CETECH_MAP_LON_MIN );
+	$height = ( CETECH_MAP_LAT_MAX - CETECH_MAP_LAT_MIN ) * $scale;
+
+	$xs = array();
+	$ys = array();
+
+	foreach ( $cities as $city ) {
+		$xs[] = ( $city['lng'] - CETECH_MAP_LON_MIN ) * $scale;
+		$ys[] = ( CETECH_MAP_LAT_MAX - $city['lat'] ) * $scale;
+	}
+
+	if ( empty( $xs ) ) {
+		return sprintf( '0 0 %1.1f %1.1f', CETECH_MAP_WIDTH, $height );
+	}
+
+	$min_x = min( $xs );
+	$max_x = max( $xs );
+	$min_y = min( $ys );
+	$max_y = max( $ys );
+
+	$span   = max( $max_x - $min_x, $max_y - $min_y );
+	$pad    = max( $span * 0.45, 22.0 );
+	$view_w = $max_x - $min_x + ( 2 * $pad );
+	$view_h = $max_y - $min_y + ( 2 * $pad );
+
+	/* Mantem o zoom dentro dos limites do mapa inteiro. */
+	$view_w = min( $view_w, CETECH_MAP_WIDTH );
+	$view_h = min( $view_h, $height );
+
+	$vb_x = max( 0, min( $min_x - $pad, CETECH_MAP_WIDTH - $view_w ) );
+	$vb_y = max( 0, min( $min_y - $pad, $height - $view_h ) );
+
+	return sprintf( '%1.1f %1.1f %1.1f %1.1f', $vb_x, $vb_y, $view_w, $view_h );
+}
+
+function cetech_cobertura_pins_svg( $cities = null ) {
+	if ( null === $cities ) {
+		$cities = cetech_cobertura_cities();
+	}
 	if ( empty( $cities ) ) {
 		return '';
 	}
@@ -499,12 +538,18 @@ function cetech_cobertura_svg() {
 		return $svg;
 	}
 
-	$svg   = '';
-	$file  = get_stylesheet_directory() . '/assets/maps/brasil.svg';
-	$raw   = @file_get_contents( $file );
+	$svg  = '';
+	$file = get_stylesheet_directory() . '/assets/maps/brasil.svg';
+	$raw  = @file_get_contents( $file );
 
 	if ( false !== $raw && false !== strpos( $raw, '</svg>' ) ) {
-		$svg = str_replace( '</svg>', cetech_cobertura_pins_svg() . '</svg>', $raw );
+		$cities  = cetech_cobertura_cities();
+		$viewbox = cetech_cobertura_viewbox( $cities );
+
+		/* Zoom na regiao que concentra as cidades atendidas. */
+		$raw = preg_replace( '/\sviewBox="[^"]*"/', ' viewBox="' . $viewbox . '"', $raw, 1 );
+
+		$svg = str_replace( '</svg>', cetech_cobertura_pins_svg( $cities ) . '</svg>', $raw );
 	}
 
 	return $svg;
@@ -518,7 +563,7 @@ function cetech_cobertura_render() {
 
 	if ( ! $enqueued ) {
 		wp_enqueue_style( CETECH_COBERTURA_CSS );
-		wp_enqueue_script( CETECH_COBERTURA_FILTER_JS );
+		wp_enqueue_script( CETECH_COBERTURA_JS );
 		$enqueued = true;
 	}
 
@@ -528,25 +573,6 @@ function cetech_cobertura_render() {
 	ob_start();
 	?>
 	<div class="cetech-cobertura">
-		<div class="cetech-cobertura__head">
-			<h2 class="cetech-cobertura__title"><?php esc_html_e( 'Cidades atendidas', 'Divi' ); ?></h2>
-			<?php if ( ! empty( $cities ) ) : ?>
-				<span class="cetech-cobertura__count" id="cetech-cobertura-count"><?php echo esc_html( count( $cities ) ); ?></span>
-			<?php endif; ?>
-		</div>
-
-		<?php if ( ! empty( $cities ) ) : ?>
-			<div class="cetech-cobertura__filter">
-				<span class="cetech-cobertura__filter-icon" aria-hidden="true">
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-				</span>
-				<input type="search" class="cetech-cobertura__filter-input" id="cetech-cobertura-filter" placeholder="<?php esc_attr_e( 'Filtrar por cidade…', 'Divi' ); ?>" autocomplete="off" aria-label="<?php esc_attr_e( 'Filtrar por cidade', 'Divi' ); ?>" />
-				<button type="button" class="cetech-cobertura__filter-clear" id="cetech-cobertura-filter-clear" aria-label="<?php esc_attr_e( 'Limpar filtro', 'Divi' ); ?>">
-					<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-				</button>
-			</div>
-		<?php endif; ?>
-
 		<div class="cetech-cobertura__layout">
 			<div class="cetech-cobertura__map-svg">
 				<div class="cetech-cobertura__chip" aria-hidden="true">
