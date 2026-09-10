@@ -503,6 +503,28 @@ function cetech_cobertura_viewbox( $cities ) {
 	return sprintf( '%1.1f %1.1f %1.1f %1.1f', $vb_x, $vb_y, $view_w, $view_h );
 }
 
+function cetech_cobertura_palette() {
+	return array(
+		'#ff3b30', // vermelho
+		'#ff9500', // laranja
+		'#ffcc00', // amarelo
+		'#34c759', // verde
+		'#00c7be', // turquesa
+		'#007aff', // azul
+		'#5856d6', // roxo
+		'#ff2d55', // rosa
+		'#5ac8fa', // azul claro
+		'#00e8a8', // verde claro da marca
+		'#ff9f0a', // laranja vivo
+		'#af52de', // lilas
+	);
+}
+
+function cetech_cobertura_pin_color( $index ) {
+	$palette = cetech_cobertura_palette();
+	return $palette[ $index % count( $palette ) ];
+}
+
 function cetech_cobertura_pins_svg( $cities = null ) {
 	if ( null === $cities ) {
 		$cities = cetech_cobertura_cities();
@@ -535,13 +557,14 @@ function cetech_cobertura_pins_svg( $cities = null ) {
 		}
 
 		$out .= sprintf(
-			'<g transform="translate(%1$s %2$s)"><g class="cetech-svg__pin" data-name="%3$s" style="--i:%4$d">' .
+			'<g transform="translate(%1$s %2$s)"><g class="cetech-svg__pin" data-name="%3$s" style="--i:%4$d; --cetech-pin:%5$s">' .
 			'<circle class="cetech-svg__pin-ring" r="9"/><circle class="cetech-svg__pin-dot" r="5.5"/>' .
-			'<title>%5$s</title></g></g>',
+			'<title>%6$s</title></g></g>',
 			number_format( $px, 1, '.', '' ),
 			number_format( $py, 1, '.', '' ),
 			esc_attr( $city['name'] ),
 			$index,
+			esc_attr( cetech_cobertura_pin_color( $index ) ),
 			esc_html( $title )
 		);
 
@@ -608,8 +631,8 @@ function cetech_cobertura_render() {
 					<span class="cetech-cobertura__list-count" id="cetech-cobertura-list-count"><?php echo esc_html( count( $cities ) ); ?></span>
 				</div>
 				<ul id="cetech-cobertura-list">
-					<?php foreach ( $cities as $cidade ) : ?>
-						<li data-name="<?php echo esc_attr( $cidade['name'] ); ?>">
+					<?php foreach ( $cities as $index => $cidade ) : ?>
+						<li data-name="<?php echo esc_attr( $cidade['name'] ); ?>" style="--cetech-pin:<?php echo esc_attr( cetech_cobertura_pin_color( $index ) ); ?>">
 							<span class="cetech-cobertura__list-dot" aria-hidden="true"></span>
 							<span class="cetech-cobertura__list-name"><?php echo esc_html( $cidade['name'] ); ?></span>
 							<span class="cetech-cobertura__list-uf"><?php echo esc_html( $cidade['uf'] ); ?></span>

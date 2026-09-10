@@ -104,8 +104,8 @@ Prefixos: .cetech-cobertura / .cetech-svg
 }
 
 .cetech-cobertura__list li.is-active {
-	background: #eef1ff;
-	color: #2020EE;
+	background: rgba(32, 32, 238, 0.07);
+	color: var(--cetech-pin, #2020ee);
 	font-weight: 700;
 }
 
@@ -118,8 +118,8 @@ Prefixos: .cetech-cobertura / .cetech-svg
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
-	background: #2020EE;
-	opacity: 0.35;
+	background: var(--cetech-pin, #2020ee);
+	opacity: 0.45;
 	transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
@@ -188,21 +188,22 @@ Prefixos: .cetech-cobertura / .cetech-svg
 	transition: fill 0.2s ease, stroke 0.2s ease;
 }
 
-/* Cidades atendidas: divisa em vermelho, como o Google. */
+/* Cidades atendidas: divisa e area na cor de cada cidade. */
 .cetech-svg__mun.is-served {
-	stroke: #ff3b30;
+	stroke: var(--cetech-pin, #ff3b30);
 	stroke-width: 1.4;
-	fill: rgba(255, 59, 48, 0.06);
+	fill: var(--cetech-pin, #ff3b30);
+	fill-opacity: 0.06;
 }
 
 .cetech-svg__mun.is-served:hover {
-	fill: rgba(255, 59, 48, 0.12);
+	fill-opacity: 0.12;
 }
 
 /* Cidade selecionada: destaque da area. */
 .cetech-svg__mun.is-active {
-	fill: rgba(255, 59, 48, 0.16);
-	stroke: #ff3b30;
+	fill-opacity: 0.18;
+	stroke: var(--cetech-pin, #ff3b30);
 	stroke-width: 2.2;
 }
 
@@ -233,7 +234,7 @@ Prefixos: .cetech-cobertura / .cetech-svg
 }
 
 .cetech-svg__pin.is-pin-active {
-	filter: drop-shadow(0 0 6px rgba(32, 32, 238, 0.7));
+	filter: drop-shadow(0 0 6px var(--cetech-pin, #2020ee));
 }
 
 .cetech-svg__pin.is-pin-active .cetech-svg__pin-ring {
@@ -241,14 +242,14 @@ Prefixos: .cetech-cobertura / .cetech-svg
 }
 
 .cetech-svg__pin-dot {
-	fill: #2020EE;
+	fill: var(--cetech-pin, #2020ee);
 	stroke: #ffffff;
 	stroke-width: 1.6;
 }
 
 .cetech-svg__pin-ring {
 	fill: none;
-	stroke: #2020EE;
+	stroke: var(--cetech-pin, #2020ee);
 	stroke-width: 2.2;
 	opacity: 0;
 	transform-box: fill-box;

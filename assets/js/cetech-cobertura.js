@@ -33,10 +33,14 @@
 			return found;
 		}
 
-		/* Marca em vermelho (linha do Google) as municipalidades atendidas. */
+		/* Marca as municipalidades atendidas na cor de cada cidade. */
 		items.forEach(function (item) {
 			var mun = byName(municipios, item.getAttribute('data-name'));
 			if (mun) {
+				var cor = item.style.getPropertyValue('--cetech-pin').trim();
+				if (cor) {
+					mun.style.setProperty('--cetech-pin', cor);
+				}
 				mun.classList.add('is-served');
 			}
 		});
