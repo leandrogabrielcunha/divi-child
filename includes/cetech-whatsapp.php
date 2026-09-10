@@ -523,51 +523,61 @@ function cetech_wa_render() {
 					</button>
 				</div>
 			</div>
-
-			<form class="cetech-wa__form" id="cetech-wa-form" hidden>
+<form class="cetech-wa__form" id="cetech-wa-form" hidden>
 				<input type="hidden" name="tipo_cliente" value="" />
-				<div class="cetech-wa__field">
-					<label for="cetech-wa-nome"><?php esc_html_e( 'Nome', 'Divi' ); ?></label>
-					<input type="text" id="cetech-wa-nome" name="nome" required autocomplete="name" placeholder="<?php esc_attr_e( 'Seu nome', 'Divi' ); ?>" />
+
+				<div class="cetech-wa__dados" data-cetech-wa-dados>
+					<div class="cetech-wa__field">
+						<label for="cetech-wa-nome"><?php esc_html_e( 'Nome', 'Divi' ); ?></label>
+						<input type="text" id="cetech-wa-nome" name="nome" required autocomplete="name" placeholder="<?php esc_attr_e( 'Seu nome', 'Divi' ); ?>" />
+					</div>
+
+					<div class="cetech-wa__field">
+						<label for="cetech-wa-fone"><?php esc_html_e( 'Telefone / WhatsApp', 'Divi' ); ?></label>
+						<input type="tel" id="cetech-wa-fone" name="fone" autocomplete="tel" placeholder="(00) 00000-0000" />
+					</div>
+
+					<div class="cetech-wa__field">
+						<label for="cetech-wa-setor"><?php esc_html_e( 'Tipo de atendimento', 'Divi' ); ?></label>
+						<select id="cetech-wa-setor" name="setor" required>
+							<option value=""><?php esc_html_e( 'Selecione o setor...', 'Divi' ); ?></option>
+							<?php foreach ( $setores as $setor ) : ?>
+								<option value="<?php echo esc_attr( $setor ); ?>"><?php echo esc_html( $setor ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</div>
+
+					<button type="button" class="cetech-wa__continue" data-cetech-wa-continue><?php esc_html_e( 'Continuar', 'Divi' ); ?></button>
+				</div>
 				</div>
 
-				<div class="cetech-wa__field">
-					<label for="cetech-wa-fone"><?php esc_html_e( 'Telefone / WhatsApp', 'Divi' ); ?></label>
-					<input type="tel" id="cetech-wa-fone" name="fone" autocomplete="tel" placeholder="(00) 00000-0000" />
-				</div>
+				<div class="cetech-wa__dados" data-cetech-wa-final hidden>
+					<div class="cetech-wa__field" data-cetech-wa-perfil hidden>
+						<label for="cetech-wa-perfil"><?php esc_html_e( 'Perfil do cliente', 'Divi' ); ?></label>
+						<select id="cetech-wa-perfil" name="perfil" required>
+							<option value=""><?php esc_html_e( 'Residencial ou empresarial?', 'Divi' ); ?></option>
+							<option value="residencial"><?php esc_html_e( 'Residencial', 'Divi' ); ?></option>
+							<option value="empresarial"><?php esc_html_e( 'Empresarial', 'Divi' ); ?></option>
+						</select>
+					</div>
 
-				<div class="cetech-wa__field">
-					<label for="cetech-wa-setor"><?php esc_html_e( 'Tipo de atendimento', 'Divi' ); ?></label>
-					<select id="cetech-wa-setor" name="setor" required>
-						<option value=""><?php esc_html_e( 'Selecione o setor...', 'Divi' ); ?></option>
-						<?php foreach ( $setores as $setor ) : ?>
-							<option value="<?php echo esc_attr( $setor ); ?>"><?php echo esc_html( $setor ); ?></option>
-						<?php endforeach; ?>
-					</select>
-				</div>
+					<div class="cetech-wa__field" data-cetech-wa-plano hidden>
+						<label for="cetech-wa-plano"><?php esc_html_e( 'Plano', 'Divi' ); ?></label>
+						<select id="cetech-wa-plano" name="plano" required>
+							<option value=""><?php esc_html_e( 'Selecione o plano...', 'Divi' ); ?></option>
+						</select>
+					</div>
 
-				<div class="cetech-wa__field" data-cetech-wa-perfil hidden>
-					<label for="cetech-wa-perfil"><?php esc_html_e( 'Perfil do cliente', 'Divi' ); ?></label>
-					<select id="cetech-wa-perfil" name="perfil" required>
-						<option value=""><?php esc_html_e( 'Residencial ou empresarial?', 'Divi' ); ?></option>
-						<option value="residencial"><?php esc_html_e( 'Residencial', 'Divi' ); ?></option>
-						<option value="empresarial"><?php esc_html_e( 'Empresarial', 'Divi' ); ?></option>
-					</select>
-				</div>
+					<div class="cetech-wa__field">
+						<label for="cetech-wa-mensagem"><?php esc_html_e( 'Mensagem', 'Divi' ); ?></label>
+						<textarea id="cetech-wa-mensagem" name="mensagem" rows="3" placeholder="<?php esc_attr_e( 'Como podemos ajudar?', 'Divi' ); ?>"></textarea>
+					</div>
 
-				<div class="cetech-wa__field" data-cetech-wa-plano hidden>
-					<label for="cetech-wa-plano"><?php esc_html_e( 'Plano', 'Divi' ); ?></label>
-					<select id="cetech-wa-plano" name="plano" required>
-						<option value=""><?php esc_html_e( 'Selecione o plano...', 'Divi' ); ?></option>
-					</select>
+					<div class="cetech-wa__nav">
+						<button type="button" class="cetech-wa__back" data-cetech-wa-back><?php esc_html_e( 'Voltar', 'Divi' ); ?></button>
+						<button type="submit" class="cetech-wa__submit"><?php esc_html_e( 'Enviar mensagem', 'Divi' ); ?></button>
+					</div>
 				</div>
-
-				<div class="cetech-wa__field">
-					<label for="cetech-wa-mensagem"><?php esc_html_e( 'Mensagem', 'Divi' ); ?></label>
-					<textarea id="cetech-wa-mensagem" name="mensagem" rows="3" placeholder="<?php esc_attr_e( 'Como podemos ajudar?', 'Divi' ); ?>"></textarea>
-				</div>
-
-				<button type="submit" class="cetech-wa__submit"><?php esc_html_e( 'Enviar mensagem', 'Divi' ); ?></button>
 			</form>
 		</div>
 

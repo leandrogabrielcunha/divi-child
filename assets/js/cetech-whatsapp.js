@@ -21,6 +21,10 @@
 		var fone = root.querySelector('input[name="fone"]');
 		var tipoStep = root.querySelector('[data-cetech-wa-tipo]');
 		var tipoBtns = root.querySelectorAll('.cetech-wa__tipo');
+		var dadosStep = root.querySelector('[data-cetech-wa-dados]');
+		var finalStep = root.querySelector('[data-cetech-wa-final]');
+		var continueBtn = root.querySelector('[data-cetech-wa-continue]');
+		var backBtn = root.querySelector('[data-cetech-wa-back]');
 		var tipoCliente = '';
 
 		var isOpen = false;
@@ -30,18 +34,44 @@
 			var hiddenTipo = form.querySelector('input[name="tipo_cliente"]');
 		}
 
+		function showStep(step) {
+			if (dadosStep) {
+				dadosStep.hidden = step !== dadosStep;
+			}
+			if (finalStep) {
+				finalStep.hidden = step !== finalStep;
+			}
+		}
+
 		tipoBtns.forEach(function (tipoBtn) {
 			tipoBtn.addEventListener('click', function () {
 				tipoCliente = tipoBtn.getAttribute('data-tipo');
 				hiddenTipo.value = tipoCliente;
 				tipoStep.hidden = true;
 				form.hidden = false;
+				showStep(dadosStep);
 				var nomeInput = form.querySelector('input[name="nome"]');
 				if (nomeInput) {
 					nomeInput.focus();
 				}
 			});
 		});
+
+		if (continueBtn) {
+			continueBtn.addEventListener('click', function () {
+				if (!form.reportValidity()) {
+					return;
+				}
+				showStep(finalStep);
+			});
+		}
+
+		if (backBtn) {
+			backBtn.addEventListener('click', function () {
+				resetComercialFields();
+				showStep(dadosStep);
+			});
+		}
 
 		function maskPhone(value) {
 			var digits = String(value).replace(/\D/g, '').slice(0, 11);
