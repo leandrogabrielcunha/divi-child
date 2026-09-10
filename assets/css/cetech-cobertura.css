@@ -225,19 +225,25 @@ Prefixos: .cetech-cobertura / .cetech-svg
 	}
 }
 
-/* ---------- Linha de selecao (hub -> cidade) ---------- */
-.cetech-linha {
-	stroke: #2020EE;
-	stroke-width: 2;
-	stroke-linecap: round;
-	fill: none;
-	opacity: 0.9;
-	transition: opacity 0.25s ease;
-	pointer-events: none;
+/* ---------- Celulas (linhas que separam as cidades) ---------- */
+.cetech-svg__cell {
+	fill: rgba(32, 32, 238, 0.03);
+	stroke: rgba(32, 32, 238, 0.28);
+	stroke-width: 1.2;
+	stroke-linejoin: round;
+	fill-rule: evenodd;
+	cursor: pointer;
+	transition: fill 0.2s ease, stroke 0.2s ease;
 }
 
-.cetech-cobertura--linha-sumindo .cetech-linha {
-	opacity: 0;
+.cetech-svg__cell:hover {
+	fill: rgba(32, 32, 238, 0.06);
+}
+
+.cetech-svg__cell.is-active {
+	fill: rgba(32, 32, 238, 0.12);
+	stroke: rgba(32, 32, 238, 0.6);
+	stroke-width: 1.8;
 }
 
 /* ---------- Pins das cidades ---------- */

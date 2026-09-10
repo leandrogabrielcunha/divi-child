@@ -464,27 +464,126 @@ function cetech_cobertura_pin_xy( $lng, $lat ) {
 	);
 }
 
-/* Ponto central (hub) das cidades atendidas - origem da linha ao selecionar. */
-function cetech_cobertura_hub_xy( $cities ) {
-	$x = 0;
-	$y = 0;
-	$n = 0;
+/* Voronoi das cidades: divide o mapa em celulas (poligonos) por proximidade
+ * ao pin, gerando as linhas que separam uma cidade da outra. */
+function cetech_cobertura_voronoi_clip_polygon( $polygon, $ax, $ay, $bx, $by ) {
+	$mx = ( $ax + $bx ) / 2;
+	$my = ( $ay + $by ) / 2;
+	$dx = $bx - $ax;
+	$dy = $by - $ay;
+
+	$value = static function ( $p ) use ( $mx, $my, $dx, $dy ) {
+		return ( $dx * ( $p[0] - $mx ) ) + ( $dy * ( $p[1] - $my ) );
+	};
+
+	$n    = count( $polygon );
+	$out  = array();
+
+	for ( $i = 0; $i < $n; $i++ ) {
+		$cur   = $polygon[ $i ];
+		$next  = $polygon[ ( $i + 1 ) % $n ];
+		$vcur  = $value( $cur );
+		$vnext = $value( $next );
+
+		if ( $vcur <= 0 && $vnext <= 0 ) {
+			$out[] = $next;
+		} elseif ( $vcur <= 0 && $vnext > 0 ) {
+			$t = $vcur / ( $vcur - $vnext );
+			$out[] = array(
+				$cur[0] + ( $t * ( $next[0] - $cur[0] ) ),
+				$cur[1] + ( $t * ( $next[1] - $cur[1] ) ),
+			);
+		} elseif ( $vcur > 0 && $vnext <= 0 ) {
+			$t = $vcur / ( $vcur - $vnext );
+			$out[] = array(
+				$cur[0] + ( $t * ( $next[0] - $cur[0] ) ),
+				$cur[1] + ( $t * ( $next[1] - $cur[1] ) ),
+			);
+			$out[] = $next;
+		}
+	}
+
+	return $out;
+}
+
+function cetech_cobertura_voronoi_cells( $cities ) {
+	$sites = array();
+	$scale = CETECH_MAP_WIDTH / ( CETECH_MAP_LON_MAX - CETECH_MAP_LON_MIN );
+	$hmap  = ( CETECH_MAP_LAT_MAX - CETECH_MAP_LAT_MIN ) * $scale;
 
 	foreach ( $cities as $city ) {
-		$p = cetech_cobertura_pin_xy( $city['lng'], $city['lat'] );
-		$x += $p['x'];
-		$y += $p['y'];
-		$n++;
+		$sites[] = array(
+			'name'      => $city['name'],
+			'x'         => ( $city['lng'] - CETECH_MAP_LON_MIN ) * $scale,
+			'y'         => ( CETECH_MAP_LAT_MAX - $city['lat'] ) * $scale,
+			'polygon'   => array(
+				array( 0, 0 ),
+				array( CETECH_MAP_WIDTH, 0 ),
+				array( CETECH_MAP_WIDTH, $hmap ),
+				array( 0, $hmap ),
+			),
+		);
 	}
 
-	if ( 0 === $n ) {
-		return null;
-	}
+	$count = count( $sites );
 
-	return array(
-		'x' => $x / $n,
-		'y' => $y / $n,
+	foreach ( $sites as $i => &$site ) {
+		for ( $j = 0; $j < $count; $j++ ) {
+			if ( $i === $j ) {
+				continue;
+			}
+			$site['polygon'] = cetech_cobertura_voronoi_clip_polygon(
+				$site['polygon'],
+				$sites[ $i ]['x'],
+				$sites[ $i ]['y'],
+				$sites[ $j ]['x'],
+				$sites[ $j ]['y']
+			);
+		}
+	}
+	unset( $site );
+
+	return array_map(
+		static function ( $site ) {
+			return array(
+				'name'    => $site['name'],
+				'polygon' => $site['polygon'],
+			);
+		},
+		$sites
 	);
+}
+
+function cetech_cobertura_cells_svg( $cities ) {
+	$cells = cetech_cobertura_voronoi_cells( $cities );
+
+	if ( count( $cells ) < 2 ) {
+		return '';
+	}
+
+	$out = '<g class="cetech-svg__cells" aria-hidden="true">';
+
+	foreach ( $cells as $cell ) {
+		if ( count( $cell['polygon'] ) < 3 ) {
+			continue;
+		}
+
+		$d = '';
+		foreach ( $cell['polygon'] as $i => $p ) {
+			$d .= ( 0 === $i ? 'M' : 'L' ) . number_format( $p[0], 1, '.', '' ) . ' ' . number_format( $p[1], 1, '.', '' );
+		}
+		$d .= 'Z';
+
+		$out .= sprintf(
+			'<path class="cetech-svg__cell" data-name="%1$s" d="%2$s"/>',
+			esc_attr( $cell['name'] ),
+			$d
+		);
+	}
+
+	$out .= '</g>';
+
+	return $out;
 }
 
 function cetech_cobertura_viewbox( $cities ) {
@@ -601,7 +700,8 @@ function cetech_cobertura_svg() {
 		/* Zoom na regiao que concentra as cidades atendidas. */
 		$raw = preg_replace( '/\sviewBox="[^"]*"/', ' viewBox="' . $viewbox . '"', $raw, 1 );
 
-		$svg = str_replace( '</svg>', cetech_cobertura_pins_svg( $cities ) . '</svg>', $raw );
+		/* Celulas (linhas de separacao entre cidades) antes dos pins. */
+		$svg = str_replace( '</svg>', cetech_cobertura_cells_svg( $cities ) . cetech_cobertura_pins_svg( $cities ) . '</svg>', $raw );
 	}
 
 	return $svg;
@@ -613,13 +713,12 @@ function cetech_cobertura_svg() {
 function cetech_cobertura_render() {
 	$cities = cetech_cobertura_cities();
 	$svg    = cetech_cobertura_svg();
-	$hub    = cetech_cobertura_hub_xy( $cities );
 
 	ob_start();
 	?>
 	<div class="cetech-cobertura">
 		<div class="cetech-cobertura__layout">
-			<div class="cetech-cobertura__map-svg" <?php if ( $hub ) : ?>data-hub-x="<?php echo esc_attr( number_format( $hub['x'], 1, '.', '' ) ); ?>" data-hub-y="<?php echo esc_attr( number_format( $hub['y'], 1, '.', '' ) ); ?>"<?php endif; ?>>
+			<div class="cetech-cobertura__map-svg">
 				<div class="cetech-cobertura__chip" aria-hidden="true">
 					<strong>SP</strong>
 					<span><b id="cetech-cobertura-chip-count"><?php echo esc_html( count( $cities ) ); ?></b> <?php esc_html_e( 'cidades atendidas', 'Divi' ); ?></span>
