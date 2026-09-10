@@ -161,15 +161,10 @@ Prefixos: .cetech-wa
 	font-size: 16px;
 	font-weight: 800;
 	line-height: 1.3;
+	color: #fff !important;
 }
 
-.cetech-wa__subtitle {
-	margin: 2px 0 0;
-	font-size: 12.5px;
-	font-weight: 600;
-	color: rgba(255, 255, 255, 0.9);
-}
-
+/* ---------- Fechar painel ---------- */
 .cetech-wa__close {
 	display: inline-flex;
 	align-items: center;
@@ -195,15 +190,6 @@ Prefixos: .cetech-wa
 .cetech-wa__close:focus-visible {
 	outline: 3px solid rgba(255, 255, 255, 0.55);
 	outline-offset: 2px;
-}
-
-/* ---------- Boas-vindas ---------- */
-.cetech-wa__intro {
-	margin: 0;
-	padding: 14px 18px 6px;
-	font-size: 13px;
-	line-height: 1.55;
-	color: var(--cetech-wa-muted);
 }
 
 /* ---------- Formulário ---------- */
@@ -292,13 +278,6 @@ Prefixos: .cetech-wa
 .cetech-wa__submit:focus-visible {
 	outline: 3px solid rgba(37, 211, 102, 0.45);
 	outline-offset: 2px;
-}
-
-.cetech-wa__note {
-	margin: 0;
-	text-align: center;
-	font-size: 11.5px;
-	color: var(--cetech-wa-muted);
 }
 
 /* ---------- Responsivo ---------- */

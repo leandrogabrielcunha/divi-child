@@ -103,16 +103,6 @@ function cetech_wa_titulo() {
 }
 
 /**
- * Mensagem de boas-vindas exibida no topo do painel.
- *
- * @return string
- */
-function cetech_wa_saudacao() {
-	$saudacao = trim( (string) get_option( 'cetech_whatsapp_saudacao', '' ) );
-	return '' !== $saudacao ? $saudacao : __( 'Escolha o setor do atendimento e nosso time vai responder pelo WhatsApp.', 'Divi' );
-}
-
-/**
  * Carrega os assets e envia os dados (número, planos, nonce) ao JS.
  */
 function cetech_wa_enqueue_assets() {
@@ -356,17 +346,6 @@ function cetech_wa_settings_init() {
 		)
 	);
 
-	register_setting(
-		CETECH_WA_OPTION_GROUP,
-		'cetech_whatsapp_saudacao',
-		array(
-			'type'              => 'string',
-			'sanitize_callback' => function ( $value ) {
-				return sanitize_textarea_field( $value );
-			},
-		)
-	);
-
 	add_settings_section(
 		'cetech_wa_section',
 		__( 'Configurações do WhatsApp', 'Divi' ),
@@ -402,14 +381,6 @@ function cetech_wa_settings_init() {
 		'cetech_whatsapp_titulo',
 		__( 'Título do painel', 'Divi' ),
 		'cetech_wa_field_titulo',
-		CETECH_WA_PAGE,
-		'cetech_wa_section'
-	);
-
-	add_settings_field(
-		'cetech_whatsapp_saudacao',
-		__( 'Mensagem de boas-vindas', 'Divi' ),
-		'cetech_wa_field_saudacao',
 		CETECH_WA_PAGE,
 		'cetech_wa_section'
 	);
@@ -457,13 +428,6 @@ function cetech_wa_field_titulo() {
 	<?php
 }
 
-function cetech_wa_field_saudacao() {
-	$value = get_option( 'cetech_whatsapp_saudacao', '' );
-	?>
-	<textarea class="large-text" rows="3" name="cetech_whatsapp_saudacao" id="cetech_whatsapp_saudacao" placeholder="<?php esc_attr_e( 'Escolha o setor do atendimento e nosso time vai responder pelo WhatsApp.', 'Divi' ); ?>"><?php echo esc_textarea( $value ); ?></textarea>
-	<?php
-}
-
 function cetech_wa_admin_menu() {
 	add_options_page(
 		__( 'CE Tech WhatsApp', 'Divi' ),
@@ -499,9 +463,8 @@ function cetech_wa_render() {
 		return;
 	}
 
-	$setores    = cetech_wa_setores();
-	$titulo     = cetech_wa_titulo();
-	$saudacao   = cetech_wa_saudacao();
+	$setores  = cetech_wa_setores();
+	$titulo   = cetech_wa_titulo();
 
 	ob_start();
 	?>
@@ -513,14 +476,11 @@ function cetech_wa_render() {
 				</span>
 				<div class="cetech-wa__head-text">
 					<h2 class="cetech-wa__title"><?php echo esc_html( $titulo ); ?></h2>
-					<p class="cetech-wa__subtitle"><?php esc_html_e( 'Geralmente responde em poucos minutos', 'Divi' ); ?></p>
 				</div>
 				<button class="cetech-wa__close" type="button" aria-label="<?php esc_attr_e( 'Fechar', 'Divi' ); ?>">
 					<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
 				</button>
 			</header>
-
-			<p class="cetech-wa__intro"><?php echo esc_html( $saudacao ); ?></p>
 
 			<form class="cetech-wa__form" id="cetech-wa-form">
 				<div class="cetech-wa__field">
@@ -565,7 +525,6 @@ function cetech_wa_render() {
 				</div>
 
 				<button type="submit" class="cetech-wa__submit"><?php esc_html_e( 'Enviar mensagem', 'Divi' ); ?></button>
-				<p class="cetech-wa__note"><?php esc_html_e( 'Seu contato será aberto no WhatsApp para o setor escolhido.', 'Divi' ); ?></p>
 			</form>
 		</div>
 
