@@ -480,12 +480,11 @@ function cetech_cobertura_viewbox( $cities ) {
 	$span_x = $max_x - $min_x;
 	$span_y = $max_y - $min_y;
 
-	/* Zoom suave: mesmo com uma unica cidade a janela mantem boa
-	 * parte do estado visivel; o aglomerado de cidades so adiciona
-	 * area quando necessario, sem recortar demais o mapa. */
-	$floor_w = CETECH_MAP_WIDTH * 0.60;
-	$floor_h = $height * 0.60;
-	$margin  = $span * 0.45;
+	/* Zoom: a janela acompanha o aglomerado de cidades, com minimo
+	 * de 50% do estado para manter contexto e sem sobrepor pins. */
+	$floor_w = CETECH_MAP_WIDTH * 0.50;
+	$floor_h = $height * 0.50;
+	$margin  = $span * 0.5;
 
 	$center_x = ( $min_x + $max_x ) / 2;
 	$center_y = ( $min_y + $max_y ) / 2;
@@ -504,19 +503,20 @@ function cetech_cobertura_viewbox( $cities ) {
 }
 
 function cetech_cobertura_palette() {
+	/* Paleta CE Tech: tons de azul (#2020EE) e verde (#00E8A8). */
 	return array(
-		'#ff3b30', // vermelho
-		'#ff9500', // laranja
-		'#ffcc00', // amarelo
-		'#34c759', // verde
-		'#00c7be', // turquesa
-		'#007aff', // azul
-		'#5856d6', // roxo
-		'#ff2d55', // rosa
-		'#5ac8fa', // azul claro
+		'#2020ee', // azul principal
+		'#00c48e', // verde turquesa da marca
+		'#1515c0', // azul escuro
 		'#00e8a8', // verde claro da marca
-		'#ff9f0a', // laranja vivo
-		'#af52de', // lilas
+		'#3d5bff', // azul medio
+		'#00a573', // verde profundo
+		'#7ba4ff', // azul pastel
+		'#66e6c8', // verde menta
+		'#1f32e8', // azul royal
+		'#10d0a5', // verde petrol
+		'#4f7cff', // azul indigo
+		'#2ecab0', // verde azulado
 	);
 }
 

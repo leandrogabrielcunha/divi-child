@@ -188,11 +188,11 @@ Prefixos: .cetech-cobertura / .cetech-svg
 	transition: fill 0.2s ease, stroke 0.2s ease;
 }
 
-/* Cidades atendidas: divisa e area na cor de cada cidade. */
+/* Cidades atendidas: divisa e area na cor de cada cidade (paleta CE Tech). */
 .cetech-svg__mun.is-served {
-	stroke: var(--cetech-pin, #ff3b30);
+	stroke: var(--cetech-pin, #2020ee);
 	stroke-width: 1.4;
-	fill: var(--cetech-pin, #ff3b30);
+	fill: var(--cetech-pin, #2020ee);
 	fill-opacity: 0.06;
 }
 
@@ -203,7 +203,7 @@ Prefixos: .cetech-cobertura / .cetech-svg
 /* Cidade selecionada: destaque da area. */
 .cetech-svg__mun.is-active {
 	fill-opacity: 0.18;
-	stroke: var(--cetech-pin, #ff3b30);
+	stroke: var(--cetech-pin, #2020ee);
 	stroke-width: 2.2;
 }
 
