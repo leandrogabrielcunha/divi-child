@@ -103,8 +103,16 @@ add_action( 'et_before_main_content', 'cetech_render_header', 1 );
  */
 function cetech_header_markup() {
 	$home   = home_url( '/' );
-	$logo   = 'https://cetech.net.br/wp-content/uploads/2025/07/01-Logo-Horizontal-Principal-2-scaled.png';
 	$perfil = cetech_perfil_url();
+
+	$logo = '';
+	$custom_logo_id = get_theme_mod( 'custom_logo' );
+	if ( $custom_logo_id ) {
+		$logo = wp_get_attachment_image_url( (int) $custom_logo_id, 'full' );
+	}
+	if ( ! $logo ) {
+		$logo = 'https://cetech.net.br/wp-content/uploads/2025/07/0ed00f6e-440c-4b1f-88b5-117e555dd9d0-Photoroom.png';
+	}
 
 	if ( is_user_logged_in() ) {
 		$user       = wp_get_current_user();
@@ -120,7 +128,7 @@ function cetech_header_markup() {
 		<div class="cetech-header__box">
 			<div class="cetech-header__start">
 				<a class="cetech-header__logo" href="<?php echo esc_url( $home ); ?>" aria-label="CE Tech">
-					<img src="<?php echo esc_url( $logo ); ?>" alt="CE Tech" width="240" height="44" loading="eager">
+					<img src="<?php echo esc_url( $logo ); ?>" alt="CE Tech" height="44" loading="eager">
 				</a>
 			</div>
 
