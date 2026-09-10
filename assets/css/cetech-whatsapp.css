@@ -1,0 +1,336 @@
+/*============================================================
+CE TECH - Botão e Painel de WhatsApp
+Botão flutuante fixo à direita (footer) com leve efeito de
+pulsação. Painel com formulário de atendimento por setor e,
+no setor Comercial, seleção de perfil e plano.
+Prefixos: .cetech-wa
+============================================================*/
+.cetech-wa {
+	position: fixed;
+	right: 20px;
+	bottom: 20px;
+	z-index: 99999;
+	font-family: var(--cetech-font, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+	--cetech-wa-green: #25D366;
+	--cetech-wa-green-dark: #1DA851;
+	--cetech-wa-ink: #0F172A;
+	--cetech-wa-muted: #64748B;
+	--cetech-wa-border: #DDE3EC;
+}
+
+.cetech-wa *,
+.cetech-wa *::before,
+.cetech-wa *::after {
+	box-sizing: border-box;
+}
+
+.cetech-wa button {
+	font-family: inherit;
+}
+
+.cetech-wa a {
+	text-decoration: none;
+}
+
+/* ---------- Botão flutuante (pílula com ícone) ---------- */
+.cetech-wa__btn {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	min-height: 58px;
+	padding: 0 24px;
+	border: 0;
+	border-radius: 999px;
+	background: var(--cetech-wa-green);
+	color: #fff;
+	font-size: 15px;
+	font-weight: 700;
+	letter-spacing: 0.2px;
+	cursor: pointer;
+	box-shadow: 0 12px 26px rgba(37, 211, 102, 0.38);
+	transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, filter 0.18s ease;
+	z-index: 1;
+}
+
+.cetech-wa__btn:hover {
+	background: var(--cetech-wa-green-dark);
+	transform: translateY(-2px);
+	box-shadow: 0 16px 32px rgba(37, 211, 102, 0.44);
+}
+
+.cetech-wa__btn:focus-visible {
+	outline: 3px solid rgba(37, 211, 102, 0.45);
+	outline-offset: 2px;
+}
+
+/* Anel de pulsação */
+.cetech-wa__btn::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	background: rgba(37, 211, 102, 0.45);
+	z-index: -1;
+	animation: cetech-wa-pulse 2.4s ease-out infinite;
+	pointer-events: none;
+}
+
+.cetech-wa__btn-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+}
+
+.cetech-wa__btn-icon svg {
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+
+@keyframes cetech-wa-pulse {
+	0% {
+		transform: scale(1);
+		opacity: 0.55;
+	}
+	70% {
+		transform: scale(1.32);
+		opacity: 0;
+	}
+	100% {
+		transform: scale(1.32);
+		opacity: 0;
+	}
+}
+
+/* ---------- Painel ---------- */
+.cetech-wa__panel {
+	position: absolute;
+	right: 0;
+	bottom: calc(100% + 16px);
+	width: 350px;
+	max-width: calc(100vw - 32px);
+	background: #fff;
+	border: 1px solid var(--cetech-wa-border);
+	border-radius: 18px;
+	box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16), 0 4px 16px rgba(15, 23, 42, 0.06);
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(10px) scale(0.985);
+	transform-origin: bottom right;
+	transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s;
+	overflow: hidden;
+}
+
+.cetech-wa.is-open .cetech-wa__panel {
+	opacity: 1;
+	visibility: visible;
+	transform: none;
+}
+
+/* ---------- Cabeçalho do painel ---------- */
+.cetech-wa__head {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 18px 18px 14px;
+	background: linear-gradient(135deg, var(--cetech-wa-green) 0%, var(--cetech-wa-green-dark) 100%);
+	color: #fff;
+}
+
+.cetech-wa__head-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 42px;
+	height: 42px;
+	flex: none;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.18);
+}
+
+.cetech-wa__head-text {
+	min-width: 0;
+}
+
+.cetech-wa__title {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 800;
+	line-height: 1.3;
+}
+
+.cetech-wa__subtitle {
+	margin: 2px 0 0;
+	font-size: 12.5px;
+	font-weight: 600;
+	color: rgba(255, 255, 255, 0.9);
+}
+
+.cetech-wa__close {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	margin-left: auto;
+	flex: none;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.2);
+	color: #fff;
+	cursor: pointer;
+	transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.cetech-wa__close:hover {
+	background: rgba(255, 255, 255, 0.32);
+	transform: rotate(90deg);
+}
+
+.cetech-wa__close:focus-visible {
+	outline: 3px solid rgba(255, 255, 255, 0.55);
+	outline-offset: 2px;
+}
+
+/* ---------- Boas-vindas ---------- */
+.cetech-wa__intro {
+	margin: 0;
+	padding: 14px 18px 6px;
+	font-size: 13px;
+	line-height: 1.55;
+	color: var(--cetech-wa-muted);
+}
+
+/* ---------- Formulário ---------- */
+.cetech-wa__form {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 10px 18px 16px;
+}
+
+.cetech-wa__field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.cetech-wa__field[hidden] {
+	display: none !important;
+}
+
+.cetech-wa__field label {
+	font-size: 12px;
+	font-weight: 700;
+	color: #334155;
+}
+
+.cetech-wa__field input,
+.cetech-wa__field select,
+.cetech-wa__field textarea {
+	width: 100%;
+	padding: 10px 12px;
+	font-family: inherit;
+	font-size: 14px;
+	line-height: 1.4;
+	color: var(--cetech-wa-ink);
+	background: #fff;
+	border: 1.5px solid var(--cetech-wa-border);
+	border-radius: 10px;
+	outline: none;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cetech-wa__field textarea {
+	resize: vertical;
+	min-height: 64px;
+}
+
+.cetech-wa__field input:focus,
+.cetech-wa__field select:focus,
+.cetech-wa__field textarea:focus {
+	border-color: var(--cetech-wa-green);
+	box-shadow: 0 0 0 4px rgba(37, 211, 102, 0.14);
+}
+
+.cetech-wa__field input::placeholder,
+.cetech-wa__field textarea::placeholder {
+	color: #94A3B8;
+	opacity: 1;
+}
+
+/* ---------- Botão enviar ---------- */
+.cetech-wa__submit {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	padding: 13px 16px;
+	border: 0;
+	border-radius: 12px;
+	background: var(--cetech-wa-green);
+	color: #fff;
+	font-size: 15px;
+	font-weight: 700;
+	letter-spacing: 0.2px;
+	cursor: pointer;
+	box-shadow: 0 8px 18px rgba(37, 211, 102, 0.28);
+	transition: background 0.18s ease, transform 0.16s ease, box-shadow 0.18s ease;
+}
+
+.cetech-wa__submit:hover {
+	background: var(--cetech-wa-green-dark);
+	transform: translateY(-1px);
+	box-shadow: 0 12px 22px rgba(37, 211, 102, 0.34);
+}
+
+.cetech-wa__submit:focus-visible {
+	outline: 3px solid rgba(37, 211, 102, 0.45);
+	outline-offset: 2px;
+}
+
+.cetech-wa__note {
+	margin: 0;
+	text-align: center;
+	font-size: 11.5px;
+	color: var(--cetech-wa-muted);
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 560px) {
+	.cetech-wa {
+		right: 12px;
+		bottom: 12px;
+	}
+
+	.cetech-wa__panel {
+		width: calc(100vw - 24px);
+		max-width: none;
+		bottom: calc(100% + 14px);
+		border-radius: 16px;
+	}
+
+	.cetech-wa__btn {
+		width: 58px;
+		height: 58px;
+		min-height: 0;
+		padding: 0;
+	}
+
+	.cetech-wa__btn-label {
+		display: none;
+	}
+
+	.cetech-wa__form {
+		padding: 10px 14px 14px;
+	}
+
+	.cetech-wa__head {
+		padding: 16px 14px 12px;
+	}
+}
