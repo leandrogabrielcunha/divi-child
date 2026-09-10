@@ -557,7 +557,7 @@ function cetech_wa_render() {
 				<div class="cetech-wa__dados" data-cetech-wa-final hidden>
 					<div class="cetech-wa__field" data-cetech-wa-perfil hidden>
 						<label for="cetech-wa-perfil"><?php esc_html_e( 'Perfil do cliente', 'Divi' ); ?></label>
-						<select id="cetech-wa-perfil" name="perfil" required>
+						<select id="cetech-wa-perfil" name="perfil">
 							<option value=""><?php esc_html_e( 'Residencial ou empresarial?', 'Divi' ); ?></option>
 							<option value="residencial"><?php esc_html_e( 'Residencial', 'Divi' ); ?></option>
 							<option value="empresarial"><?php esc_html_e( 'Empresarial', 'Divi' ); ?></option>
@@ -566,7 +566,7 @@ function cetech_wa_render() {
 
 					<div class="cetech-wa__field" data-cetech-wa-plano hidden>
 						<label for="cetech-wa-plano"><?php esc_html_e( 'Plano', 'Divi' ); ?></label>
-						<select id="cetech-wa-plano" name="plano" required>
+						<select id="cetech-wa-plano" name="plano">
 							<option value=""><?php esc_html_e( 'Selecione o plano...', 'Divi' ); ?></option>
 						</select>
 					</div>

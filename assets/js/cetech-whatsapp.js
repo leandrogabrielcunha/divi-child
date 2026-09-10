@@ -113,9 +113,35 @@
 
 		if (continueBtn) {
 			continueBtn.addEventListener('click', function () {
-				if (!form.reportValidity()) {
+				if (!dadosStep) {
 					return;
 				}
+
+				var fields = dadosStep.querySelectorAll('input:not([type="hidden"]), select, textarea');
+				for (var i = 0; i < fields.length; i++) {
+					if (fields[i].hasAttribute('required') && !fields[i].checkValidity()) {
+						fields[i].reportValidity();
+						return;
+					}
+				}
+
+				isComercial = 'comercial' === (setor && setor.value ? setor.value.trim().toLowerCase() : '');
+
+				if (isComercial) {
+					if (perfil) {
+						perfil.setAttribute('required', '');
+						perfil.value = '';
+					}
+					if (planoSelect) {
+						planoSelect.removeAttribute('required');
+						planoSelect.innerHTML = '';
+					}
+					perfilWrap.hidden = false;
+					planoWrap.hidden = true;
+				} else {
+					resetComercialFields();
+				}
+
 				showStep(finalStep);
 			});
 		}
@@ -225,12 +251,20 @@
 		}
 
 		function resetComercialFields() {
-			perfilWrap.hidden = true;
-			planoWrap.hidden = true;
 			if (perfil) {
+				perfil.removeAttribute('required');
 				perfil.value = '';
 			}
-			planoSelect.innerHTML = '';
+			if (planoSelect) {
+				planoSelect.removeAttribute('required');
+				planoSelect.innerHTML = '';
+			}
+			if (perfilWrap) {
+				perfilWrap.hidden = true;
+			}
+			if (planoWrap) {
+				planoWrap.hidden = true;
+			}
 		}
 
 		if (setor) {
@@ -252,10 +286,16 @@
 				if ('' === perfil.value) {
 					planoWrap.hidden = true;
 					planoSelect.innerHTML = '';
+					if (planoSelect) {
+						planoSelect.removeAttribute('required');
+					}
 					return;
 				}
 				setPlanoOptions();
 				planoWrap.hidden = false;
+				if (planoSelect) {
+					planoSelect.setAttribute('required', '');
+				}
 			});
 		}
 
