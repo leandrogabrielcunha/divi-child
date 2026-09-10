@@ -447,6 +447,38 @@ function cetech_cobertura_cities() {
  * 8. Mapa SVG (SP) + pins das cidades, com zoom na regiao das
  *    cidades atendidas
  * ------------------------------------------------------------ */
+function cetech_cobertura_pin_xy( $lng, $lat ) {
+	$scale = CETECH_MAP_WIDTH / ( CETECH_MAP_LON_MAX - CETECH_MAP_LON_MIN );
+
+	return array(
+		'x' => ( $lng - CETECH_MAP_LON_MIN ) * $scale,
+		'y' => ( CETECH_MAP_LAT_MAX - $lat ) * $scale,
+	);
+}
+
+/* Ponto central (hub) das cidades atendidas - origem da linha ao selecionar. */
+function cetech_cobertura_hub_xy( $cities ) {
+	$x = 0;
+	$y = 0;
+	$n = 0;
+
+	foreach ( $cities as $city ) {
+		$p = cetech_cobertura_pin_xy( $city['lng'], $city['lat'] );
+		$x += $p['x'];
+		$y += $p['y'];
+		$n++;
+	}
+
+	if ( 0 === $n ) {
+		return null;
+	}
+
+	return array(
+		'x' => $x / $n,
+		'y' => $y / $n,
+	);
+}
+
 function cetech_cobertura_viewbox( $cities ) {
 	$scale  = CETECH_MAP_WIDTH / ( CETECH_MAP_LON_MAX - CETECH_MAP_LON_MIN );
 	$height = ( CETECH_MAP_LAT_MAX - CETECH_MAP_LAT_MIN ) * $scale;
@@ -581,12 +613,13 @@ function cetech_cobertura_render() {
 
 	$cities = cetech_cobertura_cities();
 	$svg    = cetech_cobertura_svg();
+	$hub    = cetech_cobertura_hub_xy( $cities );
 
 	ob_start();
 	?>
 	<div class="cetech-cobertura">
 		<div class="cetech-cobertura__layout">
-			<div class="cetech-cobertura__map-svg">
+			<div class="cetech-cobertura__map-svg" <?php if ( $hub ) : ?>data-hub-x="<?php echo esc_attr( number_format( $hub['x'], 1, '.', '' ) ); ?>" data-hub-y="<?php echo esc_attr( number_format( $hub['y'], 1, '.', '' ) ); ?>"<?php endif; ?>>
 				<div class="cetech-cobertura__chip" aria-hidden="true">
 					<strong>SP</strong>
 					<span><b id="cetech-cobertura-chip-count"><?php echo esc_html( count( $cities ) ); ?></b> <?php esc_html_e( 'cidades atendidas', 'Divi' ); ?></span>

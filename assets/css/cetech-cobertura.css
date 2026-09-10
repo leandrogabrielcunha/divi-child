@@ -225,6 +225,21 @@ Prefixos: .cetech-cobertura / .cetech-svg
 	}
 }
 
+/* ---------- Linha de selecao (hub -> cidade) ---------- */
+.cetech-linha {
+	stroke: #2020EE;
+	stroke-width: 2;
+	stroke-linecap: round;
+	fill: none;
+	opacity: 0.9;
+	transition: opacity 0.25s ease;
+	pointer-events: none;
+}
+
+.cetech-cobertura--linha-sumindo .cetech-linha {
+	opacity: 0;
+}
+
 /* ---------- Pins das cidades ---------- */
 .cetech-svg__pin {
 	transform-box: fill-box;
