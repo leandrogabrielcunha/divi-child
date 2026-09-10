@@ -229,7 +229,7 @@ Prefixos: .cetech-cobertura / .cetech-svg
 }
 
 .cetech-svg__pin.is-pin-active .cetech-svg__pin-dot {
-	r: 7.5;
+	r: 6;
 	stroke-width: 2.2;
 }
 

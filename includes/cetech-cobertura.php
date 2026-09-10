@@ -481,9 +481,9 @@ function cetech_cobertura_viewbox( $cities ) {
 	$span_y = $max_y - $min_y;
 
 	/* Zoom: a janela acompanha o aglomerado de cidades, com minimo
-	 * de 50% do estado para manter contexto e sem sobrepor pins. */
-	$floor_w = CETECH_MAP_WIDTH * 0.50;
-	$floor_h = $height * 0.50;
+	 * de 42% do estado para manter contexto e sem sobrepor pins. */
+	$floor_w = CETECH_MAP_WIDTH * 0.42;
+	$floor_h = $height * 0.42;
 	$margin  = $span * 0.5;
 
 	$center_x = ( $min_x + $max_x ) / 2;
@@ -558,7 +558,7 @@ function cetech_cobertura_pins_svg( $cities = null ) {
 
 		$out .= sprintf(
 			'<g transform="translate(%1$s %2$s)"><g class="cetech-svg__pin" data-name="%3$s" style="--i:%4$d; --cetech-pin:%5$s">' .
-			'<circle class="cetech-svg__pin-ring" r="9"/><circle class="cetech-svg__pin-dot" r="5.5"/>' .
+			'<circle class="cetech-svg__pin-ring" r="12"/><circle class="cetech-svg__pin-dot" r="4.5"/>' .
 			'<title>%6$s</title></g></g>',
 			number_format( $px, 1, '.', '' ),
 			number_format( $py, 1, '.', '' ),
