@@ -179,9 +179,9 @@ Prefixos: .cetech-cobertura / .cetech-svg
 
 /* ---------- Divisas municipais (todos os municipios) ---------- */
 .cetech-svg__mun {
-	fill: #ffffff;
+	fill: #eefaf5;
 	fill-rule: evenodd;
-	stroke: #dbe4ee;
+	stroke: #c3e6d6;
 	stroke-width: 0.6;
 	stroke-linejoin: round;
 	opacity: 1;
