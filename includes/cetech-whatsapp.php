@@ -579,4 +579,4 @@ function cetech_wa_render() {
 	<?php
 	echo ob_get_clean();
 }
-add_action( 'wp_footer', 'cetech_wa_render', 20 );
+add_action( 'wp_footer', 'cetech_wa_render', 15 );
