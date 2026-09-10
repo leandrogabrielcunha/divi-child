@@ -1,11 +1,12 @@
 /*============================================================
 CE Tech - Cobertura (mapa SVG animado de cidades atendidas)
-Shortcode [cetech_cobertura] - Mapa do Brasil com destaque no
-estado de Sao Paulo e pins animados nas cidades atendidas.
+Shortcode [cetech_cobertura] - Mapa de Sao Paulo e estados
+vizinhos com pins animados nas cidades atendidas.
+Identidade visual: azul (#2020EE) e verde/turquesa (#00E8A8).
 Prefixos: .cetech-cobertura / .cetech-svg
 ============================================================*/
 .cetech-cobertura {
-	max-width: 1080px;
+	max-width: 700px;
 	margin: 24px auto;
 }
 
@@ -15,28 +16,28 @@ Prefixos: .cetech-cobertura / .cetech-svg
 	align-items: center;
 	justify-content: space-between;
 	gap: 12px;
-	margin-bottom: 14px;
+	margin-bottom: 12px;
 }
 
 .cetech-cobertura__title {
 	margin: 0;
-	font-size: 24px;
+	font-size: 22px;
 	font-weight: 800;
 	line-height: 1.3;
-	color: #0f172a;
+	color: #1a1a2e;
 }
 
 .cetech-cobertura__count {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	min-width: 34px;
-	height: 34px;
+	min-width: 32px;
+	height: 32px;
 	padding: 0 12px;
 	border-radius: 999px;
-	background: #16a34a;
+	background: #2020EE;
 	color: #fff;
-	font-size: 14px;
+	font-size: 13px;
 	font-weight: 800;
 }
 
@@ -80,10 +81,10 @@ Prefixos: .cetech-cobertura / .cetech-svg
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 30px;
-	height: 30px;
+	width: 28px;
+	height: 28px;
 	border-radius: 50%;
-	background: #16a34a;
+	background: #2020EE;
 	color: #fff;
 	font-size: 12px;
 }
@@ -106,7 +107,7 @@ Prefixos: .cetech-cobertura / .cetech-svg
 /* ---------- Sao Paulo (destaque + desenho da borda) ---------- */
 .cetech-svg__state--sp {
 	fill: url(#cetech-sp-grad);
-	stroke: #16a34a;
+	stroke: #00C48E;
 	stroke-width: 1.6;
 	stroke-linecap: round;
 	stroke-linejoin: round;
@@ -133,10 +134,10 @@ Prefixos: .cetech-cobertura / .cetech-svg
 @keyframes cetech-cobertura-glow {
 	0%,
 	100% {
-		filter: drop-shadow(0 8px 12px rgba(22, 163, 74, 0.28));
+		filter: drop-shadow(0 8px 12px rgba(0, 232, 168, 0.35));
 	}
 	50% {
-		filter: drop-shadow(0 12px 20px rgba(22, 163, 74, 0.5));
+		filter: drop-shadow(0 12px 20px rgba(0, 196, 142, 0.55));
 	}
 }
 
@@ -151,14 +152,14 @@ Prefixos: .cetech-cobertura / .cetech-svg
 }
 
 .cetech-svg__pin-dot {
-	fill: #16a34a;
+	fill: #00C48E;
 	stroke: #ffffff;
 	stroke-width: 1.4;
 }
 
 .cetech-svg__pin-ring {
 	fill: none;
-	stroke: #16a34a;
+	stroke: #00E8A8;
 	stroke-width: 2;
 	opacity: 0;
 	transform-box: fill-box;

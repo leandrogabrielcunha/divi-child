@@ -23,12 +23,12 @@ define( 'CETECH_CIDADE_CPT', 'cetech_cidade' );
 define( 'CETECH_COBERTURA_CSS', 'cetech-cobertura' );
 define( 'CETECH_COBERTURA_ADMIN_JS', 'cetech-cobertura-admin' );
 
-/* Limites da projecao equirretangular do mapa SVG (Brasil). */
-define( 'CETECH_MAP_LON_MIN', -73.9902 );
-define( 'CETECH_MAP_LON_MAX', -32.3909 );
-define( 'CETECH_MAP_LAT_MAX', 5.2710 );
-define( 'CETECH_MAP_LAT_MIN', -33.7514 );
-define( 'CETECH_MAP_WIDTH', 1000.0 );
+/* Limites da projecao equirretangular do mapa SVG (SP + vizinhos). */
+define( 'CETECH_MAP_LON_MIN', -58.8992 );
+define( 'CETECH_MAP_LON_MAX', -39.1240 );
+define( 'CETECH_MAP_LAT_MAX', -13.5004 );
+define( 'CETECH_MAP_LAT_MIN', -27.4492 );
+define( 'CETECH_MAP_WIDTH', 900.0 );
 
 /* ------------------------------------------------------------
  * 1. Registro do CSS do front-end (mapa SVG)
