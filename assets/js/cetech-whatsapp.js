@@ -354,6 +354,7 @@ var lines = [];
 				var body = new URLSearchParams();
 				body.append('action', 'cetech_wa_save_lead');
 				body.append('nonce', config.nonce || '');
+				body.append('tipo_cliente', tipoCliente || '');
 				body.append('nome', nome);
 				body.append('fone', fone);
 				body.append('setor', setorVal);
