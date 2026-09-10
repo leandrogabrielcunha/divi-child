@@ -19,9 +19,29 @@
 		var perfilWrap = root.querySelector('[data-cetech-wa-perfil]');
 		var planoWrap = root.querySelector('[data-cetech-wa-plano]');
 		var fone = root.querySelector('input[name="fone"]');
+		var tipoStep = root.querySelector('[data-cetech-wa-tipo]');
+		var tipoBtns = root.querySelectorAll('.cetech-wa__tipo');
+		var tipoCliente = '';
 
 		var isOpen = false;
 		var isComercial = false;
+
+		if (form) {
+			var hiddenTipo = form.querySelector('input[name="tipo_cliente"]');
+		}
+
+		tipoBtns.forEach(function (tipoBtn) {
+			tipoBtn.addEventListener('click', function () {
+				tipoCliente = tipoBtn.getAttribute('data-tipo');
+				hiddenTipo.value = tipoCliente;
+				tipoStep.hidden = true;
+				form.hidden = false;
+				var nomeInput = form.querySelector('input[name="nome"]');
+				if (nomeInput) {
+					nomeInput.focus();
+				}
+			});
+		});
 
 		function maskPhone(value) {
 			var digits = String(value).replace(/\D/g, '').slice(0, 11);
@@ -185,13 +205,16 @@
 					return;
 				}
 
-				var lines = [];
-				lines.push('Olá! Vim pelo site da CE Tech.');
-				lines.push('Nome: ' + nome);
-				if (fone) {
-					lines.push('Telefone: ' + fone);
-				}
-				lines.push('Tipo de atendimento: ' + setorVal);
+var lines = [];
+			lines.push('Olá! Vim pelo site da CE Tech.');
+			lines.push('Nome: ' + nome);
+			if (fone) {
+				lines.push('Telefone: ' + fone);
+			}
+			if (tipoCliente) {
+				lines.push('Já é cliente: ' + ('cliente' === tipoCliente ? 'Sim' : 'Não'));
+			}
+			lines.push('Tipo de atendimento: ' + setorVal);
 				if (isComercial) {
 					lines.push('Perfil: ' + ('empresarial' === perfilVal ? 'Empresarial' : 'Residencial'));
 					if (planoId) {

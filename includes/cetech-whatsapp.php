@@ -185,6 +185,7 @@ function cetech_wa_columns( $columns ) {
 	$new_columns = array(
 		'cb'               => isset( $columns['cb'] ) ? $columns['cb'] : '<input type="checkbox" />',
 		'title'            => __( 'Nome', 'Divi' ),
+		'cetech_wa_tipo'   => __( 'Tipo', 'Divi' ),
 		'cetech_wa_fone'   => __( 'Telefone', 'Divi' ),
 		'cetech_wa_setor'  => __( 'Setor', 'Divi' ),
 		'cetech_wa_perfil' => __( 'Perfil', 'Divi' ),
@@ -198,6 +199,17 @@ add_filter( 'manage_' . CETECH_WA_CPT . '_posts_columns', 'cetech_wa_columns' );
 
 function cetech_wa_render_column( $column, $post_id ) {
 	switch ( $column ) {
+		case 'cetech_wa_tipo':
+			$tipo = get_post_meta( $post_id, '_cetech_lead_tipo_cliente', true );
+			if ( 'cliente' === $tipo ) {
+				echo '<span style="color:#1a7f37;font-weight:600;">' . esc_html__( 'Já é cliente', 'Divi' ) . '</span>';
+			} elseif ( 'novo' === $tipo ) {
+				echo '<span style="color:#2020EE;font-weight:600;">' . esc_html__( 'Novo cliente', 'Divi' ) . '</span>';
+			} else {
+				echo '&mdash;';
+			}
+			break;
+
 		case 'cetech_wa_fone':
 			echo esc_html( get_post_meta( $post_id, '_cetech_lead_fone', true ) );
 			break;
@@ -228,6 +240,8 @@ function cetech_wa_save_lead() {
 	$nome     = trim( sanitize_text_field( wp_unslash( isset( $_POST['nome'] ) ? $_POST['nome'] : '' ) ) );
 	$fone     = trim( sanitize_text_field( wp_unslash( isset( $_POST['fone'] ) ? $_POST['fone'] : '' ) ) );
 	$setor    = trim( sanitize_text_field( wp_unslash( isset( $_POST['setor'] ) ? $_POST['setor'] : '' ) ) );
+	$tipo_cliente = isset( $_POST['tipo_cliente'] ) ? sanitize_key( wp_unslash( $_POST['tipo_cliente'] ) ) : '';
+	$tipo_cliente = in_array( $tipo_cliente, array( 'cliente', 'novo' ), true ) ? $tipo_cliente : '';
 	$perfil   = isset( $_POST['perfil'] ) ? sanitize_key( wp_unslash( $_POST['perfil'] ) ) : '';
 	$perfil   = in_array( $perfil, array( 'residencial', 'empresarial' ), true ) ? $perfil : '';
 	$plano_id = isset( $_POST['plano_id'] ) ? absint( $_POST['plano_id'] ) : 0;
@@ -237,6 +251,14 @@ function cetech_wa_save_lead() {
 		wp_send_json_error(
 			array(
 				'message' => __( 'Preencha o nome e o tipo de atendimento.', 'Divi' ),
+			)
+		);
+	}
+
+	if ( '' === $tipo_cliente ) {
+		wp_send_json_error(
+			array(
+				'message' => __( 'Informe se você já é cliente.', 'Divi' ),
 			)
 		);
 	}
@@ -274,6 +296,7 @@ function cetech_wa_save_lead() {
 	update_post_meta( $lead_id, '_cetech_lead_nome', $nome );
 	update_post_meta( $lead_id, '_cetech_lead_fone', $fone );
 	update_post_meta( $lead_id, '_cetech_lead_setor', $setor );
+	update_post_meta( $lead_id, '_cetech_lead_tipo_cliente', $tipo_cliente );
 	update_post_meta( $lead_id, '_cetech_lead_perfil', $perfil );
 
 	if ( $plano_id && '' !== $plano_title ) {
@@ -482,7 +505,27 @@ function cetech_wa_render() {
 				</button>
 			</header>
 
-			<form class="cetech-wa__form" id="cetech-wa-form">
+			<div class="cetech-wa__step" data-cetech-wa-tipo>
+				<p class="cetech-wa__step-title"><?php esc_html_e( 'Você já é cliente da CE Tech?', 'Divi' ); ?></p>
+				<p class="cetech-wa__step-sub"><?php esc_html_e( 'Selecione a opção para continuar o atendimento.', 'Divi' ); ?></p>
+				<div class="cetech-wa__step-options">
+					<button type="button" class="cetech-wa__tipo" data-tipo="cliente">
+						<span class="cetech-wa__tipo-icon" aria-hidden="true">
+							<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+						</span>
+						<span class="cetech-wa__tipo-label"><?php esc_html_e( 'Já sou cliente', 'Divi' ); ?></span>
+					</button>
+					<button type="button" class="cetech-wa__tipo" data-tipo="novo">
+						<span class="cetech-wa__tipo-icon" aria-hidden="true">
+							<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
+						</span>
+						<span class="cetech-wa__tipo-label"><?php esc_html_e( 'Quero ser cliente', 'Divi' ); ?></span>
+					</button>
+				</div>
+			</div>
+
+			<form class="cetech-wa__form" id="cetech-wa-form" hidden>
+				<input type="hidden" name="tipo_cliente" value="" />
 				<div class="cetech-wa__field">
 					<label for="cetech-wa-nome"><?php esc_html_e( 'Nome', 'Divi' ); ?></label>
 					<input type="text" id="cetech-wa-nome" name="nome" required autocomplete="name" placeholder="<?php esc_attr_e( 'Seu nome', 'Divi' ); ?>" />
