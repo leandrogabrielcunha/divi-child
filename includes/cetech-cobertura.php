@@ -20,44 +20,25 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Constantes
  * ------------------------------------------------------------ */
 define( 'CETECH_CIDADE_CPT', 'cetech_cidade' );
-define( 'CETECH_COBERTURA_JS', 'cetech-cobertura' );
 define( 'CETECH_COBERTURA_CSS', 'cetech-cobertura' );
 define( 'CETECH_COBERTURA_ADMIN_JS', 'cetech-cobertura-admin' );
 
+/* Limites da projecao equirretangular do mapa SVG (Brasil). */
+define( 'CETECH_MAP_LON_MIN', -73.9902 );
+define( 'CETECH_MAP_LON_MAX', -32.3909 );
+define( 'CETECH_MAP_LAT_MAX', 5.2710 );
+define( 'CETECH_MAP_LAT_MIN', -33.7514 );
+define( 'CETECH_MAP_WIDTH', 1000.0 );
+
 /* ------------------------------------------------------------
- * 1. Registro dos assets (Leaflet via CDN + assets do tema)
+ * 1. Registro do CSS do front-end (mapa SVG)
  * ------------------------------------------------------------ */
 function cetech_cobertura_register_assets() {
-	$theme = wp_get_theme();
-
-	wp_register_style(
-		'leaflet',
-		'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-		array(),
-		'1.9.4'
-	);
-
-	wp_register_script(
-		'leaflet',
-		'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-		array(),
-		'1.9.4',
-		true
-	);
-
 	wp_register_style(
 		CETECH_COBERTURA_CSS,
 		get_stylesheet_directory_uri() . '/assets/css/cetech-cobertura.css',
-		array( 'leaflet' ),
-		$theme->get( 'Version' )
-	);
-
-	wp_register_script(
-		CETECH_COBERTURA_JS,
-		get_stylesheet_directory_uri() . '/assets/js/cetech-cobertura.js',
-		array( 'leaflet' ),
-		$theme->get( 'Version' ),
-		true
+		array(),
+		wp_get_theme()->get( 'Version' )
 	);
 }
 add_action( 'wp_enqueue_scripts', 'cetech_cobertura_register_assets' );
@@ -452,56 +433,108 @@ function cetech_cobertura_cities() {
 }
 
 /* ------------------------------------------------------------
- * 8. Shortcode [cetech_cobertura]
+ * 8. Mapa SVG (Brasil focado em Sao Paulo) + pins das cidades
+ * ------------------------------------------------------------ */
+function cetech_cobertura_pins_svg() {
+	$cities = cetech_cobertura_cities();
+	if ( empty( $cities ) ) {
+		return '';
+	}
+
+	$width  = CETECH_MAP_WIDTH;
+	$scale  = $width / ( CETECH_MAP_LON_MAX - CETECH_MAP_LON_MIN );
+	$height = ( CETECH_MAP_LAT_MAX - CETECH_MAP_LAT_MIN ) * $scale;
+
+	$out   = '';
+	$index = 0;
+
+	foreach ( $cities as $city ) {
+		$px = ( $city['lng'] - CETECH_MAP_LON_MIN ) * $scale;
+		$py = ( CETECH_MAP_LAT_MAX - $city['lat'] ) * $scale;
+
+		if ( $px < 0 || $px > $width || $py < 0 || $py > $height ) {
+			continue;
+		}
+
+		$title = $city['name'];
+		if ( '' !== $city['uf'] ) {
+			$title .= ' (' . $city['uf'] . ')';
+		}
+		if ( ! empty( $city['bairros'] ) ) {
+			$title .= ' — ' . implode( ' · ', $city['bairros'] );
+		}
+
+		$out .= sprintf(
+			'<g transform="translate(%1$s %2$s)"><g class="cetech-svg__pin" style="--i:%3$d">' .
+			'<circle class="cetech-svg__pin-ring" r="9"/><circle class="cetech-svg__pin-dot" r="5.5"/>' .
+			'<title>%4$s</title></g></g>',
+			number_format( $px, 1, '.', '' ),
+			number_format( $py, 1, '.', '' ),
+			$index,
+			esc_html( $title )
+		);
+
+		$index++;
+	}
+
+	return $out;
+}
+
+function cetech_cobertura_svg() {
+	static $svg = null;
+
+	if ( null !== $svg ) {
+		return $svg;
+	}
+
+	$svg   = '';
+	$file  = get_stylesheet_directory() . '/assets/maps/brasil.svg';
+	$raw   = @file_get_contents( $file );
+
+	if ( false !== $raw && false !== strpos( $raw, '</svg>' ) ) {
+		$svg = str_replace( '</svg>', cetech_cobertura_pins_svg() . '</svg>', $raw );
+	}
+
+	return $svg;
+}
+
+/* ------------------------------------------------------------
+ * 9. Shortcode [cetech_cobertura]
  * ------------------------------------------------------------ */
 function cetech_cobertura_render() {
 	static $enqueued = false;
 
 	if ( ! $enqueued ) {
 		wp_enqueue_style( CETECH_COBERTURA_CSS );
-		wp_enqueue_script( CETECH_COBERTURA_JS );
-
-		$cities  = cetech_cobertura_cities();
-		$sp_url  = get_stylesheet_directory_uri() . '/assets/maps/sp.geojson';
-
-		wp_localize_script(
-			CETECH_COBERTURA_JS,
-			'cetechCobertura',
-			array(
-				'spUrl'    => $sp_url,
-				'cities'   => $cities,
-				'mapTitle' => __( 'Cidades atendidas', 'Divi' ),
-				'mapSub'   => __( 'Fiber tudo a sua volta.', 'Divi' ),
-			)
-		);
-
 		$enqueued = true;
 	}
 
 	$cities = cetech_cobertura_cities();
+	$svg    = cetech_cobertura_svg();
 
 	ob_start();
 	?>
-	<div class="cetech-cobertura" style="--cetech-map-h: 520px;">
+	<div class="cetech-cobertura">
 		<div class="cetech-cobertura__head">
 			<h2 class="cetech-cobertura__title"><?php esc_html_e( 'Cidades atendidas', 'Divi' ); ?></h2>
 			<?php if ( ! empty( $cities ) ) : ?>
 				<span class="cetech-cobertura__count"><?php echo esc_html( count( $cities ) ); ?></span>
 			<?php endif; ?>
 		</div>
-		<div class="cetech-cobertura__map-wrap">
-			<div class="cetech-cobertura__map" id="cetech-cobertura-map" aria-label="Mapa das cidades atendidas"></div>
-			<div class="cetech-cobertura__loading" id="cetech-cobertura-loading" aria-hidden="true">
-				<span class="cetech-cobertura__spinner" aria-hidden="true"></span>
-				<span><?php esc_html_e( 'Carregando mapa…', 'Divi' ); ?></span>
+		<div class="cetech-cobertura__map-svg">
+			<div class="cetech-cobertura__chip" aria-hidden="true">
+				<strong>SP</strong>
+				<span><?php echo esc_html( count( $cities ) ); ?> <?php esc_html_e( 'cidades atendidas', 'Divi' ); ?></span>
 			</div>
-			<noscript>
+			<?php if ( '' !== $svg ) : ?>
+				<?php echo $svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- SVG interno do tema. ?>
+			<?php elseif ( ! empty( $cities ) ) : ?>
 				<ul class="cetech-cobertura__noscript">
 					<?php foreach ( $cities as $cidade ) : ?>
 						<li><?php echo esc_html( $cidade['name'] ); ?></li>
 					<?php endforeach; ?>
 				</ul>
-			</noscript>
+			<?php endif; ?>
 		</div>
 	</div>
 	<?php
