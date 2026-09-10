@@ -102,3 +102,8 @@ require_once get_stylesheet_directory() . '/includes/cetech-planos.php';
 #CE Tech - WhatsApp (botão flutuante + leads)
 ================================================*/
 require_once get_stylesheet_directory() . '/includes/cetech-whatsapp.php';
+
+/*================================================
+#CE Tech - Cobertura (mapa de cidades atendidas)
+================================================*/
+require_once get_stylesheet_directory() . '/includes/cetech-cobertura.php';
