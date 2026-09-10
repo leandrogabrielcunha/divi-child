@@ -468,17 +468,26 @@ function cetech_cobertura_viewbox( $cities ) {
 	$min_y = min( $ys );
 	$max_y = max( $ys );
 
-	$span   = max( $max_x - $min_x, $max_y - $min_y );
-	$pad    = max( $span * 0.45, 22.0 );
-	$view_w = $max_x - $min_x + ( 2 * $pad );
-	$view_h = $max_y - $min_y + ( 2 * $pad );
+	$span = max( $max_x - $min_x, $max_y - $min_y );
+
+	/* Margem ao redor das cidades (zoom suave) e janela minima
+	 * para manter contexto do estado e pins sem sobreposicao. */
+	$margin = max( $span * 0.9, 90.0 );
+	$min_w  = 200.0;
+	$min_h  = 150.0;
+
+	$center_x = ( $min_x + $max_x ) / 2;
+	$center_y = ( $min_y + $max_y ) / 2;
+
+	$view_w = max( $max_x - $min_x + ( 2 * $margin ), $min_w );
+	$view_h = max( $max_y - $min_y + ( 2 * $margin ), $min_h );
 
 	/* Mantem o zoom dentro dos limites do mapa inteiro. */
 	$view_w = min( $view_w, CETECH_MAP_WIDTH );
 	$view_h = min( $view_h, $height );
 
-	$vb_x = max( 0, min( $min_x - $pad, CETECH_MAP_WIDTH - $view_w ) );
-	$vb_y = max( 0, min( $min_y - $pad, $height - $view_h ) );
+	$vb_x = max( 0, min( $center_x - ( $view_w / 2 ), CETECH_MAP_WIDTH - $view_w ) );
+	$vb_y = max( 0, min( $center_y - ( $view_h / 2 ), $height - $view_h ) );
 
 	return sprintf( '%1.1f %1.1f %1.1f %1.1f', $vb_x, $vb_y, $view_w, $view_h );
 }
