@@ -4,7 +4,7 @@
  *
  * Area do associado, fora do painel do WordPress. E o destino do login
  * dos associados e concentra os servicos: emissao de boletos, planilhas,
- * relatorios, convencoes coletivas, juridico e fale conosco.
+ * relatorios, convencoes coletivas, simuladores, juridico e fale conosco.
  *
  * Usa o fluxo padrao do Divi (get_header/get_footer) para exibir o
  * header e o footer globais. O header customizado e renderizado pelo
@@ -58,6 +58,7 @@ foreach ( $planilhas as $plan_item ) {
 $relatorios   = setceb_relatorios();
 $convencoes   = setceb_convencoes();
 $outros_materiais = setceb_outros_mat();
+$simuladores  = setceb_simuladores();
 $recentes     = setceb_conteudos_recentes( 8 );
 $boletos      = setceb_boletos();
 $assuntos     = setceb_contato_assuntos();
@@ -70,6 +71,7 @@ $atalhos = array(
 	'relatorios'       => 'Relatórios',
 	'convencoes'       => 'Convenções Coletivas',
 	'outros-materiais' => 'Outros Materiais',
+	'simuladores'      => 'Simuladores',
 	'juridico'         => 'Jurídico',
 	'financeiro'       => 'Financeiro',
 	'fale-conosco'     => 'Fale Conosco',
@@ -333,7 +335,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 												continue;
 											}
 											?>
-											<li class="assoc-list__item"<?php echo isset( $item['ano'] ) ? ' data-ano="' . esc_attr( $item['ano'] ) . '"' : ''; ?>>
+											<li class="assoc-list__item">
 												<span class="assoc-list__icon"><span class="dashicons dashicons-media-document" aria-hidden="true"></span></span>
 												<div class="assoc-list__info">
 													<h3 class="assoc-list__title"><?php echo esc_html( $item['titulo'] ); ?></h3>
@@ -379,7 +381,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 												$om_meta[] = $item['ano'];
 											}
 											?>
-											<li class="assoc-list__item"<?php echo ! empty( $item['categoria'] ) ? ' data-categoria="' . esc_attr( $item['categoria'] ) . '"' : ''; ?><?php echo ! empty( $item['ano'] ) ? ' data-ano="' . esc_attr( $item['ano'] ) . '"' : ''; ?>>
+											<li class="assoc-list__item">
 												<span class="assoc-list__icon"><span class="dashicons dashicons-portfolio" aria-hidden="true"></span></span>
 												<div class="assoc-list__info">
 													<h3 class="assoc-list__title"><?php echo esc_html( $item['titulo'] ); ?></h3>
@@ -398,6 +400,52 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 									<div class="assoc-empty">
 										<span class="dashicons dashicons-portfolio assoc-empty__icon" aria-hidden="true"></span>
 										<p>Nenhum material disponível no momento.</p>
+									</div>
+								<?php endif; ?>
+							</section>
+
+							<!-- SIMULADORES -->
+							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'simuladores', $active_panel, 'class' ) ) ); ?>" id="panel-simuladores" role="tabpanel" aria-labelledby="tab-simuladores" tabindex="0">
+								<h2 class="assoc-panel__title">Simuladores</h2>
+								<p class="assoc-panel__intro">Ferramentas online de cálculo e simulação disponibilizadas para os associados.</p>
+
+								<?php if ( ! empty( $simuladores ) ) : ?>
+									<ul class="assoc-list">
+										<?php foreach ( $simuladores as $item ) : ?>
+											<?php
+											if ( empty( $item['titulo'] ) || empty( $item['url'] ) ) {
+												continue;
+											}
+
+											$sim_meta = array();
+
+											if ( ! empty( $item['descricao'] ) ) {
+												$sim_meta[] = $item['descricao'];
+											}
+
+											if ( ! empty( $item['ano'] ) ) {
+												$sim_meta[] = $item['ano'];
+											}
+											?>
+											<li class="assoc-list__item">
+												<span class="assoc-list__icon"><span class="dashicons dashicons-performance" aria-hidden="true"></span></span>
+												<div class="assoc-list__info">
+													<h3 class="assoc-list__title"><?php echo esc_html( $item['titulo'] ); ?></h3>
+													<?php if ( ! empty( $sim_meta ) ) : ?>
+														<span class="assoc-list__meta"><?php echo esc_html( implode( ' · ', $sim_meta ) ); ?></span>
+													<?php endif; ?>
+												</div>
+												<a class="assoc-list__link" href="<?php echo esc_url( $item['url'] ); ?>" target="_blank" rel="noopener noreferrer">
+													Abrir
+													<span class="dashicons dashicons-external" aria-hidden="true"></span>
+												</a>
+											</li>
+										<?php endforeach; ?>
+									</ul>
+								<?php else : ?>
+									<div class="assoc-empty">
+										<span class="dashicons dashicons-performance assoc-empty__icon" aria-hidden="true"></span>
+										<p>Nenhum simulador disponível no momento.</p>
 									</div>
 								<?php endif; ?>
 							</section>

@@ -9,6 +9,7 @@
  * - Relatorios             (setceb_relatorio)
  * - Convencoes Coletivas   (setceb_convencoes)
  * - Outros Materiais       (setceb_outros_mat)
+ * - Simuladores            (setceb_simulador)
  *
  * Cada item possui: titulo, arquivo (URL da biblioteca de midia ou
  * link externo), categoria (taxonomia "Categorias de Documentos",
@@ -30,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string[]
  */
 function setceb_documento_post_types() {
-	return array( 'setceb_planilha', 'setceb_relatorio', 'setceb_convencoes', 'setceb_outros_mat' );
+	return array( 'setceb_planilha', 'setceb_relatorio', 'setceb_convencoes', 'setceb_outros_mat', 'setceb_simulador' );
 }
 
 /**
@@ -60,6 +61,7 @@ function setceb_documentos_register() {
 		'setceb_relatorio'        => array( 'Relatórios', 'Relatório', 'dashicons-chart-bar', 31 ),
 		'setceb_convencoes'       => array( 'Convenções Coletivas', 'Convenção Coletiva', 'dashicons-media-document', 32 ),
 		'setceb_outros_mat' => array( 'Outros Materiais', 'Outro Material', 'dashicons-portfolio', 33 ),
+		'setceb_simulador'  => array( 'Simuladores', 'Simulador', 'dashicons-performance', 34 ),
 	);
 
 	foreach ( $tipos as $slug => $info ) {
@@ -93,55 +95,65 @@ function setceb_documentos_register() {
 add_action( 'init', 'setceb_documentos_register' );
 
 /**
- * Garante o menu "Outros Materiais" no painel.
+ * Garante os menus de nivel superior dos CPTs da area do associado.
  *
  * Alguem mais (plugin com o mesmo slug, reorganizador de menus etc.) pode
- * sobrescrever o menu deste post type. Aqui, no final do admin_menu,
- * verificamos se ele realmente esta no menu global e, se nao estiver,
- * recriamos o item de nivel superior e seus submenus.
+ * sobrescrever o menu de algum post type. Aqui, no final do admin_menu,
+ * verificamos se cada tipo realmente esta no menu global e, se nao
+ * estiver, recriamos o item de nivel superior e seus submenus.
  */
-function setceb_documentos_ensure_outros_materiais_menu() {
+function setceb_documentos_ensure_menus() {
 	global $menu;
 
+	$menu_slugs = array();
+
 	foreach ( (array) $menu as $item ) {
-		if ( ! empty( $item[2] ) && 'edit.php?post_type=setceb_outros_mat' === $item[2] ) {
-			return;
+		if ( ! empty( $item[2] ) ) {
+			$menu_slugs[ $item[2] ] = true;
 		}
 	}
 
-	$obj = get_post_type_object( 'setceb_outros_mat' );
+	foreach ( setceb_documento_post_types() as $slug ) {
+		$menu_url = 'edit.php?post_type=' . $slug;
 
-	if ( ! $obj || ! current_user_can( $obj->cap->edit_posts ) ) {
-		return;
+		if ( isset( $menu_slugs[ $menu_url ] ) ) {
+			continue;
+		}
+
+		$obj = get_post_type_object( $slug );
+
+		if ( ! $obj || ! current_user_can( $obj->cap->edit_posts ) ) {
+			continue;
+		}
+
+		add_menu_page(
+			$obj->labels->name,
+			$obj->labels->menu_name,
+			$obj->cap->edit_posts,
+			$menu_url,
+			'',
+			$obj->menu_icon ? $obj->menu_icon : 'dashicons-admin-post',
+			$obj->menu_position
+		);
+
+		add_submenu_page(
+			$menu_url,
+			$obj->labels->all_items,
+			$obj->labels->all_items,
+			$obj->cap->edit_posts,
+			$menu_url
+		);
+
+		add_submenu_page(
+			$menu_url,
+			$obj->labels->add_new_item,
+			$obj->labels->add_new,
+			$obj->cap->create_posts,
+			'post-new.php?post_type=' . $slug
+		);
 	}
-
-	add_menu_page(
-		$obj->labels->name,
-		$obj->labels->menu_name,
-		$obj->cap->edit_posts,
-		'edit.php?post_type=setceb_outros_mat',
-		'',
-		$obj->menu_icon ? $obj->menu_icon : 'dashicons-portfolio',
-		33
-	);
-
-	add_submenu_page(
-		'edit.php?post_type=setceb_outros_mat',
-		$obj->labels->all_items,
-		$obj->labels->all_items,
-		$obj->cap->edit_posts,
-		'edit.php?post_type=setceb_outros_mat'
-	);
-
-	add_submenu_page(
-		'edit.php?post_type=setceb_outros_mat',
-		$obj->labels->add_new_item,
-		$obj->labels->add_new,
-		$obj->cap->create_posts,
-		'post-new.php?post_type=setceb_outros_mat'
-	);
 }
-add_action( 'admin_menu', 'setceb_documentos_ensure_outros_materiais_menu', 99 );
+add_action( 'admin_menu', 'setceb_documentos_ensure_menus', 99 );
 
 /**
  * Popula a taxonomia com as categorias padrao do menu de filtros.

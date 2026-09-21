@@ -421,11 +421,24 @@ function setceb_outros_mat() {
 }
 
 /**
+ * Simuladores disponibilizados ao associado.
+ *
+ * Fonte: itens do CPT "setceb_simulador" (menu Simuladores no painel).
+ *
+ * @return array[]
+ */
+function setceb_simuladores() {
+	$itens = function_exists( 'setceb_documentos_query' ) ? setceb_documentos_query( 'setceb_simulador' ) : array();
+
+	return apply_filters( 'setceb_simuladores', $itens );
+}
+
+/**
  * Conteudos mais recentes publicados para o associado.
  *
  * Reune os itens mais recentes dos CPTs da area do associado
- * (Planilhas, Relatorios, Convencoes e Outros Materiais), ordenados
- * pela data de publicacao. Itens sem URL sao ignorados.
+ * (Planilhas, Relatorios, Convencoes, Outros Materiais e Simuladores),
+ * ordenados pela data de publicacao. Itens sem URL sao ignorados.
  *
  * @param int $limite Quantidade maxima de itens.
  * @return array[]
@@ -440,6 +453,7 @@ function setceb_conteudos_recentes( $limite = 8 ) {
 		'setceb_relatorio'        => array( 'Relatórios', 'dashicons-chart-bar' ),
 		'setceb_convencoes'       => array( 'Convenções Coletivas', 'dashicons-media-document' ),
 		'setceb_outros_mat' => array( 'Outros Materiais', 'dashicons-portfolio' ),
+		'setceb_simulador'  => array( 'Simuladores', 'dashicons-performance' ),
 	);
 
 	$posts = get_posts(
