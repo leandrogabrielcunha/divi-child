@@ -2,8 +2,12 @@
 CE TECH - Cards de Planos (shortcode [planos])
 CSS isolado com prefixo .cetech-planos para nao afetar outros
 componentes do site. Baseado no design dos cards da referencia.
+
+O modal de detalhes (.cetech-planos__modal-root) fica fora de
+.cetech-planos e compartilha as mesmas variaveis de design.
 ============================================================*/
-.cetech-planos {
+.cetech-planos,
+.cetech-planos__modal-root {
 	font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	--cetech-p-blue: #2020EE;
 	--cetech-p-blue-dark: #1515C0;
@@ -19,12 +23,24 @@ componentes do site. Baseado no design dos cards da referencia.
 
 .cetech-planos *,
 .cetech-planos *::before,
-.cetech-planos *::after {
+.cetech-planos *::after,
+.cetech-planos__modal-root *,
+.cetech-planos__modal-root *::before,
+.cetech-planos__modal-root *::after {
 	box-sizing: border-box;
 }
 
-.cetech-planos a {
+.cetech-planos a,
+.cetech-planos__modal-root a {
 	text-decoration: none;
+}
+
+/* O conteudo guardado fica fora do fluxo e e clonado pelo JS no modal.
+   Nao se aplica display:none em .cetech-planos__store-item, senao o clone
+   também apareceria escondido dentro do modal. */
+.cetech-planos__modal-root [hidden],
+.cetech-planos__store {
+	display: none;
 }
 
 /* ---------- Grid ---------- */
@@ -228,6 +244,16 @@ componentes do site. Baseado no design dos cards da referencia.
 	border-top-color: rgba(255, 255, 255, 0.15);
 }
 
+/* Sem borda quando o bloco de apps ja faz a divisao da secao. */
+.cetech-planos__benefits--flush {
+	border-top: 0;
+	padding-top: 0;
+}
+
+.cetech-planos__card--featured .cetech-planos__benefits--flush {
+	border-top-color: transparent;
+}
+
 .cetech-planos__benefit {
 	display: flex;
 	align-items: center;
@@ -258,6 +284,222 @@ componentes do site. Baseado no design dos cards da referencia.
 	color: var(--cetech-p-green);
 }
 
+/* ============================================================
+   Apps / Canais inclusos
+   Vitrine compacta: logo em area propria com tamanho fixo e
+   object-fit: contain, para logos uniformes e nunca distorcidos.
+   ============================================================ */
+.cetech-planos__apps {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding-top: 14px;
+	border-top: 1px solid #ebebf5;
+}
+
+.cetech-planos__apps--featured {
+	border-top-color: rgba(255, 255, 255, 0.15);
+}
+
+.cetech-planos__apps-title {
+	font-size: 10.5px;
+	font-weight: 700;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	color: #bbbbbb;
+}
+
+.cetech-planos__apps--featured .cetech-planos__apps-title {
+	color: rgba(255, 255, 255, 0.5);
+}
+
+.cetech-planos__apps-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+	gap: 8px;
+}
+
+.cetech-planos__app {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+	padding: 10px 6px;
+	border: 1px solid var(--cetech-p-border);
+	border-radius: 12px;
+	background: #fff;
+	transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cetech-planos__apps--featured .cetech-planos__app {
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
+}
+
+/* Area reservada ao logo: altura fixa para todos os apps. */
+.cetech-planos__app-logo {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 38px;
+}
+
+.cetech-planos__app-logo img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: 52px;
+	object-fit: contain;
+	object-position: center;
+}
+
+.cetech-planos__app-info {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+	min-width: 0;
+	width: 100%;
+}
+
+.cetech-planos__app-name {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	max-width: 100%;
+	font-size: 10.5px;
+	font-weight: 600;
+	line-height: 1.25;
+	text-align: center;
+	color: var(--cetech-p-muted);
+	overflow-wrap: anywhere;
+}
+
+.cetech-planos__app-desc,
+.cetech-planos__app-details {
+	display: none;
+}
+
+/* Variante detalhada, usada no modal. */
+.cetech-planos__apps--card {
+	padding-top: 0;
+	border-top: 0;
+	gap: 12px;
+}
+
+.cetech-planos__apps--card .cetech-planos__apps-list {
+	grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+	gap: 10px;
+}
+
+.cetech-planos__apps--card .cetech-planos__app {
+	flex-direction: row;
+	align-items: center;
+	gap: 14px;
+	padding: 14px;
+	border-radius: 14px;
+}
+
+.cetech-planos__apps--card .cetech-planos__app-logo {
+	flex: none;
+	width: 58px;
+	height: 58px;
+	border: 1px solid #ebebf5;
+	border-radius: 12px;
+	background: #fff;
+}
+
+.cetech-planos__apps--card .cetech-planos__app-logo img {
+	max-width: 38px;
+	max-height: 38px;
+}
+
+.cetech-planos__apps--card .cetech-planos__app-info {
+	align-items: flex-start;
+	text-align: left;
+}
+
+.cetech-planos__apps--card .cetech-planos__app-name {
+	display: block;
+	-webkit-line-clamp: none;
+	overflow: visible;
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--cetech-p-ink);
+}
+
+.cetech-planos__apps--card .cetech-planos__app-desc,
+.cetech-planos__apps--card .cetech-planos__app-details {
+	display: block;
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--cetech-p-muted);
+}
+
+.cetech-planos__apps--card .cetech-planos__app-details {
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--cetech-p-green-dark);
+}
+
+/* ---------- Ações do card ---------- */
+.cetech-planos__actions {
+	margin-top: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.cetech-planos__more {
+	display: inline-flex;
+	align-self: center;
+	align-items: center;
+	gap: 5px;
+	background: none;
+	border: 0;
+	padding: 0;
+	font-family: inherit;
+	font-size: 12.5px;
+	font-weight: 700;
+	color: var(--cetech-p-blue);
+	cursor: pointer;
+	transition: gap 0.18s ease, opacity 0.18s ease;
+}
+
+.cetech-planos__more::after {
+	content: "\203A";
+	font-size: 18px;
+	line-height: 0.8;
+}
+
+.cetech-planos__more:hover {
+	gap: 9px;
+}
+
+.cetech-planos__more:focus-visible {
+	outline: 3px solid rgba(32, 32, 238, 0.35);
+	outline-offset: 3px;
+	border-radius: 4px;
+}
+
+.cetech-planos__card--featured .cetech-planos__more {
+	color: var(--cetech-p-green);
+}
+
+.cetech-planos__card--featured .cetech-planos__more:focus-visible {
+	outline-color: rgba(0, 232, 168, 0.45);
+}
+
+/* O card inteiro abre o modal; o cursor precisa refletir isso. */
+.cetech-planos__card[data-cetech-card] {
+	cursor: pointer;
+}
+
 /* ---------- Botão ---------- */
 .cetech-planos__btn {
 	display: block;
@@ -266,7 +508,6 @@ componentes do site. Baseado no design dos cards da referencia.
 	border-radius: 9px;
 	font-weight: 700;
 	font-size: 14px;
-	margin-top: auto;
 	background: var(--cetech-p-lavender);
 	color: var(--cetech-p-blue);
 	border: 1.5px solid rgba(32, 32, 238, 0.13);
@@ -296,6 +537,194 @@ componentes do site. Baseado no design dos cards da referencia.
 	outline-offset: 2px;
 }
 
+/* ============================================================
+   Modal de detalhes do plano
+   ============================================================ */
+.cetech-planos__modal {
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+}
+
+.cetech-planos__modal[hidden] {
+	display: none;
+}
+
+.cetech-planos__modal-overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(13, 13, 26, 0.62);
+	animation: cetech-planos-fade 0.2s ease;
+}
+
+.cetech-planos__modal-dialog {
+	position: relative;
+	width: 100%;
+	max-width: 640px;
+	max-height: 88vh;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	-webkit-overflow-scrolling: touch;
+	padding: 32px 28px 26px;
+	background: #fff;
+	border-radius: 20px;
+	box-shadow: 0 32px 80px rgba(13, 13, 26, 0.3);
+	animation: cetech-planos-rise 0.24s ease;
+}
+
+.cetech-planos__modal-dialog:focus {
+	outline: none;
+}
+
+.cetech-planos__modal-close {
+	position: absolute;
+	top: 14px;
+	right: 14px;
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 34px;
+	height: 34px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: var(--cetech-p-lavender);
+	color: var(--cetech-p-blue);
+	cursor: pointer;
+	transition: background 0.18s ease, color 0.18s ease;
+}
+
+.cetech-planos__modal-close:hover {
+	background: var(--cetech-p-blue);
+	color: #fff;
+}
+
+.cetech-planos__modal-close:focus-visible {
+	outline: 3px solid rgba(32, 32, 238, 0.35);
+	outline-offset: 2px;
+}
+
+.cetech-planos__modal-content {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.cetech-planos__modal-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 20px;
+	padding-bottom: 20px;
+	border-bottom: 1px solid #ebebf5;
+}
+
+.cetech-planos__modal-headings {
+	min-width: 0;
+}
+
+.cetech-planos__modal-name {
+	margin: 0 0 6px;
+	font-family: "Outfit", "Inter", sans-serif;
+	font-weight: 900;
+	font-size: 32px;
+	line-height: 1.1;
+	color: var(--cetech-p-blue);
+}
+
+.cetech-planos__modal-head .cetech-planos__desc {
+	margin: 0;
+}
+
+.cetech-planos__modal-head .cetech-planos__price {
+	flex: none;
+	align-items: flex-end;
+	text-align: right;
+	padding-top: 4px;
+}
+
+/* Badge dentro do modal: fluxo normal em vez de absoluto. */
+.cetech-planos__badge--static {
+	position: static;
+	transform: none;
+	display: inline-block;
+	margin: 0 0 10px;
+}
+
+.cetech-planos__modal-section {
+	display: flex;
+	flex-direction: column;
+}
+
+.cetech-planos__section-title {
+	display: block;
+	margin-bottom: 12px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	color: #bbbbbb;
+}
+
+/* O titulo da secao ja cumpre o papel da borda superior. */
+.cetech-planos__modal-content .cetech-planos__benefits {
+	border-top: 0;
+	padding-top: 0;
+}
+
+.cetech-planos__modal-content .cetech-planos__benefit {
+	font-size: 13.5px;
+}
+
+.cetech-planos__modal-foot {
+	margin-top: 2px;
+	padding-top: 20px;
+	border-top: 1px solid #ebebf5;
+}
+
+.cetech-planos__btn--modal {
+	padding: 15px 20px;
+	font-size: 15px;
+	background: var(--cetech-p-blue);
+	color: #fff;
+	border-color: var(--cetech-p-blue);
+}
+
+.cetech-planos__btn--modal:hover {
+	background: var(--cetech-p-blue-dark);
+	color: #fff;
+}
+
+@keyframes cetech-planos-fade {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes cetech-planos-rise {
+	from {
+		opacity: 0;
+		transform: translateY(16px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+html.cetech-planos-modal-open,
+html.cetech-planos-modal-open body {
+	overflow: hidden;
+}
+
 /* ---------- Responsivo ---------- */
 @media (max-width: 1023px) {
 	.cetech-planos__grid {
@@ -306,5 +735,61 @@ componentes do site. Baseado no design dos cards da referencia.
 @media (max-width: 640px) {
 	.cetech-planos__grid {
 		grid-template-columns: 1fr;
+	}
+
+	/* A grade reempacota sozinha: 58px de base evita overflow com 4+ apps. */
+	.cetech-planos__apps-list {
+		grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+		gap: 7px;
+	}
+
+	.cetech-planos__app {
+		padding: 9px 5px;
+		border-radius: 10px;
+	}
+
+	.cetech-planos__app-logo {
+		height: 32px;
+	}
+
+	.cetech-planos__app-logo img {
+		max-width: 44px;
+	}
+
+	.cetech-planos__apps--card .cetech-planos__apps-list {
+		grid-template-columns: 1fr;
+	}
+
+	/* Modal vira uma folha ancorada no rodape, sem cortar conteudo. */
+	.cetech-planos__modal {
+		padding: 0;
+		align-items: flex-end;
+	}
+
+	.cetech-planos__modal-dialog {
+		max-width: 100%;
+		max-height: 92vh;
+		padding: 26px 18px 22px;
+		border-radius: 20px 20px 0 0;
+	}
+
+	.cetech-planos__modal-head {
+		flex-direction: column;
+		gap: 14px;
+	}
+
+	.cetech-planos__modal-head .cetech-planos__price {
+		align-items: flex-start;
+		text-align: left;
+		padding-top: 0;
+	}
+
+	.cetech-planos__modal-name {
+		font-size: 27px;
+	}
+
+	.cetech-planos__apps--card .cetech-planos__app-logo {
+		width: 50px;
+		height: 50px;
 	}
 }

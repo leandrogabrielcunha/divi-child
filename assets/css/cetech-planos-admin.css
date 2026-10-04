@@ -26,3 +26,111 @@
 	margin-left: 4px;
 	padding: 0;
 }
+
+/* =========================================================
+   Repetidor de apps/canais inclusos
+   ========================================================= */
+.cetech-apps__list {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-bottom: 8px;
+}
+
+.cetech-apps__row {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	padding: 12px;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	background: #fff;
+}
+
+.cetech-apps__logo {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	flex: none;
+	width: 88px;
+}
+
+.cetech-apps__preview {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 64px;
+	height: 64px;
+	border: 1px dashed #c3c4c7;
+	border-radius: 8px;
+	background: #f6f7f7;
+	overflow: hidden;
+}
+
+.cetech-apps__preview img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: 56px;
+	max-height: 56px;
+	object-fit: contain;
+	object-position: center;
+}
+
+.cetech-apps__logo .button {
+	width: 100%;
+	min-height: 30px;
+	line-height: 1;
+	padding: 0 8px;
+}
+
+.cetech-apps__fields {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	flex: 1;
+	min-width: 0;
+}
+
+.cetech-apps__fields input[type="text"] {
+	margin: 0;
+	max-width: 100%;
+}
+
+.cetech-apps__active {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	color: #50575e;
+}
+
+.cetech-apps__actions {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex: none;
+	padding-top: 2px;
+}
+
+.cetech-apps__actions .button {
+	min-height: 30px;
+	line-height: 1;
+	padding: 0 10px;
+}
+
+.cetech-apps__actions .cetech-apps__remove {
+	padding: 0;
+}
+
+@media (max-width: 782px) {
+	.cetech-apps__row {
+		flex-wrap: wrap;
+	}
+
+	.cetech-apps__fields {
+		flex-basis: 100%;
+		order: 3;
+	}
+}
