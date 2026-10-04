@@ -229,29 +229,14 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	color: rgba(255, 255, 255, 0.8);
 }
 
-/* ---------- Benefícios ---------- */
+/* ---------- Benefícios (somente no modal de detalhes) ---------- */
 .cetech-planos__benefits {
 	list-style: none;
 	margin: 0;
-	padding: 14px 0 0;
-	border-top: 1px solid #ebebf5;
+	padding: 0;
 	display: flex;
 	flex-direction: column;
 	gap: 9px;
-}
-
-.cetech-planos__card--featured .cetech-planos__benefits {
-	border-top-color: rgba(255, 255, 255, 0.15);
-}
-
-/* Sem borda quando o bloco de apps ja faz a divisao da secao. */
-.cetech-planos__benefits--flush {
-	border-top: 0;
-	padding-top: 0;
-}
-
-.cetech-planos__card--featured .cetech-planos__benefits--flush {
-	border-top-color: transparent;
 }
 
 .cetech-planos__benefit {
@@ -261,10 +246,6 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	font-size: 13px;
 	color: #555555;
 	line-height: 1.4;
-}
-
-.cetech-planos__card--featured .cetech-planos__benefit {
-	color: rgba(255, 255, 255, 0.85);
 }
 
 .cetech-planos__check {
@@ -277,11 +258,6 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	border-radius: 6px;
 	background: var(--cetech-p-mint);
 	color: var(--cetech-p-green-dark);
-}
-
-.cetech-planos__card--featured .cetech-planos__check {
-	background: rgba(255, 255, 255, 0.16);
-	color: var(--cetech-p-green);
 }
 
 /* ============================================================
@@ -669,12 +645,6 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	letter-spacing: 1px;
 	text-transform: uppercase;
 	color: #bbbbbb;
-}
-
-/* O titulo da secao ja cumpre o papel da borda superior. */
-.cetech-planos__modal-content .cetech-planos__benefits {
-	border-top: 0;
-	padding-top: 0;
 }
 
 .cetech-planos__modal-content .cetech-planos__benefit {

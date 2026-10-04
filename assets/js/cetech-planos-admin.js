@@ -74,9 +74,9 @@ var list = wrap.find('[data-cetech-apps-list]');
 				'<button type="button" class="button-link delete cetech-apps__image-remove" style="display:none;">Remover</button>' +
 				'</div>' +
 				'<div class="cetech-apps__fields">' +
-				'<input type="text" class="regular-text" name="cetech_planos_apps[__i__][nome]" value="" placeholder="Ex.: Netflix" />' +
-				'<input type="text" class="large-text" name="cetech_planos_apps[__i__][desc]" value="" placeholder="Descrição: Ex.: Streaming de filmes e séries" />' +
-				'<input type="text" class="large-text" name="cetech_planos_apps[__i__][detalhes]" value="" placeholder="Detalhes: Ex.: Incluído sem custo adicional" />' +
+				'<input type="text" class="regular-text" name="cetech_planos_apps[__i__][nome]" value="" placeholder="Nome (opcional) — Ex.: Netflix" />' +
+				'<input type="text" class="large-text" name="cetech_planos_apps[__i__][desc]" value="" placeholder="Descrição (opcional): Ex.: Streaming de filmes e séries" />' +
+				'<input type="text" class="large-text" name="cetech_planos_apps[__i__][detalhes]" value="" placeholder="Detalhes (opcional): Ex.: Incluído sem custo adicional" />' +
 				'<label class="cetech-apps__active"><input type="checkbox" name="cetech_planos_apps[__i__][ativo]" value="1" checked="checked" /> Ativo</label>' +
 				'</div>' +
 				'<div class="cetech-apps__actions">' +
