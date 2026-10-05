@@ -14,6 +14,18 @@
 			return;
 		}
 
+		/* Sobe o modal para o fim do <body>. No site ele é impresso dentro de
+		   um módulo do Divi (.et_pb_code_inner > column > row > section), e
+		   qualquer ancestrais com position + z-index cria um contexto de
+		   empilhamento: o overlay fica preso naquele contexto e passa por
+		   baixo do header sticky, do botão do WhatsApp e do banner de
+		   cookies. No body, ele compete direto no contexto da raiz. */
+		var root = modal.parentNode;
+
+		if (root && root.parentNode !== document.body) {
+			document.body.appendChild(root);
+		}
+
 		var lastFocused = null;
 
 		function store(planId) {
