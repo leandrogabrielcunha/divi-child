@@ -267,16 +267,14 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 
 /* ============================================================
    Apps / Canais
-   Vitrine compacta: 3 icones por linha, logo em area propria com
-   tamanho fixo e object-fit: contain, para logos uniformes e nunca
-   distorcidos. Dois grupos separados pela palavra "OU" quando existe
-   app de escolha do cliente.
+   Vitrine compacta: 2 apps por linha, logo em area propria com tamanho
+   fixo e object-fit: contain, para logos uniformes e nunca distorcidos.
+   O cliente contrata UM app, entao todos sao alternativas e cada um e
+   precedido pela palavra "ou" numa coluna estreita a sua esquerda.
    ============================================================ */
 .cetech-planos__apps {
 	display: flex;
 	flex-direction: column;
-	/* Mesmo gap das colunas: as duas linhas ficam com o mesmo ritmo. */
-	gap: 8px;
 	padding-top: 14px;
 	border-top: 1px solid #ebebf5;
 }
@@ -286,51 +284,52 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 }
 
 /* ---------- Palavra separadora ----------
-   Nao e um divisor de linha nem entra dentro do box: fica numa coluna
-   estreita a esquerda de cada app de escolha. Assim o box continua do
-   mesmo tamanho do dos inclusos e a grade de 3 colunas se mantem. */
+   Coluna propria a esquerda de cada box. Sem fundo, sem borda e sem
+   raio: e so texto. Minúscula e leve de proposito, para ler como
+   palavra e nao como um selo/badge (em caixa alta e bold, "OU" virava
+   um borrão na tela). O card de destaque mantem o box branco, entao a
+   palavra nao precisa de variante. */
 .cetech-planos__app-or {
 	align-self: center;
-	padding-right: 2px;
-	font-size: 9px;
-	font-weight: 800;
-	letter-spacing: 0.6px;
+	padding-right: 4px;
+	font-family: inherit;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.4px;
 	line-height: 1;
 	text-align: right;
-	text-transform: uppercase;
-	color: #8a8aa0;
+	text-transform: lowercase;
+	color: #a3a3b8;
 	white-space: nowrap;
 }
-
-/* Sem variante para o card de destaque: o box do app e branco nos dois
-   casos, entao a palavra fica igual. */
 
 .cetech-planos__apps-list {
 	list-style: none;
 	margin: 0;
 	padding: 0;
 	display: grid;
-	/* 3 icones por linha, como no layout de vitrine de streaming. */
-	grid-template-columns: repeat(3, 1fr);
+	/* 2 apps por linha: com a coluna da palavra reserving espaco, 3
+	   deixavam a caixa estreita e alta demais. */
+	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 8px;
 }
 
-/* Linha de escolhas: cada app e precedido pela propria coluna estreita com
-   a palavra, entao o par (palavra | app) se repete 3 vezes na linha. Como a
-   coluna da palavra e estreita e identica em todos os pares, o box do app
-   continua do mesmo tamanho do dos inclusos e a grade de 3 colunas se mantem
-   mesmo com varias escolhas. */
+/* O par (palavra | box) se repete 2 vezes na linha. Como a coluna da
+   palavra tem sempre a mesma largura, todos os boxes ficam exatamente do
+   mesmo tamanho e alinhados entre si — algo que nao acontecia quando
+   inclusos e escolhas usavam duas grades diferentes. */
 .cetech-planos__apps-list--choices {
 	grid-template-columns:
-		20px minmax(0, 1fr)
-		20px minmax(0, 1fr)
-		20px minmax(0, 1fr);
+		24px minmax(0, 1fr)
+		24px minmax(0, 1fr);
 	column-gap: 6px;
 }
 
-/* Palavra oculta: sem a coluna estreita, as 3 colunas voltam a ser cheias. */
+/* Palavra oculta: a grade volta a ter so as 2 colunas de app, na mesma
+   largura da caixa de quando a palavra aparece. Assim o card fica igual
+   em tamanho com ou sem separador. */
 .cetech-planos__apps-list--no-or {
-	grid-template-columns: repeat(3, minmax(0, 1fr));
+	grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .cetech-planos__app {
@@ -390,15 +389,17 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 }
 
 .cetech-planos__apps--card .cetech-planos__app-or {
-	padding-right: 6px;
-	font-size: 11px;
+	padding-right: 8px;
+	font-size: 13px;
+	letter-spacing: 0.6px;
 }
 
+/* 2 apps por linha no modal. */
 .cetech-planos__apps--card .cetech-planos__apps-list--choices {
 	grid-template-columns:
-		34px minmax(0, 1fr)
-		34px minmax(0, 1fr);
-	column-gap: 10px;
+		30px minmax(0, 1fr)
+		30px minmax(0, 1fr);
+	column-gap: 8px;
 }
 
 .cetech-planos__apps--card .cetech-planos__apps-list--no-or {
@@ -711,14 +712,13 @@ html.cetech-planos-modal-open body {
 
 	.cetech-planos__app-or {
 		padding-right: 3px;
-		font-size: 8.5px;
+		font-size: 10px;
 	}
 
 	.cetech-planos__apps-list--choices {
 		grid-template-columns:
-			17px minmax(0, 1fr)
-			17px minmax(0, 1fr)
-			17px minmax(0, 1fr);
+			20px minmax(0, 1fr)
+			20px minmax(0, 1fr);
 		column-gap: 5px;
 	}
 
@@ -728,9 +728,13 @@ html.cetech-planos-modal-open body {
 
 	/* Depois da regra acima (mesma especificidade) para a palavra continuar
 	   ao lado do app no modal em vez de cair numa linha so. */
+	.cetech-planos__apps--card .cetech-planos__app-or {
+		font-size: 12px;
+	}
+
 	.cetech-planos__apps--card .cetech-planos__apps-list--choices {
-		grid-template-columns: 28px minmax(0, 1fr);
-		column-gap: 8px;
+		grid-template-columns: 26px minmax(0, 1fr);
+		column-gap: 6px;
 	}
 
 	.cetech-planos__apps--card .cetech-planos__apps-list--no-or {

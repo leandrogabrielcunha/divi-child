@@ -3,7 +3,7 @@
  * CE Tech - Planos (cards via shortcode)
  *
  * Registra o Custom Post Type "Planos", os campos customizados no editor
- * (incluindo as listas dinamicas de beneficios e de apps/canais inclusos),
+ * (incluindo as listas dinamicas de beneficios e de apps/canais do plano),
  * sementia os planos iniciais e expoe o shortcode [planos] que renderiza
  * SOMENTE os cards dos planos ativos, ordenados pela ordem cadastrada,
  * com o modal de detalhes de cada plano.
@@ -24,10 +24,10 @@ define( 'CETECH_PLANOS_CPT', 'cetech_plano' );
 define( 'CETECH_PLANOS_CSS_HANDLE', 'cetech-planos' );
 define( 'CETECH_PLANOS_JS_HANDLE', 'cetech-planos' );
 
-/* Meta key da lista de apps/canais inclusos em cada plano. */
+/* Meta key da lista de apps/canais que o cliente pode escolher em cada plano. */
 define( 'CETECH_PLANOS_APPS_META', '_cetech_plano_apps' );
 
-/* Meta key e padrao da palavra separadora dos dois grupos de apps. */
+/* Meta key e padrao da palavra separadora queprefixa cada app. */
 define( 'CETECH_PLANOS_APPS_SEPARATOR_META', '_cetech_plano_apps_separator' );
 define( 'CETECH_PLANOS_APPS_SEPARATOR_HIDE_META', '_cetech_plano_apps_separator_hide' );
 define( 'CETECH_PLANOS_APPS_SEPARATOR_DEFAULT', 'OU' );
@@ -408,7 +408,6 @@ function cetech_planos_get_apps_raw( $post_id ) {
 			'imagem'   => isset( $app['imagem'] ) ? absint( $app['imagem'] ) : 0,
 			'desc'     => isset( $app['desc'] ) ? (string) $app['desc'] : '',
 			'detalhes' => isset( $app['detalhes'] ) ? (string) $app['detalhes'] : '',
-			'incluso'  => ! isset( $app['incluso'] ) || '1' === (string) $app['incluso'] ? '1' : '0',
 			'ativo'    => ! isset( $app['ativo'] ) || '1' === (string) $app['ativo'] ? '1' : '0',
 		);
 	}
@@ -464,7 +463,7 @@ function cetech_planos_app_is_empty( $app ) {
  * partir do attachment ID cadastrado pelo administrador.
  *
  * @param int|WP_Post $post Post ou ID do plano.
- * @return array<int,array{name:string,logo:string,desc:string,detalhes:string,incluso:bool}>
+ * @return array<int,array{name:string,logo:string,desc:string,detalhes:string}>
  */
 function cetech_planos_get_apps( $post ) {
 	$post_id = $post instanceof WP_Post ? $post->ID : (int) $post;
@@ -482,7 +481,6 @@ function cetech_planos_get_apps( $post ) {
 			'logo'     => $logo ? $logo : '',
 			'desc'     => trim( $app['desc'] ),
 			'detalhes' => trim( $app['detalhes'] ),
-			'incluso'  => '1' === $app['incluso'],
 		);
 	}
 
@@ -493,29 +491,23 @@ function cetech_planos_get_apps( $post ) {
  * Renderiza o repeater de apps/canais no metabox do plano.
  *
  * @param array<int,array<string,mixed>> $apps      Lista de apps ja normalizada.
- * @param string                         $separator Palavra separadora dos dois grupos.
+ * @param string                         $separator Palavra separadora dos apps.
  * @param bool                           $hidden    Se o separador foi ocultado.
  * @return void
  */
 function cetech_planos_render_apps_field( $apps, $separator, $hidden = false ) {
-	/* Resumo dos grupos: deixa claro no admin por que o separador
-	 * aparece ou nao, evitando a confusao de "marquei e nao veio nada". */
-	$incluso = 0;
-	$escolha = 0;
+	/* Só o total de apps ativos: o cliente escolhe um entre eles, então
+	 * todos recebem a palavra e nao existe mais a contagem por grupo. */
+	$total = 0;
 
 	foreach ( $apps as $app ) {
 		if ( '1' !== $app['ativo'] || cetech_planos_app_is_empty( $app ) ) {
 			continue;
 		}
 
-		if ( '1' === $app['incluso'] ) {
-			$incluso++;
-		} else {
-			$escolha++;
-		}
+		$total++;
 	}
 
-	$total = $incluso + $escolha;
 	?>
 	<div class="cetech-apps" data-cetech-apps>
 		<div class="cetech-apps__list" data-cetech-apps-list>
@@ -531,7 +523,7 @@ function cetech_planos_render_apps_field( $apps, $separator, $hidden = false ) {
 			<button type="button" class="button cetech-apps__add"><?php esc_html_e( '+ Adicionar app/canal', 'Divi' ); ?></button>
 		</p>
 	</div>
-	<p class="description"><?php esc_html_e( 'Apps e canais de streaming inclusos no plano. Nome, descrição e detalhes são opcionais: basta o logo. Envie o logo em PNG ou SVG quadrado, com fundo transparente. Apps marcados como "Escolha do cliente" são precedidos pela palavra separadora, à esquerda do box, para o cliente saber que são alternativas. A ordem aqui é a ordem exibida no card e no modal.', 'Divi' ); ?></p>
+	<p class="description"><?php esc_html_e( 'Apps e canais de streaming que o cliente pode escolher. O cliente contrata UM deles, então todos aparecem como alternativa e cada um é precedido pela palavra separadora. Nome, descrição e detalhes são opcionais: basta o logo. Envie o logo em PNG ou SVG quadrado, com fundo transparente. A ordem aqui é a ordem exibida no card e no modal.', 'Divi' ); ?></p>
 	<p class="cetech-apps__separator-field">
 		<label for="cetech-plano-apps-separator"><?php esc_html_e( 'Palavra separadora', 'Divi' ); ?></label>
 		<input type="text" class="small-text" id="cetech-plano-apps-separator" name="<?php echo esc_attr( CETECH_PLANOS_APPS_SEPARATOR_META ); ?>" value="<?php echo esc_attr( $separator ); ?>" placeholder="<?php esc_attr_e( 'Ex.: OU', 'Divi' ); ?>" maxlength="20" />
@@ -541,55 +533,25 @@ function cetech_planos_render_apps_field( $apps, $separator, $hidden = false ) {
 		</label>
 		<span class="description"><?php esc_html_e( 'Mostrada à esquerda de cada app que o cliente escolhe. Deixe vazio para usar "OU".', 'Divi' ); ?></span>
 	</p>
-	<p class="cetech-apps__preview-note <?php echo ( $incluso > 0 && $escolha > 0 ) ? 'is-ok' : 'is-warning'; ?>"<?php echo $hidden ? ' style="display:none;"' : ''; ?>>
+	<p class="cetech-apps__preview-note <?php echo $total > 0 ? 'is-ok' : 'is-warning'; ?>"<?php echo $hidden ? ' style="display:none;"' : ''; ?>>
 		<?php if ( 0 === $total ) : ?>
 			<?php esc_html_e( 'Nenhum app ativo cadastrado ainda. Adicione o primeiro logo acima.', 'Divi' ); ?>
-		<?php elseif ( 0 === $escolha ) : ?>
+		<?php elseif ( 1 === $total ) : ?>
 			<?php
-			if ( 1 === $incluso ) {
-				printf(
-					/* translators: %s: palavra separadora. */
-					esc_html__( 'O app está como "Incluso no plano". Para ver a palavra "%s", mude o Tipo de pelo menos um para "Escolha do cliente".', 'Divi' ),
-					esc_html( $separator )
-				);
-			} else {
-				printf(
-					/* translators: 1: quantidade de apps, 2: palavra separadora. */
-					esc_html__( 'Os %1$d apps estão todos como "Incluso no plano". Para ver a palavra "%2$s", mude o Tipo de pelo menos um para "Escolha do cliente".', 'Divi' ),
-					(int) $incluso,
-					esc_html( $separator )
-				);
-			}
+			printf(
+				/* translators: %s: palavra separadora. */
+				esc_html__( 'Com um app nao ha alternativa: a palavra "%s" e ignorada na exibicao.', 'Divi' ),
+				esc_html( $separator )
+			);
 			?>
 		<?php else : ?>
 			<?php
-			$incluso_txt = sprintf(
-				/* translators: %d: quantidade de apps inclusos. */
-				_n( '%d incluso', '%d inclusos', $incluso, 'Divi' ),
-				(int) $incluso
+			printf(
+				/* translators: 1: quantidade de apps, 2: palavra separadora. */
+				esc_html__( 'Exibicao atual: %1$d apps, com a palavra "%2$s" a esquerda de cada um.', 'Divi' ),
+				(int) $total,
+				esc_html( $separator )
 			);
-
-			$escolha_txt = sprintf(
-				/* translators: %d: quantidade de apps de escolha. */
-				_n( '%d para escolher', '%d para escolher', $escolha, 'Divi' ),
-				(int) $escolha
-			);
-
-			if ( $incluso > 0 ) {
-				printf(
-					/* translators: 1: apps inclusos, 2: apps de escolha, 3: palavra separadora. */
-					esc_html__( 'Exibição atual: %1$s e %2$s, com a palavra "%3$s" à esquerda de cada app de escolha.', 'Divi' ),
-					esc_html( $incluso_txt ),
-					esc_html( $escolha_txt ),
-					esc_html( $separator )
-				);
-			} else {
-				printf(
-					/* translators: %s: apps de escolha. */
-					esc_html__( 'Exibição atual: %s, sem a palavra (não há app de escolha).', 'Divi' ),
-					esc_html( $escolha_txt )
-				);
-			}
 			?>
 		<?php endif; ?>
 	</p>
@@ -607,7 +569,6 @@ function cetech_planos_empty_app() {
 		'imagem'   => 0,
 		'desc'     => '',
 		'detalhes' => '',
-		'incluso'  => '1',
 		'ativo'    => '1',
 	);
 }
@@ -642,13 +603,6 @@ function cetech_planos_render_app_row( $app, $index ) {
 			<input type="text" class="regular-text" name="<?php echo esc_attr( $field . '[nome]' ); ?>" value="<?php echo esc_attr( $app['nome'] ); ?>" placeholder="<?php esc_attr_e( 'Nome (opcional) — Ex.: Netflix', 'Divi' ); ?>" />
 			<input type="text" class="large-text" name="<?php echo esc_attr( $field . '[desc]' ); ?>" value="<?php echo esc_attr( $app['desc'] ); ?>" placeholder="<?php esc_attr_e( 'Descrição (opcional): Ex.: Streaming de filmes e séries', 'Divi' ); ?>" />
 			<input type="text" class="large-text" name="<?php echo esc_attr( $field . '[detalhes]' ); ?>" value="<?php echo esc_attr( $app['detalhes'] ); ?>" placeholder="<?php esc_attr_e( 'Detalhes (opcional): Ex.: Incluído sem custo adicional', 'Divi' ); ?>" />
-			<label class="cetech-apps__grupo">
-				<?php esc_html_e( 'Tipo', 'Divi' ); ?>
-				<select class="cetech-apps__select" name="<?php echo esc_attr( $field . '[incluso]' ); ?>">
-					<option value="1" <?php selected( '1', $app['incluso'] ); ?>><?php esc_html_e( 'Incluso no plano', 'Divi' ); ?></option>
-					<option value="0" <?php selected( '0', $app['incluso'] ); ?>><?php esc_html_e( 'Escolha do cliente', 'Divi' ); ?></option>
-				</select>
-			</label>
 			<label class="cetech-apps__active">
 				<input type="checkbox" name="<?php echo esc_attr( $field . '[ativo]' ); ?>" value="1" <?php checked( '1', $app['ativo'] ); ?> />
 				<?php esc_html_e( 'Ativo', 'Divi' ); ?>
@@ -747,7 +701,6 @@ function cetech_planos_meta_box_save( $post_id ) {
 				'imagem'   => isset( $app['imagem'] ) ? absint( $app['imagem'] ) : 0,
 				'desc'     => isset( $app['desc'] ) ? trim( sanitize_text_field( $app['desc'] ) ) : '',
 				'detalhes' => isset( $app['detalhes'] ) ? trim( sanitize_text_field( $app['detalhes'] ) ) : '',
-				'incluso'  => ! isset( $app['incluso'] ) || '1' === (string) $app['incluso'] ? '1' : '0',
 				'ativo'    => ! empty( $app['ativo'] ) ? '1' : '0',
 			);
 
@@ -1231,18 +1184,21 @@ function cetech_planos_render_app_inner( $app, $detailed ) {
 }
 
 /**
- * Vitrine de apps/canais: um bloco com os apps inclusos no plano e outro
- * com os apps que o cliente escolhe.
+ * Vitrine de apps/canais: uma grade unica com os apps do plano.
  *
- * A palavra separadora fica fora do box, na coluna estreita a esquerda
- * da linha de escolhas: assim o box do app continua do mesmo tamanho do
- * dos inclusos e a grade de 3 colunas se mantem. Cada app de escolha e
- * precedido pela sua palavra.
+ * O cliente escolhe UM unico app, entao todos os logos sao alternativas e
+ * ficam na mesma grade, cada um precedido pela palavra separadora. Nao ha
+ * mais dois blocos (incluso x escolha): uma grade so evita que as colunas
+ * de um bloco fiquem desalinhadas em relacao as do outro.
+ *
+ * A palavra fica numa coluna estreita a esquerda do box, e o par
+ * (palavra | box) se repete na linha toda. Como a coluna da palavra tem
+ * sempre a mesma largura, todos os boxes ficam do mesmo tamanho.
  *
  * @param array  $apps      Apps/canais ja filtrados por cetech_planos_get_apps().
  * @param string $variant   "tile" para o card (compacto) ou "card" para o modal.
  * @param bool   $featured  Se o plano de origem usa o card destacado (fundo azul).
- * @param string $separator Palavra a esquerda dos apps de escolha; vazio omite.
+ * @param string $separator Palavra a esquerda de cada app; vazio omite.
  * @return string
  */
 function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false, $separator = '' ) {
@@ -1250,10 +1206,9 @@ function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false,
 		return '';
 	}
 
-	$detailed  = ( 'card' === $variant );
-	$label     = trim( (string) $separator );
-	$incluso   = '';
-	$escolhas  = '';
+	$detailed = ( 'card' === $variant );
+	$label    = trim( (string) $separator );
+	$items    = '';
 
 	foreach ( $apps as $app ) {
 		$inner = cetech_planos_render_app_inner( $app, $detailed );
@@ -1262,40 +1217,28 @@ function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false,
 			continue;
 		}
 
-		if ( ! empty( $app['incluso'] ) ) {
-			$incluso .= '<li class="cetech-planos__app">' . $inner . '</li>';
-			continue;
-		}
-
-		/* App de escolha: a palavra entra na coluna a esquerda dele. */
+		/* Todos os apps sao alternativas: a palavra entra na coluna a
+		 * esquerda do box, antes dele. */
 		if ( '' !== $label ) {
-			$escolhas .= '<li class="cetech-planos__app-or">' . esc_html( $label ) . '</li>';
+			$items .= '<li class="cetech-planos__app-or">' . esc_html( $label ) . '</li>';
 		}
 
-		$escolhas .= '<li class="cetech-planos__app">' . $inner . '</li>';
+		$items .= '<li class="cetech-planos__app">' . $inner . '</li>';
 	}
 
-	if ( '' === $incluso && '' === $escolhas ) {
+	if ( '' === $items ) {
 		return '';
 	}
 
-	$html = '';
+	/* Sem a palavra nao ha a coluna estreita a esquerda: sinaliza com uma
+	 * classe para a grade voltar a ter as colunas inteiras so de apps. */
+	$list_class = 'cetech-planos__apps-list cetech-planos__apps-list--choices';
 
-	if ( '' !== $incluso ) {
-		$html .= '<ul class="cetech-planos__apps-list">' . $incluso . '</ul>';
+	if ( '' === $label ) {
+		$list_class .= ' cetech-planos__apps-list--no-or';
 	}
 
-	if ( '' !== $escolhas ) {
-		/* Sem a palavra nao ha a coluna estreita a esquerda: sinaliza com
-		 * uma classe para a grade voltar a ter as 3 colunas cheias. */
-		$choices_class = 'cetech-planos__apps-list cetech-planos__apps-list--choices';
-
-		if ( '' === $label ) {
-			$choices_class .= ' cetech-planos__apps-list--no-or';
-		}
-
-		$html .= '<ul class="' . esc_attr( $choices_class ) . '">' . $escolhas . '</ul>';
-	}
+	$html = '<ul class="' . esc_attr( $list_class ) . '">' . $items . '</ul>';
 
 	$class = 'cetech-planos__apps cetech-planos__apps--' . ( $detailed ? 'card' : 'tile' );
 	if ( $featured ) {

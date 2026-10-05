@@ -77,11 +77,6 @@ var list = wrap.find('[data-cetech-apps-list]');
 				'<input type="text" class="regular-text" name="cetech_planos_apps[__i__][nome]" value="" placeholder="Nome (opcional) — Ex.: Netflix" />' +
 				'<input type="text" class="large-text" name="cetech_planos_apps[__i__][desc]" value="" placeholder="Descrição (opcional): Ex.: Streaming de filmes e séries" />' +
 				'<input type="text" class="large-text" name="cetech_planos_apps[__i__][detalhes]" value="" placeholder="Detalhes (opcional): Ex.: Incluído sem custo adicional" />' +
-				'<label class="cetech-apps__grupo">Tipo' +
-				'<select class="cetech-apps__select" name="cetech_planos_apps[__i__][incluso]">' +
-				'<option value="1" selected="selected">Incluso no plano</option>' +
-				'<option value="0">Escolha do cliente</option>' +
-				'</select></label>' +
 				'<label class="cetech-apps__active"><input type="checkbox" name="cetech_planos_apps[__i__][ativo]" value="1" checked="checked" /> Ativo</label>' +
 				'</div>' +
 				'<div class="cetech-apps__actions">' +
@@ -118,7 +113,6 @@ var list = wrap.find('[data-cetech-apps-list]');
 				/* Mantem sempre uma linha no formulario: zera os campos
 				 * e devolve a linha ao estado de "app novo". */
 				$row.find('input[type="text"], textarea').val('');
-				$row.find('.cetech-apps__select').val('1');
 				$row.find('input[type="checkbox"]').prop('checked', true);
 				$row.find('.cetech-apps__image-id').val('0');
 				$row.find('[data-cetech-app-preview]').empty();

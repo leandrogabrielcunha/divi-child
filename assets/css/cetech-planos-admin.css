@@ -28,7 +28,7 @@
 }
 
 /* =========================================================
-   Repetidor de apps/canais inclusos
+   Repetidor de apps/canais do plano
    ========================================================= */
 .cetech-apps__list {
 	display: flex;
@@ -104,18 +104,6 @@
 	gap: 6px;
 	font-size: 13px;
 	color: #50575e;
-}
-
-.cetech-apps__grupo {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	font-size: 13px;
-	color: #50575e;
-}
-
-.cetech-apps__select {
-	max-width: 190px;
 }
 
 .cetech-apps__separator-field {
