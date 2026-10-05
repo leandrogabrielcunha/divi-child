@@ -1184,21 +1184,20 @@ function cetech_planos_render_app_inner( $app, $detailed ) {
 }
 
 /**
- * Vitrine de apps/canais: uma grade unica com os apps do plano.
+ * Vitrine de apps/canais: uma unica linha horizontal de logos.
  *
  * O cliente escolhe UM unico app, entao todos os logos sao alternativas e
- * ficam na mesma grade, cada um precedido pela palavra separadora. Nao ha
- * mais dois blocos (incluso x escolha): uma grade so evita que as colunas
- * de um bloco fiquem desalinhadas em relacao as do outro.
+ * ficam lado a lado, separados pela palavra "ou". Nao ha mais dois blocos
+ * (incluso x escolha), que desalinhavam as colunas entre si.
  *
- * A palavra fica numa coluna estreita a esquerda do box, e o par
- * (palavra | box) se repete na linha toda. Como a coluna da palavra tem
- * sempre a mesma largura, todos os boxes ficam do mesmo tamanho.
+ * A palavra e um conector: sai entre um app e o seguinte, nunca antes do
+ * primeiro. Por isso o primeiro item nao recebe "ou" e a linha comeca
+ * sempre com um logo.
  *
  * @param array  $apps      Apps/canais ja filtrados por cetech_planos_get_apps().
  * @param string $variant   "tile" para o card (compacto) ou "card" para o modal.
  * @param bool   $featured  Se o plano de origem usa o card destacado (fundo azul).
- * @param string $separator Palavra a esquerda de cada app; vazio omite.
+ * @param string $separator Palavra que separa um app do seguinte; vazio omite.
  * @return string
  */
 function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false, $separator = '' ) {
@@ -1208,7 +1207,10 @@ function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false,
 
 	$detailed = ( 'card' === $variant );
 	$label    = trim( (string) $separator );
-	$items    = '';
+
+	/* Descarta o que nao renderiza (app inativo, sem logo e sem texto) antes
+	   de montar a lista: assim a montagem sabe quem e o primeiro e o ultimo. */
+	$rows = array();
 
 	foreach ( $apps as $app ) {
 		$inner = cetech_planos_render_app_inner( $app, $detailed );
@@ -1217,25 +1219,48 @@ function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false,
 			continue;
 		}
 
-		/* Todos os apps sao alternativas: a palavra entra na coluna a
-		 * esquerda do box, antes dele. */
-		if ( '' !== $label ) {
-			$items .= '<li class="cetech-planos__app-or">' . esc_html( $label ) . '</li>';
-		}
-
-		$items .= '<li class="cetech-planos__app">' . $inner . '</li>';
+		$rows[] = $inner;
 	}
 
-	if ( '' === $items ) {
+	if ( empty( $rows ) ) {
 		return '';
 	}
 
-	/* Sem a palavra nao ha a coluna estreita a esquerda: sinaliza com uma
-	 * classe para a grade voltar a ter as colunas inteiras so de apps. */
-	$list_class = 'cetech-planos__apps-list cetech-planos__apps-list--choices';
+	$items = '';
+	$total = count( $rows );
+	$index = 0;
 
-	if ( '' === $label ) {
-		$list_class .= ' cetech-planos__apps-list--no-or';
+	/* No modal a lista e uma coluna (o box traz nome e descricao), entao o
+	   conector nao pode ser um irmao do box: viraria uma linha sozinha com
+	   um "ou" flutuando. Ali ele entra DENTRO do box, na direita, que e a
+	   posicao equivalente: separa este app do proximo. */
+	$inline_or = $detailed;
+
+	foreach ( $rows as $inner ) {
+		$index++;
+
+		/* Listagem: o conector e um <li> irmao, emitido ANTES do box que
+		   ele separa do anterior. Como o primeiro box nao tem nada antes
+		   dele, ele comeca a lista sem "ou" — e nao com um "ou" solto na
+		   ponta. */
+		if ( ! $inline_or && $index > 1 && '' !== $label ) {
+			$items .= '<li class="cetech-planos__app-or" aria-hidden="true"><span>' . esc_html( $label ) . '</span></li>';
+		}
+
+		/* Modal: o conector vai no fim do box. Cada box que tem um app
+		   DEPOIS dele recebe o "ou" (le como "este OU o proximo"); o
+		   ultimo fica sem, senao a lista terminaria apontando para nada. */
+		$connector = ( $inline_or && $index < $total && '' !== $label )
+			? '<span class="cetech-planos__app-or" aria-hidden="true"><span>' . esc_html( $label ) . '</span></span>'
+			: '';
+
+		$items .= '<li class="cetech-planos__app">' . $inner . $connector . '</li>';
+	}
+
+	$list_class = 'cetech-planos__apps-list';
+
+	if ( '' !== $label ) {
+		$list_class .= ' cetech-planos__apps-list--choices';
 	}
 
 	$html = '<ul class="' . esc_attr( $list_class ) . '">' . $items . '</ul>';
