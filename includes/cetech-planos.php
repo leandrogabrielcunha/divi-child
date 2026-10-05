@@ -1231,12 +1231,13 @@ function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false,
 	$index = 0;
 
 	/* Quantos logos cabem por linha. Precisa ser o mesmo numero que o CSS
-	   usa na grade (--cetech-per-line), senao o "ou" fica numa posicao
-	   errada: e o PHP que decide onde cada linha termina. Listagem 3 por
-	   linha; modal 2, porque cada box traz nome e descricao. */
+	   usa (--cetech-per-line), senao o "ou" fica numa posicao errada: e o
+	   PHP que decide onde cada linha termina. Sao 2 nos dois lugares; no
+	   modal porque cada box traz nome e descricao, na listagem por escolha
+	   de design, com o icone sozinho na ultima linha sempre ao centro. */
 	$per_line = $detailed
 		? 2
-		: (int) apply_filters( 'cetech_planos_apps_per_line', 3 );
+		: (int) apply_filters( 'cetech_planos_apps_per_line', 2 );
 	$per_line = max( 1, $per_line );
 
 	foreach ( $rows as $inner ) {
@@ -1249,7 +1250,8 @@ function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false,
 		   logo depois. Fica de fora quando:
 		   - o proximo cai na linha de baixo, para nao sobrar "ou" na ponta;
 		   - e o ultimo box da lista, que apontaria para nada.
-		   Com 3 por linha: OU entre 1-2 e 2-3, nada depois do 3o. */
+		   Com 2 por linha: OU so entre 1-2, 3-4, 5-6... Um total impar
+		   deixa o ultimo icone sozinho na ultima linha, sem "ou". */
 		$is_last   = ( $index === $total );
 		$ends_line = ( 0 === $index % $per_line ) && ! $is_last;
 

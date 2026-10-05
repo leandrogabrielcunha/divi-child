@@ -275,8 +275,9 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 
 /* ============================================================
    Apps / Canais
-   3 logos por linha: [logo] (ou) [logo] (ou) [logo]
-                     [logo] (ou) [logo]
+   2 logos por linha: [logo] (ou) [logo]
+                      [logo] (ou) [logo]
+   Se sobrar um, ele fica sozinho e sozinho no centro da linha.
    O cliente contrata UM app, entao todos os logos sao alternativas e a
    palavra "ou" funciona so como conector entre um e o seguinte.
    O logo fica em area propria com object-fit: contain, para todos
@@ -340,8 +341,9 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 .cetech-planos__apps-list {
 	/* Numeros de layoute em variaveis. O --cetech-per-line precisa ser o
 	   mesmo que o PHP assume em cetech_planos_render_apps: e ele que
-	   decide onde cada linha comeca, para nao sobrar "ou" na ponta. */
-	--cetech-per-line: 3;
+	   decide onde cada linha comeca, para nao sobrar "ou" na ponta.
+	   Sao 2 na listagem e 2 no modal, entao o design e o mesmo nos dois. */
+	--cetech-per-line: 2;
 	/* Largura do box: fixa, para o plano com 4 apps ter as mesmas medidas
 	   do plano com 5 ou 6. Tambem delimita o logo, que preenche o box
 	   inteiro (ver .cetech-planos__app, sem padding). */
@@ -350,26 +352,37 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	   entre as colunas, entao a pílula fica com --cetech-or-size/2 de
 	   folga de cada lado. Precisa ser maior que a pílula (23px) para ela
 	   nao encostar nos logos vizinhos.
-	   Total da 1a linha: 3 * 56 + 2 * 30 = 228px, que cabe na largura
-	   util do card (~234px). */
+	   Linha com 2: 2 * 56 + 30 = 142px. Sobra bastante dos ~234px uteis,
+	   e quem poe a fileira no meio e o justify-content: center de baixo. */
 	--cetech-or-size: 30px;
 
 	list-style: none;
 	margin: 0;
 	padding: 0;
 	/* Flex com largura FIXA em cada item, e nao grade com colunas: o "ou"
-	   e um item da linha e nao cabe dentro de uma coluna. Como as medidas
-	   sao fixas, a quebra de linha do flex e deterministica e bate com o
-	   que o PHP calcula: 3 * 56 + 2 * 30 = 228px cabem, mais um box de
-	   56px nao cabe, entao o 4º logo cai sozinho na 2ª linha.
+	   e um item da linha e nao cabe dentro de uma coluna.
 	   Coluna de largura fixa, e nao 1fr, para o vao entre dois boxes ter
 	   exatamente --cetech-or-size: e o que deixa a pílula do "ou" centrada
 	   nele, sem sobrar folga interna que a jogaria por cima do box.
-	   justify-content: center centraliza a fileira. */
+	   justify-content: center e o que centraliza CADA linha, inclusive a
+	   ultima quando ela fica com um icone so: sem ele o icone orphanado
+	   encostaria na esquerda. */
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
 	gap: 8px 0;
+	/* A lista e larga o bastante para CABEREM 3 icones, mas so 2 devem
+	   ficar por linha (o que o PHP assume). Sem este limite o flex
+	   aproveitava a sobra do card e emendava um 3º icone na linha,
+	   discordando do PHP: o "ou" saia de lugar e o icone da 2ª linha
+	   ficava torto. Fixar a largura da linha em 2 itens + 1 conector
+	   (2 * 56 + 30 = 142px) torna a quebra independente de quanto o card
+	   sobra: o 3º icone sempre nao cabe e sempre cai na linha de baixo.
+	   margin auto centraliza o bloco de 142px dentro do card. */
+	width: 100%;
+	max-width: calc(2 * var(--cetech-app-size) + var(--cetech-or-size));
+	margin-left: auto;
+	margin-right: auto;
 }
 
 /* Cada item da linha ocupa a medida exata: nem encolhe (flex-shrink: 0)
@@ -441,8 +454,15 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	   que sobra depois da faixa do conector. Assim a quebra continua
 	   batendo com o que o PHP calcula. */
 	--cetech-or-size: 38px;
-	justify-content: stretch;
+	/* center, e nao stretch: com um app sozinho (total impar) o box tem
+	   largura definida e o stretch nao estica nada, entao ele encostaria
+	   na esquerda. Com center o app orphanado fica no meio da linha. */
+	justify-content: center;
 	gap: 10px 0;
+	/* Aqui a linha ja ocupa a largura toda (2 * box + conector = 100%),
+	   entao o limite de 2 itens da listagem nao se aplica. */
+	width: 100%;
+	max-width: none;
 }
 
 .cetech-planos__apps--card .cetech-planos__apps-list > .cetech-planos__app {
