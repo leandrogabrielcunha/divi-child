@@ -554,6 +554,16 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
 }
 
+/* CTA que abre o WhatsApp da pagina: e um <button>, entao precisa do mesmo
+   reset do <a> do modal para ficar igual (largura, fonte, sem borda padrao
+   de navegador e com cursor de link). */
+.cetech-planos__btn--whatsapp {
+	width: 100%;
+	font-family: inherit;
+	cursor: pointer;
+	appearance: none;
+}
+
 /* Na listagem, o botao ocupa o lugar do CTA e abre o modal.
    Precisa do reset de <button> para ficar igual ao <a> do modal. */
 .cetech-planos__btn--details {
@@ -618,7 +628,7 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 .cetech-planos__modal-dialog {
 	position: relative;
 	width: 100%;
-	max-width: 640px;
+	max-width: 560px;
 	max-height: 88vh;
 	overflow-y: auto;
 	overscroll-behavior: contain;

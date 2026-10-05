@@ -22,7 +22,10 @@
 		   cookies. No body, ele compete direto no contexto da raiz. */
 		var root = modal.parentNode;
 
-		if (root && root.parentNode !== document.body) {
+		/* O guard precisa dos dois lados: root !== body evita tentar
+		   body.appendChild(body), que lança HierarchyRequestError e mata o
+		   init inteiro (o modal parava de funcionar). */
+		if (root && root !== document.body && root.parentNode !== document.body) {
 			document.body.appendChild(root);
 		}
 
@@ -157,6 +160,39 @@
 				event.preventDefault();
 				first.focus();
 			}
+		});
+
+		/* "Contratar" com destino WhatsApp: abre o chat flutuante desta
+		   própria página em vez de levar o cliente para fora do site. O
+		   botão vem como <button> (não <a href>), então não há navegação a
+		   evitar. Escuta no document porque o botão vive dentro do modal, que
+		   é movido para o fim do <body>. */
+		document.addEventListener('click', function (event) {
+			var trigger = event.target.closest('[data-cetech-planos-cta="whatsapp"]');
+
+			if (!trigger) {
+				return;
+			}
+
+			event.preventDefault();
+
+			var planId = trigger.getAttribute('data-cetech-planos-plano');
+			var api = window.cetechWhatsappApi;
+
+			/* O modal do plano tem z-index 1000000 e o painel do WhatsApp
+			   99999: com os dois abertos, o modal cobriria o chat. */
+			if (!modal.hidden) {
+				close();
+			}
+
+			if (api && typeof api.openWithPlan === 'function') {
+				api.openWithPlan(planId);
+			} else if (api && typeof api.open === 'function') {
+				api.open();
+			}
+			/* Sem o widget de WhatsApp na página nao ha o que abrir. O PHP
+			   ja cai para o link nesse caso, entao este <button> so aparece
+			   com o widget disponivel. */
 		});
 	}
 

@@ -27,6 +27,14 @@ define( 'CETECH_PLANOS_JS_HANDLE', 'cetech-planos' );
 /* Meta key da lista de apps/canais que o cliente pode escolher em cada plano. */
 define( 'CETECH_PLANOS_APPS_META', '_cetech_plano_apps' );
 
+/**
+ * Meta do destino do botão "Contratar".
+ *
+ * "whatsapp" abre o chat flutuante da propria pagina (sem sair do site);
+ * "link" segue o link cadastrado no campo "Link do botão".
+ */
+define( 'CETECH_PLANOS_CTA_TARGET_META', '_cetech_plano_cta_target' );
+
 /* Meta key e padrao da palavra separadora queprefixa cada app. */
 define( 'CETECH_PLANOS_APPS_SEPARATOR_META', '_cetech_plano_apps_separator' );
 define( 'CETECH_PLANOS_APPS_SEPARATOR_HIDE_META', '_cetech_plano_apps_separator_hide' );
@@ -216,6 +224,7 @@ function cetech_planos_meta_box_render( $post ) {
 	$sep_hidden   = '1' === (string) get_post_meta( $post->ID, CETECH_PLANOS_APPS_SEPARATOR_HIDE_META, true );
 	$btn_text     = get_post_meta( $post->ID, '_cetech_plano_btn_text', true );
 	$btn_link     = get_post_meta( $post->ID, '_cetech_plano_btn_link', true );
+	$cta_target   = cetech_planos_cta_target( $post->ID );
 	$active       = get_post_meta( $post->ID, '_cetech_plano_active', true );
 	$order        = absint( get_post_field( 'menu_order', $post->ID ) );
 
@@ -306,6 +315,24 @@ function cetech_planos_meta_box_render( $post ) {
 				</th>
 				<td>
 					<input type="text" class="regular-text" name="_cetech_plano_btn_text" id="cetech-plano-btn-text" value="<?php echo esc_attr( $btn_text ); ?>" />
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">
+					<label for="cetech-plano-cta-target"><?php esc_html_e( 'Ao clicar em Contratar', 'Divi' ); ?></label>
+				</th>
+				<td>
+					<select name="<?php echo esc_attr( CETECH_PLANOS_CTA_TARGET_META ); ?>" id="cetech-plano-cta-target" data-cetech-cta-target>
+						<option value="whatsapp" <?php selected( 'whatsapp', $cta_target ); ?>><?php esc_html_e( 'Abrir o WhatsApp desta página', 'Divi' ); ?></option>
+						<option value="link" <?php selected( 'link', $cta_target ); ?>><?php esc_html_e( 'Ir para o link informado abaixo', 'Divi' ); ?></option>
+					</select>
+					<p class="description" data-cetech-cta-target-help>
+						<?php if ( cetech_planos_tem_whatsapp() ) : ?>
+							<?php esc_html_e( 'O cliente continua no site: abre o chat flutuante com este plano já selecionado. O campo "Link do botão" abaixo só é usado na segunda opção.', 'Divi' ); ?>
+						<?php else : ?>
+							<?php esc_html_e( 'O chat flutuante está desligado ou sem número em Configurações > CE Tech WhatsApp, então o botão usa o link abaixo.', 'Divi' ); ?>
+						<?php endif; ?>
+					</p>
 				</td>
 			</tr>
 			<tr>
@@ -656,6 +683,16 @@ function cetech_planos_meta_box_save( $post_id ) {
 	} else {
 		update_post_meta( $post_id, '_cetech_plano_btn_link', $btn_link );
 	}
+
+	$cta_target = isset( $_POST[ CETECH_PLANOS_CTA_TARGET_META ] )
+		? sanitize_key( wp_unslash( $_POST[ CETECH_PLANOS_CTA_TARGET_META ] ) )
+		: 'whatsapp';
+
+	if ( ! in_array( $cta_target, array( 'whatsapp', 'link' ), true ) ) {
+		$cta_target = 'whatsapp';
+	}
+
+	update_post_meta( $post_id, CETECH_PLANOS_CTA_TARGET_META, $cta_target );
 
 	$tipo = isset( $_POST['_cetech_plano_tipo'] ) ? sanitize_key( wp_unslash( $_POST['_cetech_plano_tipo'] ) ) : 'residencial';
 	$tipo = in_array( $tipo, array( 'residencial', 'empresarial' ), true ) ? $tipo : 'residencial';
@@ -1290,22 +1327,75 @@ function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false,
 }
 
 /**
- * Botao de contratacao do plano.
+ * O widget de WhatsApp da pagina esta disponivel para abrir o chat?
  *
- * @param string $btn_text Texto do botao.
- * @param string $btn_link Link do botao.
- * @param string $class    Classe CSS adicional.
+ * Sem isso o botão ficaria sem acao: o widget so e impresso quando esta
+ * ligado E tem numero configurado (ver cetech_wa_render).
+ *
+ * @return bool
+ */
+function cetech_planos_tem_whatsapp() {
+	if ( ! function_exists( 'cetech_wa_is_enabled' ) || ! function_exists( 'cetech_wa_number' ) ) {
+		return false;
+	}
+
+	return cetech_wa_is_enabled() && '' !== cetech_wa_number();
+}
+
+/**
+ * Destino do botão de contratar de um plano.
+ *
+ * Padrão é o WhatsApp da própria página. Se o widget não estiver
+ * disponível, cai para "link" para o botão nunca ficar sem ação.
+ *
+ * @param int $post_id ID do plano.
+ * @return string "whatsapp" ou "link".
+ */
+function cetech_planos_cta_target( $post_id ) {
+	$target = get_post_meta( $post_id, CETECH_PLANOS_CTA_TARGET_META, true );
+
+	if ( ! in_array( $target, array( 'whatsapp', 'link' ), true ) ) {
+		$target = 'whatsapp';
+	}
+
+	if ( 'whatsapp' === $target && ! cetech_planos_tem_whatsapp() ) {
+		return 'link';
+	}
+
+	return $target;
+}
+
+/**
+ * Botão de contratar.
+ *
+ * Com destino "whatsapp" renderiza um <button>, não um <a>: o clique é
+ *interceptado pelo JS para abrir o chat da página. Um <a> com href
+ * levaria o cliente para fora do site, que é justamente o que o cliente
+ * pediu para evitar.
+ *
+ * @param string   $btn_text  Texto do botao.
+ * @param string   $btn_link  Link do botao (usado so no destino "link").
+ * @param string   $class     Classe CSS adicional.
+ * @param int|null $plan_id   ID do plano, para pré-selecionar no chat.
  * @return string
  */
-function cetech_planos_render_cta( $btn_text, $btn_link, $class = '' ) {
+function cetech_planos_render_cta( $btn_text, $btn_link, $class = '', $plan_id = null ) {
 	if ( '' === (string) $btn_text ) {
 		return '';
+	}
+
+	$class = trim( 'cetech-planos__btn ' . $class );
+
+	if ( cetech_planos_cta_target( $plan_id ) === 'whatsapp' ) {
+		return '<button type="button" class="' . esc_attr( $class ) . ' cetech-planos__btn--whatsapp"'
+			. ' data-cetech-planos-cta="whatsapp"'
+			. ' data-cetech-planos-plano="' . esc_attr( (string) $plan_id ) . '">'
+			. esc_html( $btn_text ) . '</button>';
 	}
 
 	$href     = '' !== (string) $btn_link ? $btn_link : '#';
 	$external = 0 === strpos( $href, 'http' );
 	$target   = $external ? ' target="_blank" rel="noopener noreferrer"' : '';
-	$class    = trim( 'cetech-planos__btn ' . $class );
 
 	return '<a class="' . esc_attr( $class ) . '" href="' . esc_url( $href ) . '"' . $target . '>' . esc_html( $btn_text ) . '</a>';
 }
@@ -1401,6 +1491,18 @@ function cetech_planos_render_modal_content( $post ) {
 	$html .= cetech_planos_render_price( $price_old, $price, $period );
 	$html .= '</div>'; // .cetech-planos__modal-head
 
+	/* Os apps vem ANTES dos benefícios: o cliente primeiro ve o que pode
+	 * escolher (Netflix, Disney+, Globoplay...) e so depois le o que o plano
+	 * traz junto. */
+	$separator  = cetech_planos_get_separator( $post );
+	$apps_html  = cetech_planos_render_apps( cetech_planos_get_apps( $post ), 'card', false, $separator );
+	if ( '' !== $apps_html ) {
+		$html .= '<div class="cetech-planos__modal-section">';
+		$html .= '<span class="cetech-planos__section-title">' . esc_html( cetech_planos_apps_section_title() ) . '</span>';
+		$html .= $apps_html;
+		$html .= '</div>';
+	}
+
 	$benefits_html = cetech_planos_render_benefits( $benefits );
 	if ( '' !== $benefits_html ) {
 		$html .= '<div class="cetech-planos__modal-section">';
@@ -1409,20 +1511,24 @@ function cetech_planos_render_modal_content( $post ) {
 		$html .= '</div>';
 	}
 
-	$separator  = cetech_planos_get_separator( $post );
-	$apps_html  = cetech_planos_render_apps( cetech_planos_get_apps( $post ), 'card', false, $separator );
-	if ( '' !== $apps_html ) {
-		$html .= '<div class="cetech-planos__modal-section">';
-		$html .= $apps_html;
-		$html .= '</div>';
-	}
-
-	$cta = cetech_planos_render_cta( $btn_text, $btn_link, 'cetech-planos__btn--modal' );
+	$cta = cetech_planos_render_cta( $btn_text, $btn_link, 'cetech-planos__btn--modal', $post->ID );
 	if ( '' !== $cta ) {
 		$html .= '<div class="cetech-planos__modal-foot">' . $cta . '</div>';
 	}
 
 	return $html;
+}
+
+/**
+ * Titulo da secao de apps no modal.
+ *
+ * Fala em "escolha" porque o cliente contrata UM app: todos os logos sao
+ * alternativas, nao inclusoes. Filtravel para trocar o texto.
+ *
+ * @return string
+ */
+function cetech_planos_apps_section_title() {
+	return (string) apply_filters( 'cetech_planos_apps_section_title', __( 'Apps disponíveis para escolha', 'Divi' ) );
 }
 
 /**

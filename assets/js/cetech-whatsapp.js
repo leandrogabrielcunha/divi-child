@@ -201,6 +201,37 @@
 			btn.querySelector('.cetech-wa__btn-label').style.display = '';
 		}
 
+		/* Abre o painel já com um plano pré-selecionado, quando o plano
+		   existe na lista. Best effort: se o select ainda não tem a opção
+		   (o plano só aparece depois do perfil), abre o painel mesmo assim.
+		   É o que o botão "Contratar" dos planos usa. */
+		function openWithPlan(planId) {
+			open();
+
+			if (!planId || !planoSelect) {
+				return;
+			}
+
+			var opt = planoSelect.querySelector('option[value="' + String(planId).replace(/"/g, '') + '"]');
+
+			if (opt) {
+				planoSelect.value = opt.value;
+				planoSelect.dispatchEvent(new Event('change', { bubbles: true }));
+			}
+		}
+
+		/* Ponte para outros módulos (botão "Contratar" dos planos) abrirem o
+		   chat sem sair da página. A API é criada aqui, dentro do init, e
+		   nunca sobrescreve uma que já exista. */
+		window.cetechWhatsappApi = window.cetechWhatsappApi || {};
+
+		window.cetechWhatsappApi.open = open;
+		window.cetechWhatsappApi.close = close;
+		window.cetechWhatsappApi.openWithPlan = openWithPlan;
+		window.cetechWhatsappApi.isOpen = function () {
+			return isOpen;
+		};
+
 		if (btn) {
 			btn.addEventListener('click', function (event) {
 				event.stopPropagation();
