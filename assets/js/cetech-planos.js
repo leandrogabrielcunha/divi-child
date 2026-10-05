@@ -39,8 +39,9 @@
 
 			var clone = source.cloneNode(true);
 
-			/* Remove a classe de armazenamento: o clone precisa ser visivel. */
-			clone.className = '';
+			/* Troca a classe de armazenamento pela do modal: o clone precisa
+			 * ficar visivel e manter o espacamento entre as secoes. */
+			clone.className = 'cetech-planos__modal-plan';
 			content.innerHTML = '';
 			content.appendChild(clone);
 

@@ -275,7 +275,8 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 .cetech-planos__apps {
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
+	/* Mesmo gap das colunas: as duas linhas ficam com o mesmo ritmo. */
+	gap: 8px;
 	padding-top: 14px;
 	border-top: 1px solid #ebebf5;
 }
@@ -284,40 +285,25 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	border-top-color: rgba(255, 255, 255, 0.15);
 }
 
-/* ---------- Encaixe da palavra separadora ----------
-   A palavra nao ocupa uma linha inteira: ela entra como uma aba na
-   borda de cada app de escolha, recuada para dentro (formato de
-   encaixe). Como fica sobre a borda, nao rouba espaco do logo e o
-   app continua do mesmo tamanho dos demais. */
-.cetech-planos__app-slot {
-	position: relative;
-	min-width: 0;
-}
-
+/* ---------- Palavra separadora ----------
+   Nao e um divisor de linha nem entra dentro do box: fica numa coluna
+   estreita a esquerda de cada app de escolha. Assim o box continua do
+   mesmo tamanho do dos inclusos e a grade de 3 colunas se mantem. */
 .cetech-planos__app-or {
-	position: absolute;
-	top: -9px;
-	left: 50%;
-	transform: translateX(-50%);
-	z-index: 2;
-	padding: 2px 9px;
-	border: 1.5px solid var(--cetech-p-border);
-	border-radius: 999px;
-	background: #fff;
-	font-family: inherit;
-	font-size: 9.5px;
+	align-self: center;
+	padding-right: 2px;
+	font-size: 9px;
 	font-weight: 800;
-	line-height: 1.2;
-	letter-spacing: 0.8px;
+	letter-spacing: 0.6px;
+	line-height: 1;
+	text-align: right;
 	text-transform: uppercase;
-	color: #6b6b80;
+	color: #8a8aa0;
 	white-space: nowrap;
-	pointer-events: none;
 }
 
 /* Sem variante para o card de destaque: o box do app e branco nos dois
-   casos, entao o encaixe fica igual. E pointer-events:none para a aba
-   nao capturar o clique que abre o modal. */
+   casos, entao a palavra fica igual. */
 
 .cetech-planos__apps-list {
 	list-style: none;
@@ -329,9 +315,22 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	gap: 8px;
 }
 
-/* Respiro para a aba nao encostar na linha de cima. */
+/* Linha de escolhas: cada app e precedido pela propria coluna estreita com
+   a palavra, entao o par (palavra | app) se repete 3 vezes na linha. Como a
+   coluna da palavra e estreita e identica em todos os pares, o box do app
+   continua do mesmo tamanho do dos inclusos e a grade de 3 colunas se mantem
+   mesmo com varias escolhas. */
 .cetech-planos__apps-list--choices {
-	margin-top: 11px;
+	grid-template-columns:
+		20px minmax(0, 1fr)
+		20px minmax(0, 1fr)
+		20px minmax(0, 1fr);
+	column-gap: 6px;
+}
+
+/* Palavra oculta: sem a coluna estreita, as 3 colunas voltam a ser cheias. */
+.cetech-planos__apps-list--no-or {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .cetech-planos__app {
@@ -391,13 +390,19 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 }
 
 .cetech-planos__apps--card .cetech-planos__app-or {
-	top: -11px;
-	font-size: 10.5px;
-	padding: 3px 11px;
+	padding-right: 6px;
+	font-size: 11px;
 }
 
 .cetech-planos__apps--card .cetech-planos__apps-list--choices {
-	margin-top: 14px;
+	grid-template-columns:
+		34px minmax(0, 1fr)
+		34px minmax(0, 1fr);
+	column-gap: 10px;
+}
+
+.cetech-planos__apps--card .cetech-planos__apps-list--no-or {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .cetech-planos__apps--card .cetech-planos__app-logo {
@@ -568,6 +573,15 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	gap: 20px;
 }
 
+/* Plan clonado dentro do modal. O conteudo clonado chega aqui como um bloco
+   unico, entao o espacamento entre as secoes (cabecalho, beneficios, apps e
+   rodape do CTA) precisa viver aqui e nao so no container do modal. */
+.cetech-planos__modal-plan {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
 .cetech-planos__modal-head {
 	display: flex;
 	align-items: flex-start;
@@ -696,12 +710,31 @@ html.cetech-planos-modal-open body {
 	}
 
 	.cetech-planos__app-or {
+		padding-right: 3px;
 		font-size: 8.5px;
-		padding: 2px 7px;
 	}
 
 	.cetech-planos__apps-list--choices {
-		margin-top: 9px;
+		grid-template-columns:
+			17px minmax(0, 1fr)
+			17px minmax(0, 1fr)
+			17px minmax(0, 1fr);
+		column-gap: 5px;
+	}
+
+	.cetech-planos__apps--card .cetech-planos__apps-list {
+		grid-template-columns: 1fr;
+	}
+
+	/* Depois da regra acima (mesma especificidade) para a palavra continuar
+	   ao lado do app no modal em vez de cair numa linha so. */
+	.cetech-planos__apps--card .cetech-planos__apps-list--choices {
+		grid-template-columns: 28px minmax(0, 1fr);
+		column-gap: 8px;
+	}
+
+	.cetech-planos__apps--card .cetech-planos__apps-list--no-or {
+		grid-template-columns: minmax(0, 1fr);
 	}
 
 	.cetech-planos__app-logo {
@@ -712,9 +745,6 @@ html.cetech-planos-modal-open body {
 		max-width: 52px;
 	}
 
-	.cetech-planos__apps--card .cetech-planos__apps-list {
-		grid-template-columns: 1fr;
-	}
 
 	/* Modal vira uma folha ancorada no rodape, sem cortar conteudo. */
 	.cetech-planos__modal {
