@@ -1255,7 +1255,18 @@ function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false,
 		$is_last   = ( $index === $total );
 		$ends_line = ( 0 === $index % $per_line ) && ! $is_last;
 
-		$items .= '<li class="cetech-planos__app">' . $inner . '</li>';
+		/* O ultimo box que abre uma linha fica SOZINHO nela (total impar).
+		   A grade de 3 colunas -- icone, "ou", icone -- colocaria esse
+		   box na coluna 1, grudado na borda esquerda. A classe deixa o CSS
+		   saber disso e mandar o box ocupar a linha inteira, centralizado.
+		   E o PHP que sabe: e ele que conta as linhas. */
+		$class = 'cetech-planos__app';
+
+		if ( $is_last && 0 === ( $index - 1 ) % $per_line ) {
+			$class .= ' cetech-planos__app--solo';
+		}
+
+		$items .= '<li class="' . $class . '">' . $inner . '</li>';
 
 		if ( ! $ends_line && ! $is_last && '' !== $label ) {
 			$items .= '<li class="cetech-planos__app-or" aria-hidden="true"><span>' . esc_html( $label ) . '</span></li>';

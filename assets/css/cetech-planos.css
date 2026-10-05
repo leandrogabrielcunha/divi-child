@@ -309,9 +309,8 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	/* Sem position: participates do fluxo da linha, como o box. */
-	flex: 0 0 var(--cetech-or-size);
-	width: var(--cetech-or-size);
+	/* Item da grade: fica no trilho do meio, com a largura do vao. Sem
+	   position:absolute, entao nunca invade a coluna de um icone. */
 	min-width: 0;
 }
 
@@ -348,50 +347,54 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	   do plano com 5 ou 6. Tambem delimita o logo, que preenche o box
 	   inteiro (ver .cetech-planos__app, sem padding). */
 	--cetech-app-size: 56px;
-	/* Faixa do conector: a largura do "ou" entre duas colunas. E o vao
-	   entre as colunas, entao a pílula fica com --cetech-or-size/2 de
-	   folga de cada lado. Precisa ser maior que a pílula (23px) para ela
-	   nao encostar nos logos vizinhos.
-	   Linha com 2: 2 * 56 + 30 = 142px. Sobra bastante dos ~234px uteis,
-	   e quem poe a fileira no meio e o justify-content: center de baixo. */
-	--cetech-or-size: 30px;
+	/* Faixa do conector: a LARGURA DA COLUNA DO MEIO da grade, o vao entre
+	   os dois icones. Ela tem que ser bem maior que a pilula do "ou"
+	   (28px na listagem), senao a pílula encosta nos logos: com a coluna em
+	   30px sobrava 1px de cada lado e o "ou" ficava grudado no icone.
+	   Com 46px a pilula fica com 9px livres de cada lado, isolada.
+	   Linha com 2: 56 + 46 + 56 = 158px. */
+	--cetech-or-size: 46px;
 
 	list-style: none;
 	margin: 0;
 	padding: 0;
-	/* Flex com largura FIXA em cada item, e nao grade com colunas: o "ou"
-	   e um item da linha e nao cabe dentro de uma coluna.
-	   Coluna de largura fixa, e nao 1fr, para o vao entre dois boxes ter
-	   exatamente --cetech-or-size: e o que deixa a pílula do "ou" centrada
-	   nele, sem sobrar folga interna que a jogaria por cima do box.
-	   justify-content: center e o que centraliza CADA linha, inclusive a
-	   ultima quando ela fica com um icone so: sem ele o icone orphanado
-	   encostaria na esquerda. */
-	display: flex;
-	flex-wrap: wrap;
+	/* GRADE DE 3 COLUNAS: icone | "ou" | icone.
+	   Cada linha da lista e uma fileira de 3 trilhos, e o "ou" mora no
+	   trilho do meio -- nunca grudado num icone, nunca na mesma coluna de
+	   um icone. Como os 3 trilhos se completam exatos (2 icones + 1
+	   conector), o proprio grid garante 2 icones por linha: nao ha como
+	   sobrar espaco para um 3º icone entrar, o que antes dependia de o
+	   flex quebrar ou nao conforme a sobra do card.
+	   O "ou" e item da grade (irmao do box, e nao filho): o box precisa de
+	   overflow:hidden para o logo nunca atravessar a moldura, e um corte
+	   desse levaria o conector junto. */
+	display: grid;
+	grid-template-columns: var(--cetech-app-size) var(--cetech-or-size) var(--cetech-app-size);
+	/* justify-content centraliza a fileira de 3 trilhos dentro do card. */
 	justify-content: center;
 	gap: 8px 0;
-	/* A lista e larga o bastante para CABEREM 3 icones, mas so 2 devem
-	   ficar por linha (o que o PHP assume). Sem este limite o flex
-	   aproveitava a sobra do card e emendava um 3º icone na linha,
-	   discordando do PHP: o "ou" saia de lugar e o icone da 2ª linha
-	   ficava torto. Fixar a largura da linha em 2 itens + 1 conector
-	   (2 * 56 + 30 = 142px) torna a quebra independente de quanto o card
-	   sobra: o 3º icone sempre nao cabe e sempre cai na linha de baixo.
-	   margin auto centraliza o bloco de 142px dentro do card. */
-	width: 100%;
-	max-width: calc(2 * var(--cetech-app-size) + var(--cetech-or-size));
-	margin-left: auto;
-	margin-right: auto;
 }
 
-/* Cada item da linha ocupa a medida exata: nem encolhe (flex-shrink: 0)
-   nem estica (flex-grow: 0), senao a quebra de linha deixaria de bater
-   com o PHP. */
-.cetech-planos__apps-list > .cetech-planos__app {
-	flex: 0 0 var(--cetech-app-size);
+/* Box e conector sao itens de grade, entao ja ocupam o trilho inteiro.
+   O flex-basis do flex antigo nao se aplica mais. */
+.cetech-planos__apps-list > .cetech-planos__app,
+.cetech-planos__apps-list > .cetech-planos__app-or {
+	min-width: 0;
+}
+
+/* O ultimo icone sozinho (total impar): o PHP marca com --solo porque so
+   ele sabe que o box abre a linha. Sem isso ele cairia no trilho 1 e
+   encostaria na borda esquerda. Ocupando a linha inteira e centralizando
+   ele, o icone fica no meio -- que e o desenho pedido. */
+.cetech-planos__apps-list > .cetech-planos__app--solo {
+	grid-column: 1 / -1;
+	justify-self: center;
+	/* Largura EXPLICITA, obrigatoria: o logo e width:100% do proprio box,
+	   entao um box sem largura (que e o que justify-self:center deixa,
+	   valendo o conteudo) mediria o logo, que por sua vez mediria o box.
+	   Circular, e o resultado e 0px: o icone some. Ver --solo do modal
+	   abaixo, que precisa do auto porque la o box tem texto. */
 	width: var(--cetech-app-size);
-	max-width: 100%;
 }
 
 .cetech-planos__app {
@@ -450,24 +453,24 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	   (30px contra 23px): 38px deixa a pílula centrada no vao com folga
 	   dos dois lados, sem encostar em nenhum box. */
 	--cetech-per-line: 2;
-	/* 2 boxes + 1 conector = 100% da linha: por isso o box e a metade do
-	   que sobra depois da faixa do conector. Assim a quebra continua
-	   batendo com o que o PHP calcula. */
-	--cetech-or-size: 38px;
-	/* center, e nao stretch: com um app sozinho (total impar) o box tem
-	   largura definida e o stretch nao estica nada, entao ele encostaria
-	   na esquerda. Com center o app orphanado fica no meio da linha. */
-	justify-content: center;
+	/* Coluna do meio com 54px para a pílula maior do modal (35px) ficar
+	   isolada, com folga de ~10px de cada lado dos dois lados. As colunas
+	   de icone sao 1fr e encolhem para acomodar, entao a linha continua
+	   valendo a largura toda do modal. */
+	--cetech-or-size: 54px;
+	/* Mesma grade de 3 colunas da listagem -- icone, "ou", icone -- mas com
+	   as colunas de icone em 1fr, que preenchem a largura do modal. Os
+	   3 trilhos continuam se completando exatos, entao continuam sendo
+	   2 icones por linha. */
+	grid-template-columns: minmax(0, 1fr) var(--cetech-or-size) minmax(0, 1fr);
 	gap: 10px 0;
-	/* Aqui a linha ja ocupa a largura toda (2 * box + conector = 100%),
-	   entao o limite de 2 itens da listagem nao se aplica. */
-	width: 100%;
-	max-width: none;
 }
 
-.cetech-planos__apps--card .cetech-planos__apps-list > .cetech-planos__app {
-	flex: 0 0 calc((100% - var(--cetech-or-size)) / 2);
-	width: calc((100% - var(--cetech-or-size)) / 2);
+/* No modal o box do app sozinho se dimensiona pelo proprio conteudo (logo
+   com moldura + nome + descricao), entao aqui o auto da listagem tem que
+   voltar: a largura fixa de --cetech-app-size deixaria o texto espremido. */
+.cetech-planos__apps--card .cetech-planos__apps-list > .cetech-planos__app--solo {
+	width: auto;
 }
 
 .cetech-planos__apps--card .cetech-planos__app {
@@ -797,12 +800,13 @@ html.cetech-planos-modal-open body {
 		border-radius: 10px;
 	}
 
-	/* No mobile o box e a faixa do "ou" encolhem juntos, para as 3 colunas
-	   ainda caberem numa largura util de ~300px:
-	   3 * 48 + 2 * 26 = 200px. */
+	/* No mobile o box e a coluna do "ou" encolhem juntos, e a pílula
+	   tambem encolhe (32px), então a coluna precisa continuar bem maior que
+	   ela para o "ou" nao ficar grudado: 48px deixa 8px de cada lado.
+	   Linha com 2: 48 + 48 + 48 = 144px, que cabe em qualquer celular. */
 	.cetech-planos__apps-list {
 		--cetech-app-size: 48px;
-		--cetech-or-size: 26px;
+		--cetech-or-size: 48px;
 	}
 
 	.cetech-planos__app-or > span {
