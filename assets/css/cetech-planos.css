@@ -409,6 +409,10 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	height: auto;
 	aspect-ratio: 1 / 1;
 	min-width: 0;
+	/* Corta o desenho na borda da area: nenhum logo atravessa a
+	   moldura do box. Fica aqui, e nao no .cetech-planos__app, porque o
+	   badge do "ou" sai de fora do box e seria cortado junto. */
+	overflow: hidden;
 }
 
 .cetech-planos__app-logo img {
