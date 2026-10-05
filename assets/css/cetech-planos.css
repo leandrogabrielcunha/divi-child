@@ -463,10 +463,37 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	/* Coluna do meio com 54px para a pílula maior do modal (35px) ficar
 	   isolada, com folga de ~10px de cada lado dos dois lados. */
 	--cetech-or-size: 54px;
-	/* Mesma regra da listagem: 3 por linha sem separador, com as colunas em
-	   1fr para preencher a largura do modal. */
+	/* So vale com o separador ligado, em que a linha e icone | "ou" | icone.
+	   Sem separador a lista vira flex adiante. */
 	grid-template-columns: repeat(var(--cetech-per-line), minmax(0, 1fr));
 	gap: 10px var(--cetech-col-gap);
+}
+
+/* Sem separador a lista do modal e FLEX, nao grade: a quantidade por linha
+   passa a depender so da largura disponivel, entao o PHP nao precisa saber
+   quantos sao nem onde cada linha comeca.
+   O flex tambem centraliza CADA linha sozinho -- inclusive a ultima, quando
+   fica com um app so. Na grade isso exigia a classe --solo, que aqui
+   sozinha nao resolve porque a coluna depende da tela.
+   A largura do item vem de --cetech-modal-col, mudada por media query para
+   caberem 1, 2, 3 ou 4 por linha conforme a tela cresce. */
+.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) {
+	--cetech-modal-col: 100%;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 14px;
+}
+
+.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app {
+	/* flex: 0 0 impede encolher, entao a conta das colunas bate com o
+	   calc da media query. O grid-column/justify-self neutralizam o --solo,
+	   que aqui nao se aplica. */
+	flex: 0 0 var(--cetech-modal-col);
+	width: var(--cetech-modal-col);
+	max-width: var(--cetech-modal-col);
+	grid-column: auto;
+	justify-self: auto;
 }
 
 /* Com separador no modal: icone | "ou" | icone, com as colunas de icone em
@@ -477,23 +504,11 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	grid-template-columns: minmax(0, 1fr) var(--cetech-or-size) minmax(0, 1fr);
 }
 
-/* No modal o box traz nome e descricao, entao em 3 colunas sobra ~160px por
-   app: a logo de 68px nao caberia com o texto. Encolhe a logo e o texto
-   quando sao 3 colunas. */
+/* Sem separador o box do modal encolhe um pouco, porque sao varias colunas:
+   sobra para o texto nome + descricao ao lado da logo. */
 .cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app {
-	gap: 10px;
+	gap: 12px;
 	padding: 12px 10px;
-}
-
-.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app-logo {
-	width: 44px;
-	height: 44px;
-	border-radius: 10px;
-}
-
-.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app-logo img {
-	max-width: 32px;
-	max-height: 32px;
 }
 
 /* No modal o box do app sozinho se dimensiona pelo proprio conteudo (logo
@@ -528,16 +543,16 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 
 .cetech-planos__apps--card .cetech-planos__app-logo {
 	flex: none;
-	width: 68px;
-	height: 68px;
+	width: 72px;
+	height: 72px;
 	border: 1px solid #ebebf5;
-	border-radius: 12px;
+	border-radius: 13px;
 	background: #fff;
 }
 
 .cetech-planos__apps--card .cetech-planos__app-logo img {
-	max-width: 48px;
-	max-height: 48px;
+	max-width: 54px;
+	max-height: 54px;
 }
 
 /* Nome, descricao e detalhes em coluna, ao lado do logo. */
@@ -658,6 +673,9 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 .cetech-planos__modal-dialog {
 	position: relative;
 	width: 100%;
+	/* O modal cresce com a tela para caberem mais colunas de apps: 3 por
+	   linha ja a partir de 780px e 4 a partir de 1080px (ver as media
+	   queries de --cetech-modal-col no fim do arquivo). */
 	max-width: 560px;
 	max-height: 88vh;
 	overflow-y: auto;
@@ -895,5 +913,72 @@ html.cetech-planos-modal-open body {
 	.cetech-planos__apps--card .cetech-planos__app-logo {
 		width: 58px;
 		height: 58px;
+	}
+}
+
+/* ------------------------------------------------------------
+   Apps do modal sem separador: quantos cabem por linha
+   ------------------------------------------------------------
+   A lista e flex com largura fixa por item, entao a quantidade por linha
+   e decidida aqui, por media query, e nao pelo PHP. Telas maiores
+   comportam mais colunas; telas menores, menos. O item nunca encolhe
+   (flex: 0 0), entao a conta e exata e o flex so centraliza as linhas.
+
+   A media query do viewport serve de referencia: o modal tem max-width,
+   entao a partir de certo ponto ele deixa de crescer e caberiam mais
+   colunas sem ganho real. Por isso --cetech-modal-col volta a ser
+   calc(.../4) so quando o modal tambem esta mais largo (ver max-width
+   do .cetech-planos__modal-dialog abaixo). */
+
+/* Ate 520px: 1 app por linha, com a logo grande e o texto embaixo. */
+@media (max-width: 519px) {
+	.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app {
+		/* Coluna unica: o logo pode ir em cima, com o texto embaixo e
+		   centralizado, que usa a largura toda da linha. */
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		gap: 10px;
+		padding: 16px 12px;
+	}
+
+	.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app-info {
+		align-items: center;
+	}
+}
+
+/* De 520px: 2 apps por linha. */
+@media (min-width: 520px) {
+	.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) {
+		--cetech-modal-col: calc((100% - 14px) / 2);
+	}
+}
+
+/* De 780px: 3 apps por linha. O modal ja e largo o bastante. */
+@media (min-width: 780px) {
+	.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) {
+		--cetech-modal-col: calc((100% - 28px) / 3);
+	}
+}
+
+/* De 1080px: 4 apps por linha. */
+@media (min-width: 1080px) {
+	.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) {
+		--cetech-modal-col: calc((100% - 42px) / 4);
+	}
+}
+
+/* Largura do modal conforme a tela. Precisa acompanhar as media queries de
+   --cetech-modal-col: se o modal ficasse sempre em 560px, caberiam as
+   colunas mas cada uma sairia estreita demais para nome e descricao. */
+@media (min-width: 780px) {
+	.cetech-planos__modal-dialog {
+		max-width: 720px;
+	}
+}
+
+@media (min-width: 1080px) {
+	.cetech-planos__modal-dialog {
+		max-width: 880px;
 	}
 }
