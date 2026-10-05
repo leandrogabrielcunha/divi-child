@@ -1230,26 +1230,26 @@ function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false,
 	$total = count( $rows );
 	$index = 0;
 
-	/* Quantos logos cabem por linha. O CSS usa exatamente o mesmo numero
-	   numa grade de N colunas, entao o PHP precisa saber onde cada linha
-	   termina para naoorrender um "ou" na ponta dela. */
-	$per_line = $detailed ? 1 : (int) apply_filters( 'cetech_planos_apps_per_line', 3 );
+	/* Quantos logos cabem por linha. Precisa ser o mesmo numero que o CSS
+	   usa na grade (--cetech-per-line), senao o "ou" fica numa posicao
+	   errada: e o PHP que decide onde cada linha termina. Listagem 3 por
+	   linha; modal 2, porque cada box traz nome e descricao. */
+	$per_line = $detailed
+		? 2
+		: (int) apply_filters( 'cetech_planos_apps_per_line', 3 );
 	$per_line = max( 1, $per_line );
 
 	foreach ( $rows as $inner ) {
 		$index++;
 
-		/* O "ou" vai DEPOIS de um box quando existe outro logo na MESMA
-		   linha logo depois dele. Fica de fora em dois casos:
-		   - ultimo box da linha (o proximo cairia na linha de baixo), que
-		     e o que evita o "ou" sobrando na ponta;
-		   - ultimo box da lista, que apontaria para nada.
-		   Com 3 por linha isso da: OU apos o 1o e o 2o, nada apos o 3o. */
+		/* O "ou" vai DEPOIS de um box (a direita dele) quando existe outro
+		   logo na MESMA linha logo depois. Fica de fora em dois casos:
+		   - ultimo box da linha: o proximo cairia na linha de baixo, e o
+		     "ou" sobraria na ponta;
+		   - ultimo box da lista: apontaria para nada.
+		   Com 3 por linha: OU apos o 1o e o 2o, nada apos o 3o. */
 		$is_last   = ( $index === $total );
-		/* Com 1 coluna (modal) nao ha quebra de linha, entao o "ou" entra
-		   em todo box que tem outro depois. Com varias colunas, some no
-		   ultimo de cada linha. */
-		$ends_line = ( $per_line > 1 ) && ( 0 === $index % $per_line ) && ! $is_last;
+		$ends_line = ( 0 === $index % $per_line ) && ! $is_last;
 
 		$connector = ( ! $ends_line && ! $is_last && '' !== $label )
 			? '<span class="cetech-planos__app-or" aria-hidden="true"><span>' . esc_html( $label ) . '</span></span>'

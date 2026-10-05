@@ -293,15 +293,16 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	/* Assenta no vao entre dois boxes: centralizado na altura do logo
-	   vizinho e sem ocupar espaco do box.
-	   left:0 marca a borda esquerda do box; translateX(-50%) - calc do
-	   meio do vao recua a pílula ate o centro da faixa entre dois boxes.
-	   Sem esse segundo termo a pílula ficaria meia dentro do box. */
+	/* Assenta no vao à DIREITA do box, centralizado na altura do logo.
+	   right:0 marca a borda direita do box; translateX(50%) - calc do meio
+	   do vao empurra a pílula até o centro da faixa depois dele. Sem esse
+	   segundo termo a pílula ficaria meia dentro do box.
+	   O "ou" é lido depois do ícone ("logo1 ou logo2"), então ele
+   fica à direita de quem ele antecede na leitura. */
 	position: absolute;
-	left: 0;
+	right: 0;
 	top: 50%;
-	transform: translate(calc(-50% - var(--cetech-or-gap) / 2), -50%);
+	transform: translate(calc(50% + var(--cetech-or-gap) / 2), -50%);
 }
 
 .cetech-planos__app-or > span {
@@ -414,12 +415,18 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 }
 
 .cetech-planos__apps--card .cetech-planos__apps-list {
-	/* No modal cada app traz nome e descricao ao lado do logo, entao o box
-	   fica largo demais para 3 numa linha. Fica 1 coluna, e o conector vai
-	   dentro do box, na direita (ver cetech_planos_render_apps). */
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
+	/* No modal cada app traz nome e descricao ao lado do logo, entao 3
+	   numa linha ficariam estreitos demais. Ficam 2 por linha. O vao e
+	   maior que o da listagem porque a pilula do modal tambem e maior
+	   (30px contra 23px): 38px deixa a pílula centrada no vao com folga
+	   dos dois lados, sem encostar em nenhum box. */
+	--cetech-per-line: 2;
+	--cetech-app-size: auto;
+	--cetech-or-gap: 38px;
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	justify-content: stretch;
+	gap: 10px var(--cetech-or-gap);
 }
 
 .cetech-planos__apps--card .cetech-planos__app {
@@ -428,28 +435,15 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	gap: 16px;
 	padding: 17px 16px;
 	border-radius: 14px;
-	/* Sem o flex-basis da listagem: no modal o box ocupa a linha toda. */
-	flex: none;
+	/* No modal o box ocupa a coluna inteira (--cetech-app-size: auto). */
 	width: 100%;
+	max-width: none;
 	min-width: 0;
 }
 
-/* O logo e o texto ficam a esquerda; o conector empurra para a direita. */
-.cetech-planos__apps--card .cetech-planos__app-info {
-	margin-right: auto;
-}
-
-/* Conector do modal: encosta na direita do box, na altura do logo. Uma
-   coluna nao tem vao entre colunas, entao ele sai do posicionamento
-   absoluto da listagem. */
-.cetech-planos__apps--card .cetech-planos__app-or {
-	position: static;
-	transform: none;
-	flex: 0 0 auto;
-	margin-left: auto;
-	align-self: center;
-}
-
+/* O modal tem o mesmo vao entre colunas, entao o conector continua
+   absoluto, assentado depois do box. Sem override aqui: a pilula do modal
+   e so maior. */
 .cetech-planos__apps--card .cetech-planos__app-or > span {
 	min-width: 30px;
 	height: 21px;
