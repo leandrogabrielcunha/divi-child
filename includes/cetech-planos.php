@@ -37,7 +37,13 @@ define( 'CETECH_PLANOS_CTA_TARGET_META', '_cetech_plano_cta_target' );
 
 /* Meta key e padrao da palavra separadora queprefixa cada app. */
 define( 'CETECH_PLANOS_APPS_SEPARATOR_META', '_cetech_plano_apps_separator' );
+/* Legado: "ocultar separador". Continua valendo -- se estiver "1", o
+   separador nao aparece, mesmo que a flag nova de exibir esteja ligada. */
 define( 'CETECH_PLANOS_APPS_SEPARATOR_HIDE_META', '_cetech_plano_apps_separator_hide' );
+
+/* Meta do separador entre apps. PADRAO DESLIGADO: sem separador a
+   vitrine mostra 3 apps por linha; com o separador, 2 por linha. */
+define( 'CETECH_PLANOS_APPS_SEPARATOR_SHOW_META', '_cetech_plano_apps_separator_show' );
 define( 'CETECH_PLANOS_APPS_SEPARATOR_DEFAULT', 'OU' );
 
 /* ------------------------------------------------------------
@@ -221,7 +227,11 @@ function cetech_planos_meta_box_render( $post ) {
 	$benefits     = get_post_meta( $post->ID, '_cetech_plano_benefits', true );
 	$apps         = cetech_planos_get_apps_raw( $post->ID );
 	$separator    = cetech_planos_get_separator( $post->ID );
+	$sep_shown    = '1' === (string) get_post_meta( $post->ID, CETECH_PLANOS_APPS_SEPARATOR_SHOW_META, true );
 	$sep_hidden   = '1' === (string) get_post_meta( $post->ID, CETECH_PLANOS_APPS_SEPARATOR_HIDE_META, true );
+	/* O legado "ocultar" desligado sem a flag nova ligada significa o padrao:
+	   sem separador. */
+	$sep_shown    = $sep_shown && ! $sep_hidden;
 	$btn_text     = get_post_meta( $post->ID, '_cetech_plano_btn_text', true );
 	$btn_link     = get_post_meta( $post->ID, '_cetech_plano_btn_link', true );
 	$cta_target   = cetech_planos_cta_target( $post->ID );
@@ -378,7 +388,7 @@ function cetech_planos_meta_box_render( $post ) {
 					<?php esc_html_e( 'Apps / Canais', 'Divi' ); ?>
 				</th>
 				<td>
-					<?php cetech_planos_render_apps_field( $apps, $separator, $sep_hidden ); ?>
+					<?php cetech_planos_render_apps_field( $apps, $separator, $sep_shown ); ?>
 				</td>
 			</tr>
 			<tr>
@@ -456,7 +466,14 @@ function cetech_planos_get_apps_raw( $post_id ) {
 function cetech_planos_get_separator( $post ) {
 	$post_id = $post instanceof WP_Post ? $post->ID : (int) $post;
 
+	/* Padrao e NAO exibir: a vitrine mostra 3 apps por linha sem a palavra.
+	   O legado "ocutar" continua mandando, para um plano que ja estava com o
+	   separador escondido nao voltar a mostrar. */
 	if ( '1' === (string) get_post_meta( $post_id, CETECH_PLANOS_APPS_SEPARATOR_HIDE_META, true ) ) {
+		return '';
+	}
+
+	if ( '1' !== (string) get_post_meta( $post_id, CETECH_PLANOS_APPS_SEPARATOR_SHOW_META, true ) ) {
 		return '';
 	}
 
@@ -522,9 +539,10 @@ function cetech_planos_get_apps( $post ) {
  * @param bool                           $hidden    Se o separador foi ocultado.
  * @return void
  */
-function cetech_planos_render_apps_field( $apps, $separator, $hidden = false ) {
-	/* Só o total de apps ativos: o cliente escolhe um entre eles, então
-	 * todos recebem a palavra e nao existe mais a contagem por grupo. */
+function cetech_planos_render_apps_field( $apps, $separator, $shown = false ) {
+	/* Só o total de apps ativos: o cliente escolhe um entre eles, e não
+	   existe contagem por grupo. O total aqui é só para a nota de
+	   "exibição atual" no admin. */
 	$total = 0;
 
 	foreach ( $apps as $app ) {
@@ -550,17 +568,17 @@ function cetech_planos_render_apps_field( $apps, $separator, $hidden = false ) {
 			<button type="button" class="button cetech-apps__add"><?php esc_html_e( '+ Adicionar app/canal', 'Divi' ); ?></button>
 		</p>
 	</div>
-	<p class="description"><?php esc_html_e( 'Apps e canais de streaming que o cliente pode escolher. O cliente contrata UM deles, então todos aparecem como alternativa e cada um é precedido pela palavra separadora. Nome, descrição e detalhes são opcionais: basta o logo. Envie o logo em PNG ou SVG quadrado, com fundo transparente. A ordem aqui é a ordem exibida no card e no modal.', 'Divi' ); ?></p>
+	<p class="description"><?php esc_html_e( 'Apps e canais de streaming que o cliente pode escolher. Nome, descrição e detalhes são opcionais: basta o logo. Envie o logo em PNG ou SVG quadrado, com fundo transparente. A ordem aqui é a ordem exibida no card e no modal.', 'Divi' ); ?></p>
 	<p class="cetech-apps__separator-field">
+		<label class="cetech-apps__separator-show">
+			<input type="checkbox" name="<?php echo esc_attr( CETECH_PLANOS_APPS_SEPARATOR_SHOW_META ); ?>" value="1" <?php checked( '1', $shown ); ?> />
+			<?php esc_html_e( 'Mostrar separador entre os apps', 'Divi' ); ?>
+		</label>
 		<label for="cetech-plano-apps-separator"><?php esc_html_e( 'Palavra separadora', 'Divi' ); ?></label>
 		<input type="text" class="small-text" id="cetech-plano-apps-separator" name="<?php echo esc_attr( CETECH_PLANOS_APPS_SEPARATOR_META ); ?>" value="<?php echo esc_attr( $separator ); ?>" placeholder="<?php esc_attr_e( 'Ex.: OU', 'Divi' ); ?>" maxlength="20" />
-		<label class="cetech-apps__separator-hide">
-			<input type="checkbox" name="<?php echo esc_attr( CETECH_PLANOS_APPS_SEPARATOR_HIDE_META ); ?>" value="1" <?php checked( '1', $hidden ); ?> />
-			<?php esc_html_e( 'Ocultar separador', 'Divi' ); ?>
-		</label>
-		<span class="description"><?php esc_html_e( 'Mostrada à esquerda de cada app que o cliente escolhe. Deixe vazio para usar "OU".', 'Divi' ); ?></span>
+		<span class="description"><?php esc_html_e( 'Desligado (padrão): 3 apps por linha, sem a palavra. Ligado: 2 apps por linha com a palavra entre eles. Deixe a palavra vazia para usar "OU".', 'Divi' ); ?></span>
 	</p>
-	<p class="cetech-apps__preview-note <?php echo $total > 0 ? 'is-ok' : 'is-warning'; ?>"<?php echo $hidden ? ' style="display:none;"' : ''; ?>>
+	<p class="cetech-apps__preview-note <?php echo $total > 0 ? 'is-ok' : 'is-warning'; ?>"<?php echo ( ! $shown && 0 === $total ) ? ' style="display:none;"' : ''; ?>>
 		<?php if ( 0 === $total ) : ?>
 			<?php esc_html_e( 'Nenhum app ativo cadastrado ainda. Adicione o primeiro logo acima.', 'Divi' ); ?>
 		<?php elseif ( 1 === $total ) : ?>
@@ -573,12 +591,20 @@ function cetech_planos_render_apps_field( $apps, $separator, $hidden = false ) {
 			?>
 		<?php else : ?>
 			<?php
-			printf(
-				/* translators: 1: quantidade de apps, 2: palavra separadora. */
-				esc_html__( 'Exibicao atual: %1$d apps, com a palavra "%2$s" a esquerda de cada um.', 'Divi' ),
-				(int) $total,
-				esc_html( $separator )
-			);
+			if ( $shown ) {
+				printf(
+					/* translators: 1: quantidade de apps, 2: palavra separadora. */
+					esc_html__( 'Exibicao atual: %1$d apps, 2 por linha com a palavra "%2$s" entre eles.', 'Divi' ),
+					(int) $total,
+					esc_html( $separator )
+				);
+			} else {
+				printf(
+					/* translators: %d: quantidade de apps. */
+					esc_html__( 'Exibicao atual: %d apps, 3 por linha sem separador.', 'Divi' ),
+					(int) $total
+				);
+			}
 			?>
 		<?php endif; ?>
 	</p>
@@ -768,8 +794,15 @@ function cetech_planos_meta_box_save( $post_id ) {
 		update_post_meta( $post_id, CETECH_PLANOS_APPS_SEPARATOR_META, $separator );
 	}
 
+	$show = ! empty( $_POST[ CETECH_PLANOS_APPS_SEPARATOR_SHOW_META ] ) ? '1' : '0';
 	$hide = ! empty( $_POST[ CETECH_PLANOS_APPS_SEPARATOR_HIDE_META ] ) ? '1' : '0';
 
+	/* As duas flags nao podem ficar ligadas ao mesmo tempo: exibir manda. */
+	if ( '1' === $show ) {
+		$hide = '0';
+	}
+
+	update_post_meta( $post_id, CETECH_PLANOS_APPS_SEPARATOR_SHOW_META, $show );
 	update_post_meta( $post_id, CETECH_PLANOS_APPS_SEPARATOR_HIDE_META, $hide );
 
 	$active = '1' === ( isset( $_POST['_cetech_plano_active'] ) ? (string) $_POST['_cetech_plano_active'] : '' ) ? '1' : '0';
@@ -1268,13 +1301,18 @@ function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false,
 	$index = 0;
 
 	/* Quantos logos cabem por linha. Precisa ser o mesmo numero que o CSS
-	   usa (--cetech-per-line), senao o "ou" fica numa posicao errada: e o
-	   PHP que decide onde cada linha termina. Sao 2 nos dois lugares; no
-	   modal porque cada box traz nome e descricao, na listagem por escolha
-	   de design, com o icone sozinho na ultima linha sempre ao centro. */
-	$per_line = $detailed
-		? 2
-		: (int) apply_filters( 'cetech_planos_apps_per_line', 2 );
+	   usa, senao o "ou" fica numa posicao errada: e o PHP que decide onde
+	   cada linha comeca e onde cada linha termina.
+	   Sem separador (padrao) sao 3 apps por linha; com separador sao 2, com
+	   a palavra no meio da linha. Vale para a listagem e para o modal.
+	   O ultimo app sozinho (total impar) leva a classe --solo e o CSS o
+	   centraliza. */
+	$per_line = '' !== $label ? 2 : 3;
+
+	if ( ! $detailed ) {
+		$per_line = (int) apply_filters( 'cetech_planos_apps_per_line', $per_line );
+	}
+
 	$per_line = max( 1, $per_line );
 
 	foreach ( $rows as $inner ) {

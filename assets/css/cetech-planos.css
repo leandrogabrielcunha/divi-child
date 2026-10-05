@@ -340,9 +340,9 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 .cetech-planos__apps-list {
 	/* Numeros de layoute em variaveis. O --cetech-per-line precisa ser o
 	   mesmo que o PHP assume em cetech_planos_render_apps: e ele que
-	   decide onde cada linha comeca, para nao sobrar "ou" na ponta.
-	   Sao 2 na listagem e 2 no modal, entao o design e o mesmo nos dois. */
-	--cetech-per-line: 2;
+	   decide onde cada linha comeca. Sem separador sao 3 apps por linha;
+	   com separador o --choices abaixo troca para 2. */
+	--cetech-per-line: 3;
 	/* Largura do box: fixa, para o plano com 4 apps ter as mesmas medidas
 	   do plano com 5 ou 6. Tambem delimita o logo, que preenche o box
 	   inteiro (ver .cetech-planos__app, sem padding). */
@@ -358,21 +358,29 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	list-style: none;
 	margin: 0;
 	padding: 0;
-	/* GRADE DE 3 COLUNAS: icone | "ou" | icone.
-	   Cada linha da lista e uma fileira de 3 trilhos, e o "ou" mora no
-	   trilho do meio -- nunca grudado num icone, nunca na mesma coluna de
-	   um icone. Como os 3 trilhos se completam exatos (2 icones + 1
-	   conector), o proprio grid garante 2 icones por linha: nao ha como
-	   sobrar espaco para um 3º icone entrar, o que antes dependia de o
-	   flex quebrar ou nao conforme a sobra do card.
-	   O "ou" e item da grade (irmao do box, e nao filho): o box precisa de
-	   overflow:hidden para o logo nunca atravessar a moldura, e um corte
-	   desse levaria o conector junto. */
+	/* Grade padrao: 3 apps por linha, sem separador. Sem a palavra entre
+	   eles sobra uma coluna a menos, entao sao 3 colunas de icone e o grid
+	   se completa exato -- como no caso do separador, a propria grade
+	   garante quantos apps cabem por linha, sem depender da sobra do card. */
 	display: grid;
-	grid-template-columns: var(--cetech-app-size) var(--cetech-or-size) var(--cetech-app-size);
-	/* justify-content centraliza a fileira de 3 trilhos dentro do card. */
+	grid-template-columns: repeat(var(--cetech-per-line), var(--cetech-app-size));
+	/* justify-content centraliza a fileira de colunas dentro do card. */
 	justify-content: center;
-	gap: 8px 0;
+	/* Espaco entre as colunas. Sem separador e a coluna do "ou" que abria o
+	   vao entre os icones, entao o gap precisa existir por conta propria --
+	   com gap zero os icones ficam colados. */
+	gap: 8px var(--cetech-col-gap);
+	--cetech-col-gap: 10px;
+}
+
+/* Com separador a linha e: icone | "ou" | icone. Sao 2 apps por linha e a
+   palavra mora no trilho do meio -- isolada, nunca grudada num icone e
+   nunca na mesma coluna dele. Aqui o vao entre os icones e a propria coluna
+   do "ou", entao o gap entre colunas volta a zero. */
+.cetech-planos__apps-list--choices {
+	--cetech-per-line: 2;
+	--cetech-col-gap: 0px;
+	grid-template-columns: var(--cetech-app-size) var(--cetech-or-size) var(--cetech-app-size);
 }
 
 /* Box e conector sao itens de grade, entao ja ocupam o trilho inteiro.
@@ -452,18 +460,40 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	   maior que o da listagem porque a pilula do modal tambem e maior
 	   (30px contra 23px): 38px deixa a pílula centrada no vao com folga
 	   dos dois lados, sem encostar em nenhum box. */
-	--cetech-per-line: 2;
 	/* Coluna do meio com 54px para a pílula maior do modal (35px) ficar
-	   isolada, com folga de ~10px de cada lado dos dois lados. As colunas
-	   de icone sao 1fr e encolhem para acomodar, entao a linha continua
-	   valendo a largura toda do modal. */
+	   isolada, com folga de ~10px de cada lado dos dois lados. */
 	--cetech-or-size: 54px;
-	/* Mesma grade de 3 colunas da listagem -- icone, "ou", icone -- mas com
-	   as colunas de icone em 1fr, que preenchem a largura do modal. Os
-	   3 trilhos continuam se completando exatos, entao continuam sendo
-	   2 icones por linha. */
+	/* Mesma regra da listagem: 3 por linha sem separador, com as colunas em
+	   1fr para preencher a largura do modal. */
+	grid-template-columns: repeat(var(--cetech-per-line), minmax(0, 1fr));
+	gap: 10px var(--cetech-col-gap);
+}
+
+/* Com separador no modal: icone | "ou" | icone, com as colunas de icone em
+   1fr. Precisa repetir aqui porque a regra do modal acima tem especificidade
+   maior que a do --choices da listagem e deixaria o "ou" cair numa coluna
+   implicita. */
+.cetech-planos__apps--card .cetech-planos__apps-list--choices {
 	grid-template-columns: minmax(0, 1fr) var(--cetech-or-size) minmax(0, 1fr);
-	gap: 10px 0;
+}
+
+/* No modal o box traz nome e descricao, entao em 3 colunas sobra ~160px por
+   app: a logo de 68px nao caberia com o texto. Encolhe a logo e o texto
+   quando sao 3 colunas. */
+.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app {
+	gap: 10px;
+	padding: 12px 10px;
+}
+
+.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app-logo {
+	width: 44px;
+	height: 44px;
+	border-radius: 10px;
+}
+
+.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app-logo img {
+	max-width: 32px;
+	max-height: 32px;
 }
 
 /* No modal o box do app sozinho se dimensiona pelo proprio conteudo (logo
