@@ -284,32 +284,13 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	border-top-color: rgba(255, 255, 255, 0.15);
 }
 
-.cetech-planos__apps-group {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-	min-width: 0;
-}
-
-.cetech-planos__apps-title {
-	font-size: 10.5px;
-	font-weight: 700;
-	letter-spacing: 1px;
-	text-transform: uppercase;
-	color: #bbbbbb;
-}
-
-.cetech-planos__apps--featured .cetech-planos__apps-title {
-	color: rgba(255, 255, 255, 0.5);
-}
-
 /* Separador entre os apps inclusos e os apps de escolha. */
 .cetech-planos__apps-sep {
 	position: relative;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	margin: 2px 0;
+	margin: 5px 0;
 }
 
 .cetech-planos__apps-sep::before {

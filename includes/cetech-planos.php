@@ -1200,15 +1200,17 @@ function cetech_planos_render_app_item( $app, $detailed ) {
 }
 
 /**
- * Vitrine de apps/canais, dividida em dois grupos:
- * apps inclusos no plano e apps que o cliente escolhe.
+ * Vitrine de apps/canais em dois blocos, separados pela palavra "OU":
+ * os apps inclusos no plano e os apps que o cliente escolhe.
  *
- * Quando existe apenas um dos grupos, nenhum separador e exibido.
+ * Nao ha rotulo em nenhum dos blocos: a separacao e feita apenas pela
+ * palavra. Quando existe apenas um dos grupos, nenhum separador e
+ * exibido e a vitrine fica como uma lista unica de logos.
  *
  * @param array  $apps      Apps/canais ja filtrados por cetech_planos_get_apps().
  * @param string $variant   "tile" para o card (compacto) ou "card" para o modal.
  * @param bool   $featured  Se o plano de origem usa o card destacado (fundo azul).
- * @param string $separator Palavra exibida entre os dois grupos.
+ * @param string $separator Palavra exibida entre os dois blocos.
  * @return string
  */
 function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false, $separator = '' ) {
@@ -1218,14 +1220,8 @@ function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false,
 
 	$detailed = ( 'card' === $variant );
 	$groups   = array(
-		'incluso' => array(
-			'title' => __( 'Apps inclusos', 'Divi' ),
-			'items' => '',
-		),
-		'escolha' => array(
-			'title' => __( 'Apps para escolher', 'Divi' ),
-			'items' => '',
-		),
+		'incluso' => '',
+		'escolha' => '',
 	);
 
 	foreach ( $apps as $app ) {
@@ -1236,13 +1232,12 @@ function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false,
 		}
 
 		$key            = ! empty( $app['incluso'] ) ? 'incluso' : 'escolha';
-		$groups[ $key ]['items'] .= $item;
+		$groups[ $key ] .= $item;
 	}
 
-	/* Descarta grupos vazios: sem isso apareceria um titulo sem itens. */
-	$groups = array_filter( $groups, static function ( $group ) {
-		return '' !== $group['items'];
-	} );
+	/* Descarta blocos vazios: sem isso a palavra apareceria sem conteudo
+	 * de um lado. */
+	$groups = array_filter( $groups );
 
 	if ( empty( $groups ) ) {
 		return '';
@@ -1251,15 +1246,12 @@ function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false,
 	$sections = '';
 	$first    = true;
 
-	foreach ( $groups as $group ) {
+	foreach ( $groups as $items ) {
 		if ( ! $first && '' !== trim( (string) $separator ) ) {
 			$sections .= '<div class="cetech-planos__apps-sep" aria-hidden="true"><span>' . esc_html( trim( (string) $separator ) ) . '</span></div>';
 		}
 
-		$sections .= '<div class="cetech-planos__apps-group">';
-		$sections .= '<span class="cetech-planos__apps-title">' . esc_html( $group['title'] ) . '</span>';
-		$sections .= '<ul class="cetech-planos__apps-list">' . $group['items'] . '</ul>';
-		$sections .= '</div>';
+		$sections .= '<ul class="cetech-planos__apps-list">' . $items . '</ul>';
 
 		$first = false;
 	}
