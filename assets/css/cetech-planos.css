@@ -284,45 +284,40 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	border-top-color: rgba(255, 255, 255, 0.15);
 }
 
-/* Separador entre os apps inclusos e os apps de escolha. */
-.cetech-planos__apps-sep {
+/* ---------- Encaixe da palavra separadora ----------
+   A palavra nao ocupa uma linha inteira: ela entra como uma aba na
+   borda de cada app de escolha, recuada para dentro (formato de
+   encaixe). Como fica sobre a borda, nao rouba espaco do logo e o
+   app continua do mesmo tamanho dos demais. */
+.cetech-planos__app-slot {
 	position: relative;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	margin: 5px 0;
+	min-width: 0;
 }
 
-.cetech-planos__apps-sep::before {
-	content: "";
+.cetech-planos__app-or {
 	position: absolute;
-	left: 0;
-	right: 0;
-	top: 50%;
-	border-top: 1px dashed #dcdce8;
-}
-
-.cetech-planos__apps-sep span {
-	position: relative;
-	padding: 4px 12px;
+	top: -9px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 2;
+	padding: 2px 9px;
+	border: 1.5px solid var(--cetech-p-border);
 	border-radius: 999px;
-	background: #f1f1f9;
-	font-size: 11px;
+	background: #fff;
+	font-family: inherit;
+	font-size: 9.5px;
 	font-weight: 800;
-	letter-spacing: 1.2px;
+	line-height: 1.2;
+	letter-spacing: 0.8px;
 	text-transform: uppercase;
-	color: #55556b;
+	color: #6b6b80;
 	white-space: nowrap;
+	pointer-events: none;
 }
 
-.cetech-planos__apps--featured .cetech-planos__apps-sep::before {
-	border-top-color: rgba(255, 255, 255, 0.3);
-}
-
-.cetech-planos__apps--featured .cetech-planos__apps-sep span {
-	background: rgba(255, 255, 255, 0.18);
-	color: #fff;
-}
+/* Sem variante para o card de destaque: o box do app e branco nos dois
+   casos, entao o encaixe fica igual. E pointer-events:none para a aba
+   nao capturar o clique que abre o modal. */
 
 .cetech-planos__apps-list {
 	list-style: none;
@@ -332,6 +327,11 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	/* 3 icones por linha, como no layout de vitrine de streaming. */
 	grid-template-columns: repeat(3, 1fr);
 	gap: 8px;
+}
+
+/* Respiro para a aba nao encostar na linha de cima. */
+.cetech-planos__apps-list--choices {
+	margin-top: 11px;
 }
 
 .cetech-planos__app {
@@ -390,6 +390,16 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	border-radius: 14px;
 }
 
+.cetech-planos__apps--card .cetech-planos__app-or {
+	top: -11px;
+	font-size: 10.5px;
+	padding: 3px 11px;
+}
+
+.cetech-planos__apps--card .cetech-planos__apps-list--choices {
+	margin-top: 14px;
+}
+
 .cetech-planos__apps--card .cetech-planos__app-logo {
 	flex: none;
 	width: 68px;
@@ -404,13 +414,14 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	max-height: 48px;
 }
 
+/* Nome, descricao e detalhes em coluna, ao lado do logo. */
 .cetech-planos__apps--card .cetech-planos__app-info {
+	display: flex;
+	flex-direction: column;
 	align-items: flex-start;
-	text-align: left;
-}
-
-.cetech-planos__apps--card .cetech-planos__app-info {
 	gap: 3px;
+	min-width: 0;
+	text-align: left;
 }
 
 .cetech-planos__apps--card .cetech-planos__app-name {
@@ -682,6 +693,15 @@ html.cetech-planos-modal-open body {
 	.cetech-planos__app {
 		padding: 12px 5px;
 		border-radius: 10px;
+	}
+
+	.cetech-planos__app-or {
+		font-size: 8.5px;
+		padding: 2px 7px;
+	}
+
+	.cetech-planos__apps-list--choices {
+		margin-top: 9px;
 	}
 
 	.cetech-planos__app-logo {
