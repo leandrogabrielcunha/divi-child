@@ -99,6 +99,11 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	letter-spacing: 0.2px;
 }
 
+/* O card inteiro abre o modal; o cursor precisa refletir isso. */
+.cetech-planos__card[data-cetech-card] {
+	cursor: pointer;
+}
+
 /* ---------- Cabeçalho ---------- */
 .cetech-planos__head {
 	display: flex;
@@ -261,20 +266,29 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 }
 
 /* ============================================================
-   Apps / Canais inclusos
-   Vitrine compacta: logo em area propria com tamanho fixo e
-   object-fit: contain, para logos uniformes e nunca distorcidos.
+   Apps / Canais
+   Vitrine compacta: 3 icones por linha, logo em area propria com
+   tamanho fixo e object-fit: contain, para logos uniformes e nunca
+   distorcidos. Dois grupos separados pela palavra "OU" quando existe
+   app de escolha do cliente.
    ============================================================ */
 .cetech-planos__apps {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 12px;
 	padding-top: 14px;
 	border-top: 1px solid #ebebf5;
 }
 
 .cetech-planos__apps--featured {
 	border-top-color: rgba(255, 255, 255, 0.15);
+}
+
+.cetech-planos__apps-group {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
 }
 
 .cetech-planos__apps-title {
@@ -289,12 +303,51 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	color: rgba(255, 255, 255, 0.5);
 }
 
+/* Separador entre os apps inclusos e os apps de escolha. */
+.cetech-planos__apps-sep {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 2px 0;
+}
+
+.cetech-planos__apps-sep::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 50%;
+	border-top: 1px dashed #dcdce8;
+}
+
+.cetech-planos__apps-sep span {
+	position: relative;
+	padding: 0 9px;
+	background: #fff;
+	font-size: 9.5px;
+	font-weight: 800;
+	letter-spacing: 1.2px;
+	text-transform: uppercase;
+	color: #b3b3c2;
+}
+
+.cetech-planos__apps--featured .cetech-planos__apps-sep::before {
+	border-top-color: rgba(255, 255, 255, 0.22);
+}
+
+.cetech-planos__apps--featured .cetech-planos__apps-sep span {
+	background: var(--cetech-p-blue);
+	color: rgba(255, 255, 255, 0.65);
+}
+
 .cetech-planos__apps-list {
 	list-style: none;
 	margin: 0;
 	padding: 0;
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+	/* 3 icones por linha, como no layout de vitrine de streaming. */
+	grid-template-columns: repeat(3, 1fr);
 	gap: 8px;
 }
 
@@ -423,59 +476,6 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	color: var(--cetech-p-green-dark);
 }
 
-/* ---------- Ações do card ---------- */
-.cetech-planos__actions {
-	margin-top: auto;
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
-}
-
-.cetech-planos__more {
-	display: inline-flex;
-	align-self: center;
-	align-items: center;
-	gap: 5px;
-	background: none;
-	border: 0;
-	padding: 0;
-	font-family: inherit;
-	font-size: 12.5px;
-	font-weight: 700;
-	color: var(--cetech-p-blue);
-	cursor: pointer;
-	transition: gap 0.18s ease, opacity 0.18s ease;
-}
-
-.cetech-planos__more::after {
-	content: "\203A";
-	font-size: 18px;
-	line-height: 0.8;
-}
-
-.cetech-planos__more:hover {
-	gap: 9px;
-}
-
-.cetech-planos__more:focus-visible {
-	outline: 3px solid rgba(32, 32, 238, 0.35);
-	outline-offset: 3px;
-	border-radius: 4px;
-}
-
-.cetech-planos__card--featured .cetech-planos__more {
-	color: var(--cetech-p-green);
-}
-
-.cetech-planos__card--featured .cetech-planos__more:focus-visible {
-	outline-color: rgba(0, 232, 168, 0.45);
-}
-
-/* O card inteiro abre o modal; o cursor precisa refletir isso. */
-.cetech-planos__card[data-cetech-card] {
-	cursor: pointer;
-}
-
 /* ---------- Botão ---------- */
 .cetech-planos__btn {
 	display: block;
@@ -488,6 +488,15 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	color: var(--cetech-p-blue);
 	border: 1.5px solid rgba(32, 32, 238, 0.13);
 	transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+/* Na listagem, o botao ocupa o lugar do CTA e abre o modal.
+   Precisa do reset de <button> para ficar igual ao <a> do modal. */
+.cetech-planos__btn--details {
+	width: 100%;
+	margin-top: auto;
+	font-family: inherit;
+	cursor: pointer;
 }
 
 .cetech-planos__btn:hover {
@@ -707,9 +716,9 @@ html.cetech-planos-modal-open body {
 		grid-template-columns: 1fr;
 	}
 
-	/* A grade reempacota sozinha: 58px de base evita overflow com 4+ apps. */
+	/* Mantem 3 colunas no mobile: 3 tiles cabem sem overflow
+	   (a 320px de largura util, cada tile fica com ~87px). */
 	.cetech-planos__apps-list {
-		grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
 		gap: 7px;
 	}
 

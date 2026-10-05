@@ -106,6 +106,36 @@
 	color: #50575e;
 }
 
+.cetech-apps__grupo {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	color: #50575e;
+}
+
+.cetech-apps__select {
+	max-width: 190px;
+}
+
+.cetech-apps__separator-field {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin-top: 4px;
+}
+
+.cetech-apps__separator-field label {
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.cetech-apps__separator-field .description {
+	margin: 0;
+	flex: 1 1 100%;
+}
+
 .cetech-apps__actions {
 	display: flex;
 	align-items: center;

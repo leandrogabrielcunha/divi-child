@@ -171,6 +171,7 @@ function cetech_planos_meta_box_render( $post ) {
 	$desc         = get_post_meta( $post->ID, '_cetech_plano_desc', true );
 	$benefits     = get_post_meta( $post->ID, '_cetech_plano_benefits', true );
 	$apps         = cetech_planos_get_apps_raw( $post->ID );
+	$separator    = get_post_meta( $post->ID, '_cetech_plano_apps_separator', true );
 	$btn_text     = get_post_meta( $post->ID, '_cetech_plano_btn_text', true );
 	$btn_link     = get_post_meta( $post->ID, '_cetech_plano_btn_link', true );
 	$active       = get_post_meta( $post->ID, '_cetech_plano_active', true );
@@ -187,6 +188,9 @@ function cetech_planos_meta_box_render( $post ) {
 	}
 	if ( '' === $tipo ) {
 		$tipo = 'residencial';
+	}
+	if ( '' === $separator ) {
+		$separator = 'OU';
 	}
 	?>
 	<div class="cetech-planos-admin">
@@ -305,10 +309,10 @@ function cetech_planos_meta_box_render( $post ) {
 			</tr>
 			<tr>
 				<th scope="row">
-					<?php esc_html_e( 'Apps / Canais inclusos', 'Divi' ); ?>
+					<?php esc_html_e( 'Apps / Canais', 'Divi' ); ?>
 				</th>
 				<td>
-					<?php cetech_planos_render_apps_field( $apps ); ?>
+					<?php cetech_planos_render_apps_field( $apps, $separator ); ?>
 				</td>
 			</tr>
 			<tr>
@@ -365,6 +369,7 @@ function cetech_planos_get_apps_raw( $post_id ) {
 			'imagem'   => isset( $app['imagem'] ) ? absint( $app['imagem'] ) : 0,
 			'desc'     => isset( $app['desc'] ) ? (string) $app['desc'] : '',
 			'detalhes' => isset( $app['detalhes'] ) ? (string) $app['detalhes'] : '',
+			'incluso'  => ! isset( $app['incluso'] ) || '1' === (string) $app['incluso'] ? '1' : '0',
 			'ativo'    => ! isset( $app['ativo'] ) || '1' === (string) $app['ativo'] ? '1' : '0',
 		);
 	}
@@ -397,7 +402,7 @@ function cetech_planos_app_is_empty( $app ) {
  * partir do attachment ID cadastrado pelo administrador.
  *
  * @param int|WP_Post $post Post ou ID do plano.
- * @return array<int,array{name:string,logo:string,desc:string,detalhes:string}>
+ * @return array<int,array{name:string,logo:string,desc:string,detalhes:string,incluso:bool}>
  */
 function cetech_planos_get_apps( $post ) {
 	$post_id = $post instanceof WP_Post ? $post->ID : (int) $post;
@@ -415,6 +420,7 @@ function cetech_planos_get_apps( $post ) {
 			'logo'     => $logo ? $logo : '',
 			'desc'     => trim( $app['desc'] ),
 			'detalhes' => trim( $app['detalhes'] ),
+			'incluso'  => '1' === $app['incluso'],
 		);
 	}
 
@@ -424,10 +430,11 @@ function cetech_planos_get_apps( $post ) {
 /**
  * Renderiza o repeater de apps/canais no metabox do plano.
  *
- * @param array<int,array<string,mixed>> $apps Lista de apps ja normalizada.
+ * @param array<int,array<string,mixed>> $apps      Lista de apps ja normalizada.
+ * @param string                         $separator Palavra separadora dos dois grupos.
  * @return void
  */
-function cetech_planos_render_apps_field( $apps ) {
+function cetech_planos_render_apps_field( $apps, $separator ) {
 	?>
 	<div class="cetech-apps" data-cetech-apps>
 		<div class="cetech-apps__list" data-cetech-apps-list>
@@ -443,7 +450,12 @@ function cetech_planos_render_apps_field( $apps ) {
 			<button type="button" class="button cetech-apps__add"><?php esc_html_e( '+ Adicionar app/canal', 'Divi' ); ?></button>
 		</p>
 	</div>
-	<p class="description"><?php esc_html_e( 'Apps e canais de streaming inclusos no plano. Nome, descrição e detalhes são opcionais: basta o logo. Envie o logo em PNG ou SVG quadrado, com fundo transparente. A ordem aqui é a ordem exibida no card e no modal.', 'Divi' ); ?></p>
+	<p class="description"><?php esc_html_e( 'Apps e canais de streaming inclusos no plano. Nome, descrição e detalhes são opcionais: basta o logo. Envie o logo em PNG ou SVG quadrado, com fundo transparente. Apps marcados como "Escolha do cliente" são exibidos em um grupo separado, para o cliente escolher. A ordem aqui é a ordem exibida no card e no modal.', 'Divi' ); ?></p>
+	<p class="cetech-apps__separator-field">
+		<label for="cetech-plano-apps-separator"><?php esc_html_e( 'Palavra separadora', 'Divi' ); ?></label>
+		<input type="text" class="small-text" id="cetech-plano-apps-separator" name="_cetech_plano_apps_separator" value="<?php echo esc_attr( $separator ); ?>" placeholder="<?php esc_attr_e( 'Ex.: OU', 'Divi' ); ?>" maxlength="20" />
+		<span class="description"><?php esc_html_e( 'Exibida entre os apps inclusos e os apps que o cliente escolhe. Deixe vazio para não exibir.', 'Divi' ); ?></span>
+	</p>
 	<?php
 }
 
@@ -458,6 +470,7 @@ function cetech_planos_empty_app() {
 		'imagem'   => 0,
 		'desc'     => '',
 		'detalhes' => '',
+		'incluso'  => '1',
 		'ativo'    => '1',
 	);
 }
@@ -492,6 +505,13 @@ function cetech_planos_render_app_row( $app, $index ) {
 			<input type="text" class="regular-text" name="<?php echo esc_attr( $field . '[nome]' ); ?>" value="<?php echo esc_attr( $app['nome'] ); ?>" placeholder="<?php esc_attr_e( 'Nome (opcional) — Ex.: Netflix', 'Divi' ); ?>" />
 			<input type="text" class="large-text" name="<?php echo esc_attr( $field . '[desc]' ); ?>" value="<?php echo esc_attr( $app['desc'] ); ?>" placeholder="<?php esc_attr_e( 'Descrição (opcional): Ex.: Streaming de filmes e séries', 'Divi' ); ?>" />
 			<input type="text" class="large-text" name="<?php echo esc_attr( $field . '[detalhes]' ); ?>" value="<?php echo esc_attr( $app['detalhes'] ); ?>" placeholder="<?php esc_attr_e( 'Detalhes (opcional): Ex.: Incluído sem custo adicional', 'Divi' ); ?>" />
+			<label class="cetech-apps__grupo">
+				<?php esc_html_e( 'Tipo', 'Divi' ); ?>
+				<select class="cetech-apps__select" name="<?php echo esc_attr( $field . '[incluso]' ); ?>">
+					<option value="1" <?php selected( '1', $app['incluso'] ); ?>><?php esc_html_e( 'Incluso no plano', 'Divi' ); ?></option>
+					<option value="0" <?php selected( '0', $app['incluso'] ); ?>><?php esc_html_e( 'Escolha do cliente', 'Divi' ); ?></option>
+				</select>
+			</label>
 			<label class="cetech-apps__active">
 				<input type="checkbox" name="<?php echo esc_attr( $field . '[ativo]' ); ?>" value="1" <?php checked( '1', $app['ativo'] ); ?> />
 				<?php esc_html_e( 'Ativo', 'Divi' ); ?>
@@ -590,6 +610,7 @@ function cetech_planos_meta_box_save( $post_id ) {
 				'imagem'   => isset( $app['imagem'] ) ? absint( $app['imagem'] ) : 0,
 				'desc'     => isset( $app['desc'] ) ? trim( sanitize_text_field( $app['desc'] ) ) : '',
 				'detalhes' => isset( $app['detalhes'] ) ? trim( sanitize_text_field( $app['detalhes'] ) ) : '',
+				'incluso'  => ! isset( $app['incluso'] ) || '1' === (string) $app['incluso'] ? '1' : '0',
 				'ativo'    => ! empty( $app['ativo'] ) ? '1' : '0',
 			);
 
@@ -608,6 +629,15 @@ function cetech_planos_meta_box_save( $post_id ) {
 		delete_post_meta( $post_id, CETECH_PLANOS_APPS_META );
 	} else {
 		update_post_meta( $post_id, CETECH_PLANOS_APPS_META, $apps );
+	}
+
+	$separator = isset( $_POST['_cetech_plano_apps_separator'] ) ? sanitize_text_field( wp_unslash( $_POST['_cetech_plano_apps_separator'] ) ) : '';
+	$separator = trim( $separator );
+
+	if ( '' === $separator ) {
+		delete_post_meta( $post_id, '_cetech_plano_apps_separator' );
+	} else {
+		update_post_meta( $post_id, '_cetech_plano_apps_separator', $separator );
 	}
 
 	$active = '1' === ( isset( $_POST['_cetech_plano_active'] ) ? (string) $_POST['_cetech_plano_active'] : '' ) ? '1' : '0';
@@ -1013,7 +1043,7 @@ function cetech_planos_render_benefits( $benefits ) {
 }
 
 /**
- * Vitrine de apps/canais inclusos.
+ * Monta o <li> de um app/canal.
  *
  * O logo e sempre exibido dentro de uma area propria com tamanho fixo e
  * object-fit: contain, para que imagens de proporcoes diferentes fiquem
@@ -1023,53 +1053,105 @@ function cetech_planos_render_benefits( $benefits ) {
  * a descricao/detalhes no modal. Na vitrine compacta, itens sem logo e sem
  * nome sao ignorados para nao gerar um card vazio.
  *
- * @param array  $apps     Apps/canais ja filtrados por cetech_planos_get_apps().
- * @param string $variant  "tile" para o card (compacto) ou "card" para o modal.
- * @param bool   $featured Se o plano de origem usa o card destacado (fundo azul).
+ * @param array  $app      App normalizado por cetech_planos_get_apps().
+ * @param bool   $detailed Variante detalhada (modal) inclui descricao/detalhes.
+ * @return string HTML do <li>, ou string vazia se nada for exibido.
+ */
+function cetech_planos_render_app_item( $app, $detailed ) {
+	/* Sem logo e sem nome, o tile compacto ficaria vazio. */
+	if ( ! $detailed && '' === $app['logo'] && '' === $app['name'] ) {
+		return '';
+	}
+
+	$logo = '';
+	if ( '' !== $app['logo'] ) {
+		/* Nome vazio gera alt="" (imagem decorativa), como manda a acessibilidade. */
+		$logo = '<span class="cetech-planos__app-logo"><img src="' . esc_url( $app['logo'] ) . '" alt="' . esc_attr( $app['name'] ) . '" loading="lazy" decoding="async" /></span>';
+	}
+
+	$info = '';
+	if ( '' !== $app['name'] ) {
+		$info .= '<span class="cetech-planos__app-name">' . esc_html( $app['name'] ) . '</span>';
+	}
+	if ( $detailed && '' !== $app['desc'] ) {
+		$info .= '<span class="cetech-planos__app-desc">' . esc_html( $app['desc'] ) . '</span>';
+	}
+	if ( $detailed && '' !== $app['detalhes'] ) {
+		$info .= '<span class="cetech-planos__app-details">' . esc_html( $app['detalhes'] ) . '</span>';
+	}
+
+	$item = '<li class="cetech-planos__app">' . $logo;
+	if ( '' !== $info ) {
+		$item .= '<span class="cetech-planos__app-info">' . $info . '</span>';
+	}
+	$item .= '</li>';
+
+	return $item;
+}
+
+/**
+ * Vitrine de apps/canais, dividida em dois grupos:
+ * apps inclusos no plano e apps que o cliente escolhe.
+ *
+ * Quando existe apenas um dos grupos, nenhum separador e exibido.
+ *
+ * @param array  $apps      Apps/canais ja filtrados por cetech_planos_get_apps().
+ * @param string $variant   "tile" para o card (compacto) ou "card" para o modal.
+ * @param bool   $featured  Se o plano de origem usa o card destacado (fundo azul).
+ * @param string $separator Palavra exibida entre os dois grupos.
  * @return string
  */
-function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false ) {
+function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false, $separator = '' ) {
 	if ( empty( $apps ) ) {
 		return '';
 	}
 
 	$detailed = ( 'card' === $variant );
-	$items    = '';
+	$groups   = array(
+		'incluso' => array(
+			'title' => __( 'Apps inclusos', 'Divi' ),
+			'items' => '',
+		),
+		'escolha' => array(
+			'title' => __( 'Apps para escolher', 'Divi' ),
+			'items' => '',
+		),
+	);
 
 	foreach ( $apps as $app ) {
-		/* Sem logo e sem nome, o tile compacto ficaria vazio. */
-		if ( ! $detailed && '' === $app['logo'] && '' === $app['name'] ) {
+		$item = cetech_planos_render_app_item( $app, $detailed );
+
+		if ( '' === $item ) {
 			continue;
 		}
 
-		$logo = '';
-		if ( '' !== $app['logo'] ) {
-			/* Nome vazio gera alt="" (imagem decorativa), como manda a acessibilidade. */
-			$logo = '<span class="cetech-planos__app-logo"><img src="' . esc_url( $app['logo'] ) . '" alt="' . esc_attr( $app['name'] ) . '" loading="lazy" decoding="async" /></span>';
-		}
-
-		$info = '';
-		if ( '' !== $app['name'] ) {
-			$info .= '<span class="cetech-planos__app-name">' . esc_html( $app['name'] ) . '</span>';
-		}
-		if ( $detailed && '' !== $app['desc'] ) {
-			$info .= '<span class="cetech-planos__app-desc">' . esc_html( $app['desc'] ) . '</span>';
-		}
-		if ( $detailed && '' !== $app['detalhes'] ) {
-			$info .= '<span class="cetech-planos__app-details">' . esc_html( $app['detalhes'] ) . '</span>';
-		}
-
-		$item = '<li class="cetech-planos__app">' . $logo;
-		if ( '' !== $info ) {
-			$item .= '<span class="cetech-planos__app-info">' . $info . '</span>';
-		}
-		$item .= '</li>';
-
-		$items .= $item;
+		$key            = ! empty( $app['incluso'] ) ? 'incluso' : 'escolha';
+		$groups[ $key ]['items'] .= $item;
 	}
 
-	if ( '' === $items ) {
+	/* Descarta grupos vazios: sem isso apareceria um titulo sem itens. */
+	$groups = array_filter( $groups, static function ( $group ) {
+		return '' !== $group['items'];
+	} );
+
+	if ( empty( $groups ) ) {
 		return '';
+	}
+
+	$sections = '';
+	$first    = true;
+
+	foreach ( $groups as $group ) {
+		if ( ! $first && '' !== trim( (string) $separator ) ) {
+			$sections .= '<div class="cetech-planos__apps-sep" aria-hidden="true"><span>' . esc_html( trim( (string) $separator ) ) . '</span></div>';
+		}
+
+		$sections .= '<div class="cetech-planos__apps-group">';
+		$sections .= '<span class="cetech-planos__apps-title">' . esc_html( $group['title'] ) . '</span>';
+		$sections .= '<ul class="cetech-planos__apps-list">' . $group['items'] . '</ul>';
+		$sections .= '</div>';
+
+		$first = false;
 	}
 
 	$class = 'cetech-planos__apps cetech-planos__apps--' . ( $detailed ? 'card' : 'tile' );
@@ -1077,10 +1159,7 @@ function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false 
 		$class .= ' cetech-planos__apps--featured';
 	}
 
-	return '<div class="' . esc_attr( $class ) . '">'
-		. '<span class="cetech-planos__apps-title">' . esc_html__( 'Apps inclusos', 'Divi' ) . '</span>'
-		. '<ul class="cetech-planos__apps-list">' . $items . '</ul>'
-		. '</div>';
+	return '<div class="' . esc_attr( $class ) . '">' . $sections . '</div>';
 }
 
 /**
@@ -1114,8 +1193,6 @@ function cetech_planos_render_card( $post ) {
 	$period    = get_post_meta( $post->ID, '_cetech_plano_period', true );
 	$badge     = get_post_meta( $post->ID, '_cetech_plano_badge', true );
 	$desc      = get_post_meta( $post->ID, '_cetech_plano_desc', true );
-	$btn_text  = get_post_meta( $post->ID, '_cetech_plano_btn_text', true );
-	$btn_link  = get_post_meta( $post->ID, '_cetech_plano_btn_link', true );
 
 	list( $speed_num, $speed_label ) = cetech_planos_split_speed( $speed );
 
@@ -1138,16 +1215,17 @@ function cetech_planos_render_card( $post ) {
 		$html .= '<p class="cetech-planos__desc">' . esc_html( $desc ) . '</p>';
 	}
 
-	$apps = cetech_planos_get_apps( $post );
+	$apps      = cetech_planos_get_apps( $post );
+	$separator = get_post_meta( $post->ID, '_cetech_plano_apps_separator', true );
 
 	/* Os beneficios ficam somente no modal de detalhes; o card mostra
 	 * velocidade, preco, descricao e a vitrine de apps. */
-	$html .= cetech_planos_render_apps( $apps, 'tile', $featured );
+	$html .= cetech_planos_render_apps( $apps, 'tile', $featured, $separator );
 
-	$html .= '<div class="cetech-planos__actions">';
-	$html .= '<button type="button" class="cetech-planos__more" data-cetech-modal-open aria-haspopup="dialog">' . esc_html__( 'Ver detalhes do plano', 'Divi' ) . '</button>';
-	$html .= cetech_planos_render_cta( $btn_text, $btn_link );
-	$html .= '</div>';
+	/* Na listagem o botao abre o modal; o CTA de contratar existe apenas
+	 * dentro do modal, levando o cliente a ver os detalhes antes. */
+	$html .= '<button type="button" class="cetech-planos__btn cetech-planos__btn--details" data-cetech-modal-open aria-haspopup="dialog">'
+		. esc_html__( 'Ver detalhes do plano', 'Divi' ) . '</button>';
 
 	$html .= '</div>'; // .cetech-planos__card
 
@@ -1204,7 +1282,8 @@ function cetech_planos_render_modal_content( $post ) {
 		$html .= '</div>';
 	}
 
-	$apps_html = cetech_planos_render_apps( cetech_planos_get_apps( $post ), 'card' );
+	$separator  = get_post_meta( $post->ID, '_cetech_plano_apps_separator', true );
+	$apps_html  = cetech_planos_render_apps( cetech_planos_get_apps( $post ), 'card', false, $separator );
 	if ( '' !== $apps_html ) {
 		$html .= '<div class="cetech-planos__modal-section">';
 		$html .= $apps_html;
