@@ -27,6 +27,10 @@ define( 'CETECH_PLANOS_JS_HANDLE', 'cetech-planos' );
 /* Meta key da lista de apps/canais inclusos em cada plano. */
 define( 'CETECH_PLANOS_APPS_META', '_cetech_plano_apps' );
 
+/* Meta key e padrao da palavra separadora dos dois grupos de apps. */
+define( 'CETECH_PLANOS_APPS_SEPARATOR_META', '_cetech_plano_apps_separator' );
+define( 'CETECH_PLANOS_APPS_SEPARATOR_DEFAULT', 'OU' );
+
 /* ------------------------------------------------------------
  * 1. Registro do CSS/JS do front-end (isolado)
  * ------------------------------------------------------------ */
@@ -171,7 +175,7 @@ function cetech_planos_meta_box_render( $post ) {
 	$desc         = get_post_meta( $post->ID, '_cetech_plano_desc', true );
 	$benefits     = get_post_meta( $post->ID, '_cetech_plano_benefits', true );
 	$apps         = cetech_planos_get_apps_raw( $post->ID );
-	$separator    = get_post_meta( $post->ID, '_cetech_plano_apps_separator', true );
+	$separator    = cetech_planos_get_separator( $post->ID );
 	$btn_text     = get_post_meta( $post->ID, '_cetech_plano_btn_text', true );
 	$btn_link     = get_post_meta( $post->ID, '_cetech_plano_btn_link', true );
 	$active       = get_post_meta( $post->ID, '_cetech_plano_active', true );
@@ -188,9 +192,6 @@ function cetech_planos_meta_box_render( $post ) {
 	}
 	if ( '' === $tipo ) {
 		$tipo = 'residencial';
-	}
-	if ( '' === $separator ) {
-		$separator = 'OU';
 	}
 	?>
 	<div class="cetech-planos-admin">
@@ -375,6 +376,27 @@ function cetech_planos_get_apps_raw( $post_id ) {
 	}
 
 	return $out;
+}
+
+/**
+ * Palavra separadora exibida entre os dois grupos de apps.
+ *
+ * Distingue "campo nunca configurado" de "administrador escolheu nao
+ * exibir": meta ausente usa o padrao "OU"; meta presente e vazio esconde
+ * o separador. Sem essa distincao, planos cadastrados antes do campo
+ * existir ficariam sem a palavra.
+ *
+ * @param int|WP_Post $post Post ou ID do plano.
+ * @return string
+ */
+function cetech_planos_get_separator( $post ) {
+	$post_id = $post instanceof WP_Post ? $post->ID : (int) $post;
+
+	if ( ! metadata_exists( 'post', $post_id, CETECH_PLANOS_APPS_SEPARATOR_META ) ) {
+		return CETECH_PLANOS_APPS_SEPARATOR_DEFAULT;
+	}
+
+	return trim( (string) get_post_meta( $post_id, CETECH_PLANOS_APPS_SEPARATOR_META, true ) );
 }
 
 /**
@@ -631,14 +653,13 @@ function cetech_planos_meta_box_save( $post_id ) {
 		update_post_meta( $post_id, CETECH_PLANOS_APPS_META, $apps );
 	}
 
-	$separator = isset( $_POST['_cetech_plano_apps_separator'] ) ? sanitize_text_field( wp_unslash( $_POST['_cetech_plano_apps_separator'] ) ) : '';
-	$separator = trim( $separator );
+	/* Sempre persistido: string vazia significa "administrador escolheu
+	 * nao exibir" e nao "campo nunca configurado". */
+	$separator = isset( $_POST['_cetech_plano_apps_separator'] )
+		? trim( sanitize_text_field( wp_unslash( $_POST['_cetech_plano_apps_separator'] ) ) )
+		: CETECH_PLANOS_APPS_SEPARATOR_DEFAULT;
 
-	if ( '' === $separator ) {
-		delete_post_meta( $post_id, '_cetech_plano_apps_separator' );
-	} else {
-		update_post_meta( $post_id, '_cetech_plano_apps_separator', $separator );
-	}
+	update_post_meta( $post_id, CETECH_PLANOS_APPS_SEPARATOR_META, $separator );
 
 	$active = '1' === ( isset( $_POST['_cetech_plano_active'] ) ? (string) $_POST['_cetech_plano_active'] : '' ) ? '1' : '0';
 	update_post_meta( $post_id, '_cetech_plano_active', $active );
@@ -1216,7 +1237,7 @@ function cetech_planos_render_card( $post ) {
 	}
 
 	$apps      = cetech_planos_get_apps( $post );
-	$separator = get_post_meta( $post->ID, '_cetech_plano_apps_separator', true );
+	$separator = cetech_planos_get_separator( $post );
 
 	/* Os beneficios ficam somente no modal de detalhes; o card mostra
 	 * velocidade, preco, descricao e a vitrine de apps. */
@@ -1282,7 +1303,7 @@ function cetech_planos_render_modal_content( $post ) {
 		$html .= '</div>';
 	}
 
-	$separator  = get_post_meta( $post->ID, '_cetech_plano_apps_separator', true );
+	$separator  = cetech_planos_get_separator( $post );
 	$apps_html  = cetech_planos_render_apps( cetech_planos_get_apps( $post ), 'card', false, $separator );
 	if ( '' !== $apps_html ) {
 		$html .= '<div class="cetech-planos__modal-section">';
