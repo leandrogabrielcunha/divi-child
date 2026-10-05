@@ -201,12 +201,29 @@
 			btn.querySelector('.cetech-wa__btn-label').style.display = '';
 		}
 
-		/* Abre o painel já com um plano pré-selecionado, quando o plano
-		   existe na lista. Best effort: se o select ainda não tem a opção
-		   (o plano só aparece depois do perfil), abre o painel mesmo assim.
-		   É o que o botão "Contratar" dos planos usa. */
-		function openWithPlan(planId) {
+		/* Abre o painel já na etapa escolhida.
+		 *
+		 * `tipo` é o valor de data-tipo do botão do primeiro passo: "novo" é
+		 * "Quero ser cliente" e "cliente" é "Já sou cliente". O botão do
+		 * "Contratar" dos planos usa "novo".
+		 *
+		 * Chamar o botão em vez de reimplementar a regra de propósito: o
+		 * clique já faz tudo que precisa -- guarda o tipo no campo hidden,
+		 * ajusta o select de setor, mostra o perfil e avança para a etapa de
+		 * dados. Duplicar essa lógica aqui deixaria os dois lados divergindo.
+		 *
+		 * `planId` é best effort: na etapa de "Quero ser cliente" a lista de
+		 * planos só é montada depois que a pessoa escolhe o perfil, então
+		 * normalmente ainda não há a opção para pré-selecionar.
+		 */
+		function openWithPlan(planId, tipo) {
 			open();
+
+			var tipoBtn = root.querySelector('.cetech-wa__tipo[data-tipo="' + (tipo || 'novo') + '"]');
+
+			if (tipoBtn) {
+				tipoBtn.click();
+			}
 
 			if (!planId || !planoSelect) {
 				return;

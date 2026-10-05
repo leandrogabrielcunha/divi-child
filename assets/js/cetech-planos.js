@@ -186,7 +186,9 @@
 			}
 
 			if (api && typeof api.openWithPlan === 'function') {
-				api.openWithPlan(planId);
+				/* "novo" = "Quero ser cliente": o chat ja abre nessa etapa,
+				   sem perguntar se a pessoa já é cliente. */
+				api.openWithPlan(planId, 'novo');
 			} else if (api && typeof api.open === 'function') {
 				api.open();
 			}
