@@ -195,6 +195,19 @@
 				return;
 			}
 			isOpen = false;
+
+			/* Não dá para aplicar aria-hidden num painel que ainda tem foco
+			   dentro: o leitor de tela deixa de enxergar o elemento focado e
+			   o navegador avisa no console. Tira o foco de dentro do painel
+			   ANTES de esconder. */
+			if (panel.contains(document.activeElement)) {
+				if (btn) {
+					btn.focus();
+				} else {
+					document.activeElement.blur();
+				}
+			}
+
 			root.classList.remove('is-open');
 			panel.setAttribute('aria-hidden', 'true');
 			btn.setAttribute('aria-expanded', 'false');

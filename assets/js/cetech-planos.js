@@ -186,11 +186,22 @@
 			}
 
 			if (api && typeof api.openWithPlan === 'function') {
-				/* "novo" = "Quero ser cliente": o chat ja abre nessa etapa,
-				   sem perguntar se a pessoa já é cliente. */
-				api.openWithPlan(planId, 'novo');
+				/* O painel do WhatsApp fecha ao clicar FORA dele, num listener
+				   no document. O botão "Contratar" está fora desse painel, então
+				   se a abertura acontecesse durante o mesmo clique, esse
+				   listener veria um clique fora e fecharia o painel na hora --
+				   abriria e fecharia no mesmo instante, sem aparecer nada.
+				   Adiar para o próximo tick deixa o clique terminar com o
+				   painel ainda fechado (o listener retorna cedo), e só aí
+				   abre. Isso não depende da ordem em que os dois scripts
+				   foram carregados. */
+				setTimeout(function () {
+					/* "novo" = "Quero ser cliente": o chat ja abre nessa etapa,
+					   sem perguntar se a pessoa já é cliente. */
+					api.openWithPlan(planId, 'novo');
+				}, 0);
 			} else if (api && typeof api.open === 'function') {
-				api.open();
+				setTimeout(api.open, 0);
 			}
 			/* Sem o widget de WhatsApp na página nao ha o que abrir. O PHP
 			   ja cai para o link nesse caso, entao este <button> so aparece
