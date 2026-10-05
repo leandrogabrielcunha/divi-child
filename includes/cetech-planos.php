@@ -1242,23 +1242,22 @@ function cetech_planos_render_apps( $apps, $variant = 'tile', $featured = false,
 	foreach ( $rows as $inner ) {
 		$index++;
 
-		/* O "ou" vai DEPOIS de um box (a direita dele) quando existe outro
-		   logo na MESMA linha logo depois. Fica de fora em dois casos:
-		   - ultimo box da linha: o proximo cairia na linha de baixo, e o
-		     "ou" sobraria na ponta;
-		   - ultimo box da lista: apontaria para nada.
-		   Com 3 por linha: OU apos o 1o e o 2o, nada apos o 3o. */
+		/* O "ou" e um item da propria linha, entre um box e o seguinte, e
+		   nao dentro do box: assim o box pode ter overflow:hidden (para o
+		   logo nunca atravessar a moldura) sem cortar o conector.
+		   Ele sai depois de um box quando existe outro logo na MESMA linha
+		   logo depois. Fica de fora quando:
+		   - o proximo cai na linha de baixo, para nao sobrar "ou" na ponta;
+		   - e o ultimo box da lista, que apontaria para nada.
+		   Com 3 por linha: OU entre 1-2 e 2-3, nada depois do 3o. */
 		$is_last   = ( $index === $total );
 		$ends_line = ( 0 === $index % $per_line ) && ! $is_last;
 
-		$connector = ( ! $ends_line && ! $is_last && '' !== $label )
-			? '<span class="cetech-planos__app-or" aria-hidden="true"><span>' . esc_html( $label ) . '</span></span>'
-			: '';
+		$items .= '<li class="cetech-planos__app">' . $inner . '</li>';
 
-		/* O conector vai DENTRO do box, no fim: assim o box e o unico item
-		   da grade, todas as colunas ficam com a mesma largura e o "ou"
-		   assenta no vao entre duas colunas. */
-		$items .= '<li class="cetech-planos__app">' . $inner . $connector . '</li>';
+		if ( ! $ends_line && ! $is_last && '' !== $label ) {
+			$items .= '<li class="cetech-planos__app-or" aria-hidden="true"><span>' . esc_html( $label ) . '</span></li>';
+		}
 	}
 
 	$list_class = 'cetech-planos__apps-list';

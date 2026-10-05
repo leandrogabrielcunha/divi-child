@@ -296,21 +296,22 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 /* ---------- Conector "ou" ----------
    Vai ENTRE dois logos, nunca no inicio da linha. E um badge pequeno e
    arredondado, centrado no eixo do logo: e a pílula que o layout de
-   referencia usa como separador. */
+   referencia usa como separador.
+   E um item da linha, IRMAO do box, e nao filho dele: o box precisa de
+   overflow:hidden para o logo nunca atravessar a moldura, e um corte
+   desses levaria o conector junto. Como item, ele ocupa a propria faixa
+   de largura --cetech-or-size e assenta no vao entre duas colunas,
+   com --cetech-or-size/2 de folga de cada lado da pílula.
+   O "ou" e lido depois do ícone ("logo1 ou logo2"), entao ele vem
+   depois de quem ele antecede na leitura. */
 .cetech-planos__app-or {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	/* Assenta no vao à DIREITA do box, centralizado na altura do logo.
-	   right:0 marca a borda direita do box; translateX(50%) - calc do meio
-	   do vao empurra a pílula até o centro da faixa depois dele. Sem esse
-	   segundo termo a pílula ficaria meia dentro do box.
-	   O "ou" é lido depois do ícone ("logo1 ou logo2"), então ele
-   fica à direita de quem ele antecede na leitura. */
-	position: absolute;
-	right: 0;
-	top: 50%;
-	transform: translate(calc(50% + var(--cetech-or-gap) / 2), -50%);
+	/* Sem position: participates do fluxo da linha, como o box. */
+	flex: 0 0 var(--cetech-or-size);
+	width: var(--cetech-or-size);
+	min-width: 0;
 }
 
 .cetech-planos__app-or > span {
@@ -345,32 +346,37 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	   do plano com 5 ou 6. Tambem delimita o logo, que preenche o box
 	   inteiro (ver .cetech-planos__app, sem padding). */
 	--cetech-app-size: 56px;
-	/* Vao entre as colunas. Precisa ser maior que a pílula do "ou" (23px)
-	   para ela assentar no meio do vao sem encostar em nenhum dos dois
-	   logos vizinhos. Total da 1a linha: 3 * 56 + 2 * 30 = 228px, que
-	   cabe na largura util do card (~234px). */
-	--cetech-or-gap: 30px;
+	/* Faixa do conector: a largura do "ou" entre duas colunas. E o vao
+	   entre as colunas, entao a pílula fica com --cetech-or-size/2 de
+	   folga de cada lado. Precisa ser maior que a pílula (23px) para ela
+	   nao encostar nos logos vizinhos.
+	   Total da 1a linha: 3 * 56 + 2 * 30 = 228px, que cabe na largura
+	   util do card (~234px). */
+	--cetech-or-size: 30px;
 
 	list-style: none;
 	margin: 0;
 	padding: 0;
-	/* Grade de N colunas de largura FIXA (--cetech-per-line). O box e o
-	   unico item de cada coluna, entao todas as colunas ficam com a mesma
-	   medida aconteca o que acontecer com a quantidade de logos; o 4º logo
-	   cai sozinho na 2ª linha.
+	/* Flex com largura FIXA em cada item, e nao grade com colunas: o "ou"
+	   e um item da linha e nao cabe dentro de uma coluna. Como as medidas
+	   sao fixas, a quebra de linha do flex e deterministica e bate com o
+	   que o PHP calcula: 3 * 56 + 2 * 30 = 228px cabem, mais um box de
+	   56px nao cabe, entao o 4º logo cai sozinho na 2ª linha.
 	   Coluna de largura fixa, e nao 1fr, para o vao entre dois boxes ter
-	   exatamente --cetech-or-gap: e o que deixa a pílula do "ou" centrada
+	   exatamente --cetech-or-size: e o que deixa a pílula do "ou" centrada
 	   nele, sem sobrar folga interna que a jogaria por cima do box.
-	   justify-content: center centraliza a fileira de colunas. */
-	display: grid;
-	grid-template-columns: repeat(var(--cetech-per-line), var(--cetech-app-size));
+	   justify-content: center centraliza a fileira. */
+	display: flex;
+	flex-wrap: wrap;
 	justify-content: center;
-	gap: 8px var(--cetech-or-gap);
+	gap: 8px 0;
 }
 
-/* Cada item da grade ocupa a coluna inteira; sem isso o box esticaria
-   ate a largura da coluna e o vao do "ou" sumiria. */
+/* Cada item da linha ocupa a medida exata: nem encolhe (flex-shrink: 0)
+   nem estica (flex-grow: 0), senao a quebra de linha deixaria de bater
+   com o PHP. */
 .cetech-planos__apps-list > .cetech-planos__app {
+	flex: 0 0 var(--cetech-app-size);
 	width: var(--cetech-app-size);
 	max-width: 100%;
 }
@@ -380,14 +386,14 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	/* Ancora do conector, que se posiciona no vao da esquerda. */
-	position: relative;
 	/* Ocupa a coluna inteira. */
 	min-width: 0;
-	/* Sem padding: o logo ocupa a area toda que sobra dentro da borda do
-	   box. E o que deixa o icone do mesmo tamanho da moldura. */
+	/* Sem padding: o logo ocupa a area toda do box. E o que deixa o icone
+	   do mesmo tamanho da moldura. */
 	padding: 0;
-	border: 1px solid var(--cetech-p-border);
+	/* Corta o desenho na borda do box: nenhum logo atravessa a moldura.
+	   Agora pode ser aqui, porque o "ou" saiu de dentro do box. */
+	overflow: hidden;
 	border-radius: 12px;
 	background: #fff;
 	transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
@@ -397,10 +403,8 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
 }
 
-/* Area do logo com largura e altura fixas: e o que faz todos os boxes
-   terem exatamente a mesma medida, lado a lado, com ou sem a palavra. */
-/* Area do logo: mede a largura toda do box menos as bordas, para o logo
-   crescer junto com a coluna. */
+/* Area do logo: mede a largura toda do box, para o logo crescer junto com
+   a coluna. O corte na moldura fica no box, em .cetech-planos__app. */
 .cetech-planos__app-logo {
 	display: flex;
 	align-items: center;
@@ -409,10 +413,6 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	height: auto;
 	aspect-ratio: 1 / 1;
 	min-width: 0;
-	/* Corta o desenho na borda da area: nenhum logo atravessa a
-	   moldura do box. Fica aqui, e nao no .cetech-planos__app, porque o
-	   badge do "ou" sai de fora do box e seria cortado junto. */
-	overflow: hidden;
 }
 
 .cetech-planos__app-logo img {
@@ -437,12 +437,17 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	   (30px contra 23px): 38px deixa a pílula centrada no vao com folga
 	   dos dois lados, sem encostar em nenhum box. */
 	--cetech-per-line: 2;
-	--cetech-app-size: auto;
-	--cetech-or-gap: 38px;
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
+	/* 2 boxes + 1 conector = 100% da linha: por isso o box e a metade do
+	   que sobra depois da faixa do conector. Assim a quebra continua
+	   batendo com o que o PHP calcula. */
+	--cetech-or-size: 38px;
 	justify-content: stretch;
-	gap: 10px var(--cetech-or-gap);
+	gap: 10px 0;
+}
+
+.cetech-planos__apps--card .cetech-planos__apps-list > .cetech-planos__app {
+	flex: 0 0 calc((100% - var(--cetech-or-size)) / 2);
+	width: calc((100% - var(--cetech-or-size)) / 2);
 }
 
 .cetech-planos__apps--card .cetech-planos__app {
@@ -451,15 +456,15 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	gap: 16px;
 	padding: 17px 16px;
 	border-radius: 14px;
-	/* No modal o box ocupa a coluna inteira (--cetech-app-size: auto). */
-	width: 100%;
-	max-width: none;
+	/* O logo tem moldura propria no modal; o overflow do box nao corta
+	   nada aqui, porque o logo esta no comeco da linha. */
+	overflow: hidden;
 	min-width: 0;
 }
 
 /* O modal tem o mesmo vao entre colunas, entao o conector continua
-   absoluto, assentado depois do box. Sem override aqui: a pilula do modal
-   e so maior. */
+   assentado depois do box. Sem override de posicao aqui: a pílula do
+   modal e so maior. */
 .cetech-planos__apps--card .cetech-planos__app-or > span {
 	min-width: 30px;
 	height: 21px;
@@ -772,18 +777,12 @@ html.cetech-planos-modal-open body {
 		border-radius: 10px;
 	}
 
-	/* No mobile o badge e o box encolhem juntos para caber mais logos na
-	   mesma linha. A lista continua horizontal e so quebra quando nao ha
-	   espaco para pelo menos um logo inteiro. */
-	/* No mobile o box e o vao do "ou" encolhem juntos, para as 3 colunas
-	   ainda caberem numa largura util de ~300px. */
+	/* No mobile o box e a faixa do "ou" encolhem juntos, para as 3 colunas
+	   ainda caberem numa largura util de ~300px:
+	   3 * 48 + 2 * 26 = 200px. */
 	.cetech-planos__apps-list {
 		--cetech-app-size: 48px;
-		--cetech-or-gap: 26px;
-	}
-
-	.cetech-planos__app-logo {
-		height: auto;
+		--cetech-or-size: 26px;
 	}
 
 	.cetech-planos__app-or > span {
@@ -794,8 +793,11 @@ html.cetech-planos-modal-open body {
 		letter-spacing: 0.4px;
 	}
 
+	/* So o vao entre as linhas: um gap de coluna aqui empurraria a soma
+	   2 * box + conector alem dos 100% e o flex quebraria antes do que o
+	   PHP calcula. */
 	.cetech-planos__apps--card .cetech-planos__apps-list {
-		gap: 7px;
+		gap: 7px 0;
 	}
 
 	/* Modal vira uma folha ancorada no rodape, sem cortar conteudo. */
