@@ -29,6 +29,7 @@ define( 'CETECH_PLANOS_APPS_META', '_cetech_plano_apps' );
 
 /* Meta key e padrao da palavra separadora dos dois grupos de apps. */
 define( 'CETECH_PLANOS_APPS_SEPARATOR_META', '_cetech_plano_apps_separator' );
+define( 'CETECH_PLANOS_APPS_SEPARATOR_HIDE_META', '_cetech_plano_apps_separator_hide' );
 define( 'CETECH_PLANOS_APPS_SEPARATOR_DEFAULT', 'OU' );
 
 /* ------------------------------------------------------------
@@ -176,6 +177,7 @@ function cetech_planos_meta_box_render( $post ) {
 	$benefits     = get_post_meta( $post->ID, '_cetech_plano_benefits', true );
 	$apps         = cetech_planos_get_apps_raw( $post->ID );
 	$separator    = cetech_planos_get_separator( $post->ID );
+	$sep_hidden   = '1' === (string) get_post_meta( $post->ID, CETECH_PLANOS_APPS_SEPARATOR_HIDE_META, true );
 	$btn_text     = get_post_meta( $post->ID, '_cetech_plano_btn_text', true );
 	$btn_link     = get_post_meta( $post->ID, '_cetech_plano_btn_link', true );
 	$active       = get_post_meta( $post->ID, '_cetech_plano_active', true );
@@ -313,7 +315,7 @@ function cetech_planos_meta_box_render( $post ) {
 					<?php esc_html_e( 'Apps / Canais', 'Divi' ); ?>
 				</th>
 				<td>
-					<?php cetech_planos_render_apps_field( $apps, $separator ); ?>
+					<?php cetech_planos_render_apps_field( $apps, $separator, $sep_hidden ); ?>
 				</td>
 			</tr>
 			<tr>
@@ -381,22 +383,24 @@ function cetech_planos_get_apps_raw( $post_id ) {
 /**
  * Palavra separadora exibida entre os dois grupos de apps.
  *
- * Distingue "campo nunca configurado" de "administrador escolheu nao
- * exibir": meta ausente usa o padrao "OU"; meta presente e vazio esconde
- * o separador. Sem essa distincao, planos cadastrados antes do campo
- * existir ficariam sem a palavra.
+ * Texto vazio cai no padrao "OU": qualquer gravacao que nao passe pelo
+ * metabox (edicao rapida, bulk edit, REST, revisao) pode gravar vazio e
+ * desligaria o separador de forma permanente e silenciosa. Ocultar e uma
+ * decisao explicita, feita pelo checkbox dedicado.
  *
  * @param int|WP_Post $post Post ou ID do plano.
- * @return string
+ * @return string String vazia quando o separador foi ocultado.
  */
 function cetech_planos_get_separator( $post ) {
 	$post_id = $post instanceof WP_Post ? $post->ID : (int) $post;
 
-	if ( ! metadata_exists( 'post', $post_id, CETECH_PLANOS_APPS_SEPARATOR_META ) ) {
-		return CETECH_PLANOS_APPS_SEPARATOR_DEFAULT;
+	if ( '1' === (string) get_post_meta( $post_id, CETECH_PLANOS_APPS_SEPARATOR_HIDE_META, true ) ) {
+		return '';
 	}
 
-	return trim( (string) get_post_meta( $post_id, CETECH_PLANOS_APPS_SEPARATOR_META, true ) );
+	$value = trim( (string) get_post_meta( $post_id, CETECH_PLANOS_APPS_SEPARATOR_META, true ) );
+
+	return '' !== $value ? $value : CETECH_PLANOS_APPS_SEPARATOR_DEFAULT;
 }
 
 /**
@@ -454,9 +458,10 @@ function cetech_planos_get_apps( $post ) {
  *
  * @param array<int,array<string,mixed>> $apps      Lista de apps ja normalizada.
  * @param string                         $separator Palavra separadora dos dois grupos.
+ * @param bool                           $hidden    Se o separador foi ocultado.
  * @return void
  */
-function cetech_planos_render_apps_field( $apps, $separator ) {
+function cetech_planos_render_apps_field( $apps, $separator, $hidden = false ) {
 	/* Resumo dos grupos: deixa claro no admin por que o separador
 	 * aparece ou nao, evitando a confusao de "marquei e nao veio nada". */
 	$incluso = 0;
@@ -493,10 +498,14 @@ function cetech_planos_render_apps_field( $apps, $separator ) {
 	<p class="description"><?php esc_html_e( 'Apps e canais de streaming inclusos no plano. Nome, descrição e detalhes são opcionais: basta o logo. Envie o logo em PNG ou SVG quadrado, com fundo transparente. Apps marcados como "Escolha do cliente" são exibidos em um grupo separado, para o cliente escolher. A ordem aqui é a ordem exibida no card e no modal.', 'Divi' ); ?></p>
 	<p class="cetech-apps__separator-field">
 		<label for="cetech-plano-apps-separator"><?php esc_html_e( 'Palavra separadora', 'Divi' ); ?></label>
-		<input type="text" class="small-text" id="cetech-plano-apps-separator" name="_cetech_plano_apps_separator" value="<?php echo esc_attr( $separator ); ?>" placeholder="<?php esc_attr_e( 'Ex.: OU', 'Divi' ); ?>" maxlength="20" />
-		<span class="description"><?php esc_html_e( 'Exibida entre os apps inclusos e os apps que o cliente escolhe. Deixe vazio para não exibir.', 'Divi' ); ?></span>
+		<input type="text" class="small-text" id="cetech-plano-apps-separator" name="<?php echo esc_attr( CETECH_PLANOS_APPS_SEPARATOR_META ); ?>" value="<?php echo esc_attr( $separator ); ?>" placeholder="<?php esc_attr_e( 'Ex.: OU', 'Divi' ); ?>" maxlength="20" />
+		<label class="cetech-apps__separator-hide">
+			<input type="checkbox" name="<?php echo esc_attr( CETECH_PLANOS_APPS_SEPARATOR_HIDE_META ); ?>" value="1" <?php checked( '1', $hidden ); ?> />
+			<?php esc_html_e( 'Ocultar separador', 'Divi' ); ?>
+		</label>
+		<span class="description"><?php esc_html_e( 'Exibida entre os apps inclusos e os apps que o cliente escolhe. Deixe vazio para usar "OU".', 'Divi' ); ?></span>
 	</p>
-	<p class="cetech-apps__preview-note <?php echo ( $incluso > 0 && $escolha > 0 ) ? 'is-ok' : 'is-warning'; ?>">
+	<p class="cetech-apps__preview-note <?php echo ( $incluso > 0 && $escolha > 0 ) ? 'is-ok' : 'is-warning'; ?>"<?php echo $hidden ? ' style="display:none;"' : ''; ?>>
 		<?php if ( 0 === $total ) : ?>
 			<?php esc_html_e( 'Nenhum app ativo cadastrado ainda. Adicione o primeiro logo acima.', 'Divi' ); ?>
 		<?php elseif ( 0 === $escolha ) : ?>
@@ -723,13 +732,19 @@ function cetech_planos_meta_box_save( $post_id ) {
 		update_post_meta( $post_id, CETECH_PLANOS_APPS_META, $apps );
 	}
 
-	/* Sempre persistido: string vazia significa "administrador escolheu
-	 * nao exibir" e nao "campo nunca configurado". */
-	$separator = isset( $_POST['_cetech_plano_apps_separator'] )
-		? trim( sanitize_text_field( wp_unslash( $_POST['_cetech_plano_apps_separator'] ) ) )
-		: CETECH_PLANOS_APPS_SEPARATOR_DEFAULT;
+	/* So grava quando o metabox foi realmente submetido. Edicao rapida,
+	 * bulk edit e REST nao enviesam estes campos, e sobrescrever aqui
+	 * desligaria o separador sem ninguem pedir. */
+	if ( isset( $_POST[ CETECH_PLANOS_APPS_SEPARATOR_META ] ) ) {
+		$separator = trim( sanitize_text_field( wp_unslash( $_POST[ CETECH_PLANOS_APPS_SEPARATOR_META ] ) ) );
+		$separator = '' !== $separator ? $separator : CETECH_PLANOS_APPS_SEPARATOR_DEFAULT;
 
-	update_post_meta( $post_id, CETECH_PLANOS_APPS_SEPARATOR_META, $separator );
+		update_post_meta( $post_id, CETECH_PLANOS_APPS_SEPARATOR_META, $separator );
+	}
+
+	$hide = ! empty( $_POST[ CETECH_PLANOS_APPS_SEPARATOR_HIDE_META ] ) ? '1' : '0';
+
+	update_post_meta( $post_id, CETECH_PLANOS_APPS_SEPARATOR_HIDE_META, $hide );
 
 	$active = '1' === ( isset( $_POST['_cetech_plano_active'] ) ? (string) $_POST['_cetech_plano_active'] : '' ) ? '1' : '0';
 	update_post_meta( $post_id, '_cetech_plano_active', $active );
