@@ -457,6 +457,24 @@ function cetech_planos_get_apps( $post ) {
  * @return void
  */
 function cetech_planos_render_apps_field( $apps, $separator ) {
+	/* Resumo dos grupos: deixa claro no admin por que o separador
+	 * aparece ou nao, evitando a confusao de "marquei e nao veio nada". */
+	$incluso = 0;
+	$escolha = 0;
+
+	foreach ( $apps as $app ) {
+		if ( '1' !== $app['ativo'] || cetech_planos_app_is_empty( $app ) ) {
+			continue;
+		}
+
+		if ( '1' === $app['incluso'] ) {
+			$incluso++;
+		} else {
+			$escolha++;
+		}
+	}
+
+	$total = $incluso + $escolha;
 	?>
 	<div class="cetech-apps" data-cetech-apps>
 		<div class="cetech-apps__list" data-cetech-apps-list>
@@ -477,6 +495,58 @@ function cetech_planos_render_apps_field( $apps, $separator ) {
 		<label for="cetech-plano-apps-separator"><?php esc_html_e( 'Palavra separadora', 'Divi' ); ?></label>
 		<input type="text" class="small-text" id="cetech-plano-apps-separator" name="_cetech_plano_apps_separator" value="<?php echo esc_attr( $separator ); ?>" placeholder="<?php esc_attr_e( 'Ex.: OU', 'Divi' ); ?>" maxlength="20" />
 		<span class="description"><?php esc_html_e( 'Exibida entre os apps inclusos e os apps que o cliente escolhe. Deixe vazio para não exibir.', 'Divi' ); ?></span>
+	</p>
+	<p class="cetech-apps__preview-note <?php echo ( $incluso > 0 && $escolha > 0 ) ? 'is-ok' : 'is-warning'; ?>">
+		<?php if ( 0 === $total ) : ?>
+			<?php esc_html_e( 'Nenhum app ativo cadastrado ainda. Adicione o primeiro logo acima.', 'Divi' ); ?>
+		<?php elseif ( 0 === $escolha ) : ?>
+			<?php
+			if ( 1 === $incluso ) {
+				printf(
+					/* translators: %s: palavra separadora. */
+					esc_html__( 'O app está como "Incluso no plano". Para ver "%s" entre os grupos, mude o Tipo de pelo menos um para "Escolha do cliente".', 'Divi' ),
+					esc_html( $separator )
+				);
+			} else {
+				printf(
+					/* translators: 1: quantidade de apps, 2: palavra separadora. */
+					esc_html__( 'Os %1$d apps estão todos como "Incluso no plano". Para ver "%2$s" entre os grupos, mude o Tipo de pelo menos um para "Escolha do cliente".', 'Divi' ),
+					(int) $incluso,
+					esc_html( $separator )
+				);
+			}
+			?>
+		<?php else : ?>
+			<?php
+			$incluso_txt = sprintf(
+				/* translators: %d: quantidade de apps inclusos. */
+				_n( '%d incluso', '%d inclusos', $incluso, 'Divi' ),
+				(int) $incluso
+			);
+
+			$escolha_txt = sprintf(
+				/* translators: %d: quantidade de apps de escolha. */
+				_n( '%d para escolher', '%d para escolher', $escolha, 'Divi' ),
+				(int) $escolha
+			);
+
+			if ( $incluso > 0 ) {
+				printf(
+					/* translators: 1: apps inclusos, 2: apps de escolha, 3: palavra separadora. */
+					esc_html__( 'Exibição atual: %1$s e %2$s, separados por "%3$s".', 'Divi' ),
+					esc_html( $incluso_txt ),
+					esc_html( $escolha_txt ),
+					esc_html( $separator )
+				);
+			} else {
+				printf(
+					/* translators: %s: apps de escolha. */
+					esc_html__( 'Exibição atual: %s, em um grupo único (sem separador).', 'Divi' ),
+					esc_html( $escolha_txt )
+				);
+			}
+			?>
+		<?php endif; ?>
 	</p>
 	<?php
 }
@@ -1066,38 +1136,42 @@ function cetech_planos_render_benefits( $benefits ) {
 /**
  * Monta o <li> de um app/canal.
  *
+ * O nome e a descricao aparecem SOMENTE no modal de detalhes: na listagem
+ * a vitrine mostra apenas o logo, para ficar visualmente uniforme.
+ *
  * O logo e sempre exibido dentro de uma area propria com tamanho fixo e
  * object-fit: contain, para que imagens de proporcoes diferentes fiquem
  * uniformes e nunca sejam distorcidas.
  *
- * O nome do app e opcional: o item aparece apenas com o logo, ou apenas com
- * a descricao/detalhes no modal. Na vitrine compacta, itens sem logo e sem
- * nome sao ignorados para nao gerar um card vazio.
- *
- * @param array  $app      App normalizado por cetech_planos_get_apps().
- * @param bool   $detailed Variante detalhada (modal) inclui descricao/detalhes.
+ * @param array $app      App normalizado por cetech_planos_get_apps().
+ * @param bool  $detailed Variante detalhada (modal) inclui nome/descricao/detalhes.
  * @return string HTML do <li>, ou string vazia se nada for exibido.
  */
 function cetech_planos_render_app_item( $app, $detailed ) {
-	/* Sem logo e sem nome, o tile compacto ficaria vazio. */
-	if ( ! $detailed && '' === $app['logo'] && '' === $app['name'] ) {
+	/* Na vitrine compacta so aparece o logo: sem ele o tile ficaria vazio. */
+	if ( ! $detailed && '' === $app['logo'] ) {
 		return '';
 	}
 
 	$logo = '';
 	if ( '' !== $app['logo'] ) {
-		/* Nome vazio gera alt="" (imagem decorativa), como manda a acessibilidade. */
+		/* O nome vira o alt: na listagem ele nao aparece escrito, mas continua
+		 * sendo o rotulo acessivel da imagem. Nome vazio gera alt="". */
 		$logo = '<span class="cetech-planos__app-logo"><img src="' . esc_url( $app['logo'] ) . '" alt="' . esc_attr( $app['name'] ) . '" loading="lazy" decoding="async" /></span>';
+	}
+
+	if ( ! $detailed ) {
+		return '<li class="cetech-planos__app">' . $logo . '</li>';
 	}
 
 	$info = '';
 	if ( '' !== $app['name'] ) {
 		$info .= '<span class="cetech-planos__app-name">' . esc_html( $app['name'] ) . '</span>';
 	}
-	if ( $detailed && '' !== $app['desc'] ) {
+	if ( '' !== $app['desc'] ) {
 		$info .= '<span class="cetech-planos__app-desc">' . esc_html( $app['desc'] ) . '</span>';
 	}
-	if ( $detailed && '' !== $app['detalhes'] ) {
+	if ( '' !== $app['detalhes'] ) {
 		$info .= '<span class="cetech-planos__app-details">' . esc_html( $app['detalhes'] ) . '</span>';
 	}
 

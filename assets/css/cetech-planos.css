@@ -323,22 +323,24 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 
 .cetech-planos__apps-sep span {
 	position: relative;
-	padding: 0 9px;
-	background: #fff;
-	font-size: 9.5px;
+	padding: 4px 12px;
+	border-radius: 999px;
+	background: #f1f1f9;
+	font-size: 11px;
 	font-weight: 800;
 	letter-spacing: 1.2px;
 	text-transform: uppercase;
-	color: #b3b3c2;
+	color: #55556b;
+	white-space: nowrap;
 }
 
 .cetech-planos__apps--featured .cetech-planos__apps-sep::before {
-	border-top-color: rgba(255, 255, 255, 0.22);
+	border-top-color: rgba(255, 255, 255, 0.3);
 }
 
 .cetech-planos__apps--featured .cetech-planos__apps-sep span {
-	background: var(--cetech-p-blue);
-	color: rgba(255, 255, 255, 0.65);
+	background: rgba(255, 255, 255, 0.18);
+	color: #fff;
 }
 
 .cetech-planos__apps-list {
@@ -355,7 +357,7 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 8px;
+	justify-content: center;
 	min-width: 0;
 	padding: 14px 6px;
 	border: 1px solid var(--cetech-p-border);
@@ -386,34 +388,6 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	object-position: center;
 }
 
-.cetech-planos__app-info {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 2px;
-	min-width: 0;
-	width: 100%;
-}
-
-.cetech-planos__app-name {
-	display: -webkit-box;
-	-webkit-line-clamp: 2;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
-	max-width: 100%;
-	font-size: 10.5px;
-	font-weight: 600;
-	line-height: 1.25;
-	text-align: center;
-	color: var(--cetech-p-muted);
-	overflow-wrap: anywhere;
-}
-
-.cetech-planos__app-desc,
-.cetech-planos__app-details {
-	display: none;
-}
-
 /* Variante detalhada, usada no modal. */
 .cetech-planos__apps--card {
 	padding-top: 0;
@@ -422,7 +396,8 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 }
 
 .cetech-planos__apps--card .cetech-planos__apps-list {
-	grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+	/* 2 apps por linha no modal (dialogo de 640px de largura). */
+	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 10px;
 }
 
@@ -453,18 +428,19 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	text-align: left;
 }
 
+.cetech-planos__apps--card .cetech-planos__app-info {
+	gap: 3px;
+}
+
 .cetech-planos__apps--card .cetech-planos__app-name {
-	display: block;
-	-webkit-line-clamp: none;
-	overflow: visible;
 	font-size: 14px;
 	font-weight: 700;
 	color: var(--cetech-p-ink);
+	overflow-wrap: anywhere;
 }
 
 .cetech-planos__apps--card .cetech-planos__app-desc,
 .cetech-planos__apps--card .cetech-planos__app-details {
-	display: block;
 	font-size: 12px;
 	line-height: 1.45;
 	color: var(--cetech-p-muted);
