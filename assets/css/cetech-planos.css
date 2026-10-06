@@ -943,77 +943,65 @@ html.cetech-planos-modal-open body {
 }
 
 /* ------------------------------------------------------------
-   Apps do modal sem separador: quantos cabem por linha
+   Apps do modal sem separador: sempre 5 por linha
    ------------------------------------------------------------
-   O modal tem no maximo 400px, entao a quantidade por linha e limitada:
-   sobra ~360px de conteudo e cada coluna fica com:
-     1 coluna -> 360px   2 colunas -> 173px   3 colunas -> 111px
-     5 colunas ->  64px
-   Com nome e descricao ao lado, 5 colunas de 64px QUEBRAM o nome no meio
-   da palavra ("Disne / +", "Prime / Video"): 3 dos 5. Entao a partir de
-   560px a lista vira uma fileira so de logos, com o nome escondido --
-   o nome continua no alt da imagem, entao nao se perde nada para leitor de
-   tela. No celular, onde a coluna e larga, nome e descricao continuam
-   aparecendo.
+   O modal tem no maximo 400px e e fluido abaixo disso, entao a
+   quantidade por linha e resolvida por uma unica regra que vale para
+   TODA largura de tela. Nao existe caso de 1 por linha: em 375px (iPhone
+   SE/8) sobram ~339px de conteudo e 5 colunas de ~61px ainda cabem,
+   entao empilhar os icones nao era falta de espaco -- era uma regra de
+   breakpoint que nao devia existir.
 
    A lista e FLEX, e nao grade: sem separador nao existe "ou" para o PHP
    posicionar, entao nada obriga a lista a ter N colunas. No flex a
    quantidade depende so da largura disponivel e cada linha se centraliza
    sozinha -- inclusive a ultima parcial, que na grade ficaria colada na
    esquerda. Com o separador ligado a lista continua em grade, porque ai
-   o PHP e quem decide onde cada linha comeca. */
+   o PHP e quem decide onde cada linha comeca.
 
-/* Ate 419px: 1 app por linha, com o logo grande e o nome embaixo. */
-@media (max-width: 419px) {
+   5 colunas de 64px nao comportam nome e descricao sem o nome quebrar no
+   meio da palavra ("Disne / +"), entao a fileira mostra so os logos. O
+   nome continua no alt da imagem, entao leitor de tela nao perde nada. */
+.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) {
+	/* 36px de vao em vez de 40px: com 40 a conta dava exatamente a largura
+	   do conteudo e o arredondamento de sub-pixel de cada item jogava o
+	   5º para a linha de baixo. Sao 4px de folga. */
+	--cetech-modal-col: calc((100% - 36px) / 5);
+	gap: 8px;
+}
+
+/* So o logo na fileira: nome e descricao nao cabem em 64px. */
+.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app-info {
+	display: none;
+}
+
+.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app {
+	padding: 8px 3px;
+	gap: 0;
+}
+
+.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app-logo {
+	width: 56px;
+	height: 56px;
+	border-radius: 12px;
+}
+
+.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app-logo img {
+	max-width: 44px;
+	max-height: 44px;
+}
+
+/* Tela muito estreita: 5 colunas ficam com ~52px, entao o logo encolhe
+   para nao invadir a coluna vizinha. */
+@media (max-width: 400px) {
 	.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app-logo {
-		width: 64px;
-		height: 64px;
+		width: 48px;
+		height: 48px;
+		border-radius: 11px;
 	}
 
 	.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app-logo img {
-		max-width: 48px;
-		max-height: 48px;
-	}
-}
-
-/* De 420px: 2 apps por linha, com nome e descricao. */
-@media (min-width: 420px) {
-	.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) {
-		--cetech-modal-col: calc((100% - 14px) / 2);
-	}
-}
-
-/* De 560px: 5 apps por linha, so os logos. O modal ja esta no maximo de
-   400px, entao 5 colunas de 64px. */
-@media (min-width: 560px) {
-	.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) {
-		/* 36px em vez de 40px: com 40 a conta dava EXATAMENTE a largura do
-		   conteudo (5 * 64 + 4 * 10 = 360) e o arredondamento de
-		   sub-pixel de cada item jogava o 5º para a linha de baixo. Faltam
-		   4px de folga aqui. */
-		--cetech-modal-col: calc((100% - 36px) / 5);
-		gap: 8px;
-	}
-
-	/* So o logo na fileira: nome e descricao nao cabem em 64px sem
-	   quebrar no meio da palavra. */
-	.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app-info {
-		display: none;
-	}
-
-	.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app {
-		padding: 8px 3px;
-		gap: 0;
-	}
-
-	.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app-logo {
-		width: 56px;
-		height: 56px;
-		border-radius: 12px;
-	}
-
-	.cetech-planos__apps--card .cetech-planos__apps-list:not(.cetech-planos__apps-list--choices) .cetech-planos__app-logo img {
-		max-width: 44px;
-		max-height: 44px;
+		max-width: 38px;
+		max-height: 38px;
 	}
 }
