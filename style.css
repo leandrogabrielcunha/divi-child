@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.35.0
+Version: 1.36.0
 Template: Divi
 */
 
@@ -2616,3 +2616,268 @@ visual SETCEB, substituindo o estilo feio do Divi.
 
 
 
+/*============================================================
+SETCEB - Tabelas de Valores (shortcode [tabela_valores])
+Tabelas de servicos cadastradas no painel. Layout mobile-first:
+no mobile cada linha vira um bloco (rotulo + valor alinhado a
+direita) via CSS, sem JavaScript e sem rolagem horizontal;
+a partir de 641px volta a ser tabela de 3 colunas.
+============================================================*/
+.setceb-tabela-valores {
+	max-width: 100%;
+	margin: 0 0 26px;
+	color: var(--setceb-ink, #0f172a);
+}
+
+.setceb-tabela-valores__cabecalho {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+	margin: 0 0 10px;
+}
+
+.setceb-tabela-valores__titulo {
+	margin: 0;
+	font-size: 21px;
+	line-height: 1.25;
+	font-weight: 700;
+	color: var(--setceb-blue, #123d73);
+}
+
+.setceb-tabela-valores__vigencia {
+	display: inline-flex;
+	align-items: center;
+	width: fit-content;
+	margin: 0;
+	padding: 4px 10px;
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--setceb-white, #fff);
+	background: var(--setceb-blue, #123d73);
+	border-radius: 999px;
+}
+
+.setceb-tabela-valores__subtitulo {
+	margin: 0 0 12px;
+	font-size: 14px;
+	line-height: 1.5;
+	color: var(--setceb-muted, #64748b);
+}
+
+.setceb-tabela-valores__box {
+	overflow: hidden;
+	background: var(--setceb-white, #fff);
+	border: 1px solid var(--setceb-border, #dfe5ee);
+	border-radius: 12px;
+	box-shadow: 0 6px 18px rgba(18, 61, 115, 0.06);
+}
+
+.setceb-tabela-valores__tabela {
+	width: 100%;
+	margin: 0;
+	border: 0 !important;
+	border-collapse: collapse;
+	border-spacing: 0;
+	table-layout: fixed;
+	font-size: 14px;
+	line-height: 1.45;
+}
+
+/* ---------- Mobile: cada linha vira um bloco ---------- */
+.setceb-tabela-valores__tabela thead {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.setceb-tabela-valores__tabela tbody,
+.setceb-tabela-valores__tabela tbody tr,
+.setceb-tabela-valores__tabela tbody td {
+	display: block;
+}
+
+.setceb-tabela-valores__linha {
+	border-bottom: 1px solid var(--setceb-border, #dfe5ee) !important;
+	background: transparent !important;
+}
+
+.setceb-tabela-valores__linha--alt {
+	background: var(--setceb-gray, #f5f7fa) !important;
+}
+
+.setceb-tabela-valores__linha:last-child {
+	border-bottom: 0 !important;
+}
+
+.setceb-tabela-valores__tabela tbody td {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: baseline;
+	gap: 4px 12px;
+	padding: 10px 14px;
+	border: 0 !important;
+	text-align: left;
+	vertical-align: top;
+}
+
+.setceb-tabela-valores__tabela td::before {
+	content: attr(data-label);
+	white-space: normal;
+	font-size: 11.5px;
+	font-weight: 700;
+	line-height: 1.4;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--setceb-muted, #64748b);
+}
+
+.setceb-tabela-valores__col-servico {
+	grid-column: 1 / -1;
+	padding-bottom: 2px;
+	font-weight: 600;
+	color: var(--setceb-ink, #0f172a);
+}
+
+.setceb-tabela-valores__tabela td.setceb-tabela-valores__col-servico::before {
+	content: none;
+}
+
+.setceb-tabela-valores__servico {
+	display: block;
+	overflow-wrap: anywhere;
+}
+
+.setceb-tabela-valores__col-valor {
+	text-align: right !important;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+	color: var(--setceb-blue, #123d73);
+}
+
+.setceb-tabela-valores__col-associado {
+	color: var(--setceb-accent-deep, #085a6d);
+}
+
+.setceb-tabela-valores__obs {
+	margin: 12px 0 0;
+	padding: 11px 14px;
+	font-size: 13px;
+	line-height: 1.5;
+	color: #475569;
+	background: var(--setceb-gray, #f5f7fa);
+	border-left: 3px solid var(--setceb-turquoise, #1fb7c9);
+	border-radius: 8px;
+}
+
+.setceb-tabela-valores__vazio {
+	margin: 0 0 26px;
+	padding: 22px;
+	font-size: 14px;
+	text-align: center;
+	color: var(--setceb-muted, #64748b);
+	background: var(--setceb-gray, #f5f7fa);
+	border: 1px dashed var(--setceb-border, #dfe5ee);
+	border-radius: 12px;
+}
+
+/* ---------- Tablet: tabela de 3 colunas com larguras ajustadas ---------- */
+@media (min-width: 641px) {
+	.setceb-tabela-valores__tabela {
+		font-size: 14.5px;
+	}
+
+	.setceb-tabela-valores__tabela thead {
+		position: static;
+		width: auto;
+		height: auto;
+		margin: 0;
+		overflow: visible;
+		clip-path: none;
+		white-space: normal;
+	}
+
+	.setceb-tabela-valores__tabela thead tr {
+		display: table-row;
+	}
+
+	.setceb-tabela-valores__tabela thead th {
+		display: table-cell;
+		padding: 14px 18px;
+		font-size: 13px;
+		font-weight: 700;
+		letter-spacing: 0.03em;
+		text-transform: uppercase;
+		text-align: left;
+		color: var(--setceb-white, #fff);
+		background: var(--setceb-blue, #123d73);
+		border: 0 !important;
+	}
+
+	.setceb-tabela-valores__tabela thead th.setceb-tabela-valores__col-valor {
+		text-align: right;
+		white-space: normal;
+		background: var(--setceb-blue-light, #1d5b9f);
+	}
+
+	.setceb-tabela-valores__tabela tbody {
+		display: table-row-group;
+	}
+
+	.setceb-tabela-valores__tabela tbody tr {
+		display: table-row;
+	}
+
+	.setceb-tabela-valores__tabela tbody td {
+		display: table-cell;
+		padding: 13px 18px;
+		border-bottom: 1px solid var(--setceb-border, #dfe5ee) !important;
+		text-align: left;
+		vertical-align: top;
+	}
+
+	.setceb-tabela-valores__tabela tbody td::before {
+		content: none;
+	}
+
+	.setceb-tabela-valores__col-servico {
+		width: 50%;
+		overflow-wrap: anywhere;
+	}
+
+	.setceb-tabela-valores__col-valor {
+		width: 25%;
+		text-align: right !important;
+		white-space: nowrap;
+	}
+}
+
+/* ---------- Desktop ---------- */
+@media (min-width: 981px) {
+	.setceb-tabela-valores__tabela {
+		font-size: 15.5px;
+	}
+
+	.setceb-tabela-valores__tabela thead th {
+		padding: 16px 22px;
+		font-size: 13.5px;
+	}
+
+	.setceb-tabela-valores__tabela tbody td {
+		padding: 15px 22px;
+	}
+
+	.setceb-tabela-valores__col-servico {
+		width: 54%;
+	}
+
+	.setceb-tabela-valores__col-valor {
+		width: 23%;
+	}
+}

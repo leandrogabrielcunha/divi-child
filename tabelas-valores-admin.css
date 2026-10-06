@@ -1,0 +1,125 @@
+/*
+SETCEB - Admin das Tabelas de Valores
+Estilo do repetidor de linhas na tela de edicao do post
+(tabelas-valores). Carregado somente nessa tela.
+*/
+
+.setceb-tabela-rep {
+	margin: 0;
+}
+
+.setceb-tabela-rep__cabecalho,
+.setceb-tabela-rep__linha {
+	display: grid;
+	grid-template-columns: 28px minmax(180px, 2fr) minmax(120px, 1fr) minmax(140px, 1fr) auto;
+	gap: 8px;
+	align-items: center;
+}
+
+.setceb-tabela-rep__cabecalho {
+	padding: 0 0 8px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #646970;
+}
+
+.setceb-tabela-rep__linha {
+	padding: 8px;
+	margin-bottom: 6px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+}
+
+.setceb-tabela-rep__linha--nova {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+}
+
+.setceb-tabela-rep__linha--arrastando {
+	opacity: 0.55;
+	border-style: dashed;
+	background: #f6f7f7;
+}
+
+.setceb-tabela-rep__grip {
+	cursor: grab;
+	text-align: center;
+	font-size: 15px;
+	line-height: 1;
+	letter-spacing: -2px;
+	color: #a7aaad;
+	user-select: none;
+}
+
+.setceb-tabela-rep__grip:active {
+	cursor: grabbing;
+	color: #2271b1;
+}
+
+.setceb-tabela-rep__col {
+	display: block;
+	min-width: 0;
+}
+
+.setceb-tabela-rep__input {
+	width: 100%;
+	max-width: none;
+}
+
+.setceb-tabela-rep__col--acoes {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 4px;
+	white-space: nowrap;
+}
+
+.setceb-tabela-rep__ordem {
+	min-width: 20px;
+	font-size: 12px;
+	color: #646970;
+	text-align: center;
+}
+
+.setceb-tabela-rep__remover {
+	color: #b32d2e;
+}
+
+@media screen and (max-width: 782px) {
+	.setceb-tabela-rep__cabecalho {
+		display: none;
+	}
+
+	.setceb-tabela-rep__linha {
+		grid-template-columns: 28px 1fr;
+		row-gap: 6px;
+	}
+
+	.setceb-tabela-rep__linha .setceb-tabela-rep__col--servico {
+		grid-column: 2;
+	}
+
+	.setceb-tabela-rep__linha .setceb-tabela-rep__grip {
+		grid-row: 1;
+		grid-column: 1;
+	}
+
+	.setceb-tabela-rep__linha .setceb-tabela-rep__col--valor {
+		grid-column: 2;
+	}
+
+	.setceb-tabela-rep__linha .setceb-tabela-rep__col--valor::before {
+		content: attr(data-rotulo);
+		display: block;
+		margin-bottom: 2px;
+		font-size: 11px;
+		font-weight: 600;
+		color: #646970;
+	}
+
+	.setceb-tabela-rep__linha .setceb-tabela-rep__col--acoes {
+		grid-column: 2;
+		justify-content: flex-start;
+	}
+}

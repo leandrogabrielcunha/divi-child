@@ -139,6 +139,15 @@ shortcode [setceb_eventos]. Ver includes/eventos.php
 require_once get_stylesheet_directory() . '/includes/eventos.php';
 
 /*================================================
+#SETCEB - Tabelas de Valores (CPT)
+Tabelas cadastradas pelo admin (servico, valor normal
+e valor para associado) exibidas via shortcode
+[tabela_valores id="123"] ou [tabela_valores].
+Ver includes/tabelas-valores.php
+================================================*/
+require_once get_stylesheet_directory() . '/includes/tabelas-valores.php';
+
+/*================================================
 #SETCEB - Header global customizado
 Estrutura do cabecalho e menu principal.
 Ver includes/setceb-header.php
