@@ -761,9 +761,32 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
-	gap: 20px;
+	/* O badge "Mais vendido" precisa de uma linha propria: sem o wrap ele
+	   ficava como mais um item na linha do nome e do preco, espremerdo os
+	   tres dentro dos 400px do modal. */
+	flex-wrap: wrap;
+	column-gap: 20px;
+	row-gap: 10px;
 	padding-bottom: 20px;
 	border-bottom: 1px solid #ebebf5;
+}
+
+/* O preco ocupa a linha inteira, embaixo do nome. Em 400px ele nao cabe ao
+   lado do texto E nao pode ficar no canto direito: o botao de fechar e
+   absoluto ali (14px do topo e da direita, 34px) e o preco ficava
+   embaixo dele. Reserva nao resolvia: com 48px de espaco no lado direito o
+   nome quebrava para forcar o preco a descer. */
+.cetech-planos__modal-head .cetech-planos__price {
+	flex: 0 0 100%;
+	padding-top: 4px;
+}
+
+/* O badge ocupa a linha inteira do head, acima do nome -- mas sem esticar:
+   como item de flex o display inline-block vira block e a pilula ocuparia
+   os 400px. O max-width trava a largura no conteudo. */
+.cetech-planos__modal-head .cetech-planos__badge--static {
+	flex: 0 0 100%;
+	max-width: max-content;
 }
 
 .cetech-planos__modal-headings {
@@ -781,13 +804,6 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 
 .cetech-planos__modal-head .cetech-planos__desc {
 	margin: 0;
-}
-
-.cetech-planos__modal-head .cetech-planos__price {
-	flex: none;
-	align-items: flex-end;
-	text-align: right;
-	padding-top: 4px;
 }
 
 /* Badge dentro do modal: fluxo normal em vez de absoluto. */
@@ -929,6 +945,7 @@ html.cetech-planos-modal-open body {
 	}
 
 	.cetech-planos__modal-head .cetech-planos__price {
+		flex: 0 0 100%;
 		align-items: flex-start;
 		text-align: left;
 		padding-top: 0;
