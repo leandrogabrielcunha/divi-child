@@ -1495,7 +1495,6 @@ function cetech_planos_render_modal_content( $post ) {
 	$price_old = get_post_meta( $post->ID, '_cetech_plano_price_old', true );
 	$price     = get_post_meta( $post->ID, '_cetech_plano_price', true );
 	$period    = get_post_meta( $post->ID, '_cetech_plano_period', true );
-	$badge     = get_post_meta( $post->ID, '_cetech_plano_badge', true );
 	$desc      = get_post_meta( $post->ID, '_cetech_plano_desc', true );
 	$benefits  = get_post_meta( $post->ID, '_cetech_plano_benefits', true );
 	$btn_text  = get_post_meta( $post->ID, '_cetech_plano_btn_text', true );
@@ -1512,12 +1511,10 @@ function cetech_planos_render_modal_content( $post ) {
 		$title = get_the_title( $post->ID );
 	}
 
+	/* Sem o badge: "Mais vendido" e do card. Dentro dos 400px do modal ele
+	   disputava espaco com o nome e o preco. */
+
 	$html = '<div class="cetech-planos__modal-head" data-cetech-modal-title>';
-
-	if ( '' !== trim( (string) $badge ) ) {
-		$html .= '<span class="cetech-planos__badge cetech-planos__badge--static">' . esc_html( $badge ) . '</span>';
-	}
-
 	$html .= '<div class="cetech-planos__modal-headings">';
 	$html .= '<h2 class="cetech-planos__modal-name">' . esc_html( $title ) . '</h2>';
 

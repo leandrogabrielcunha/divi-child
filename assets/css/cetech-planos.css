@@ -761,9 +761,6 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
-	/* O badge "Mais vendido" precisa de uma linha propria: sem o wrap ele
-	   ficava como mais um item na linha do nome e do preco, espremerdo os
-	   tres dentro dos 400px do modal. */
 	flex-wrap: wrap;
 	column-gap: 20px;
 	row-gap: 10px;
@@ -781,14 +778,6 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 	padding-top: 4px;
 }
 
-/* O badge ocupa a linha inteira do head, acima do nome -- mas sem esticar:
-   como item de flex o display inline-block vira block e a pilula ocuparia
-   os 400px. O max-width trava a largura no conteudo. */
-.cetech-planos__modal-head .cetech-planos__badge--static {
-	flex: 0 0 100%;
-	max-width: max-content;
-}
-
 .cetech-planos__modal-headings {
 	min-width: 0;
 }
@@ -804,14 +793,6 @@ O modal de detalhes (.cetech-planos__modal-root) fica fora de
 
 .cetech-planos__modal-head .cetech-planos__desc {
 	margin: 0;
-}
-
-/* Badge dentro do modal: fluxo normal em vez de absoluto. */
-.cetech-planos__badge--static {
-	position: static;
-	transform: none;
-	display: inline-block;
-	margin: 0 0 10px;
 }
 
 .cetech-planos__modal-section {
