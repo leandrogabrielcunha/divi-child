@@ -12,7 +12,9 @@
  *
  * Perfis envolvidos:
  * - "advogado": equipe juridica. Ao entrar no wp-admin ve somente o menu
- *   de Solicitacoes Juridicas (qualquer outra tela e redirecionada).
+ *   de Solicitacoes Juridicas. O Painel (index.php) encaminha para a
+ *   listagem e as demais telas exibem o aviso de acesso restrito; o
+ *   perfil do proprio usuario continua liberado.
  * - Administradores: cadastram os advogados em Solicitacoes Juridicas >
  *   Advogados e acompanham os indicadores no Dashboard.
  *
@@ -51,11 +53,13 @@ if ( ! defined( 'SETCEB_SOL_ROLE' ) ) {
 }
 
 /**
- * Versao do conjunto de capacidades. Usada para sincronizar perfis ja
- * existentes sem gravar no banco a cada carregamento.
+ * Versao do conjunto de capacidades do modulo.
+ *
+ * Mantida para diagnostico em suporte: informa qual revisao de
+ * capacidades o site deveria ter. A concessao em si nao depende dela.
  */
 if ( ! defined( 'SETCEB_SOL_CAPS_VERSION' ) ) {
-	define( 'SETCEB_SOL_CAPS_VERSION', '1' );
+	define( 'SETCEB_SOL_CAPS_VERSION', '2' );
 }
 
 /* ------------------------------------------------------------
@@ -69,15 +73,34 @@ if ( ! defined( 'SETCEB_SOL_CAPS_VERSION' ) ) {
 function setceb_sol_caps_advogado() {
 	$cap = SETCEB_SOL_CAP;
 
+	/*
+	 * Apenas capacidades PRIMITIVAS. Com map_meta_cap ativo, o core
+	 * traduz sozinho edit_post/read_post/delete_post para o post type.
+	 * Conceder as meta capabilities (edit_setceb_sol, read_setceb_sol)
+	 * aqui faz o WordPress emitir "_doing_it_wrong: sempre informe um
+	 * post especifico" sempre que algo verifica a meta cap sem ID.
+	 */
 	return array(
 		'read'                            => true,
-		'read_' . $cap                    => true,
-		'edit_' . $cap                    => true,
 		'edit_' . $cap . 's'              => true,
 		'edit_others_' . $cap . 's'       => true,
 		'edit_published_' . $cap . 's'    => true,
 		'read_private_' . $cap . 's'      => true,
 	);
+}
+
+/**
+ * Capacidades que nao podem existir no perfil "advogado".
+ *
+ * Sao as meta capabilities do post type. Concedidas diretamente, elas
+ * quebram a checagem do core em toda tela do painel.
+ *
+ * @return string[]
+ */
+function setceb_sol_caps_proibidas() {
+	$cap = SETCEB_SOL_CAP;
+
+	return array( 'read_' . $cap, 'edit_' . $cap, 'delete_' . $cap );
 }
 
 /**
@@ -91,16 +114,15 @@ function setceb_sol_register_advogado_role() {
 add_action( 'init', 'setceb_sol_register_advogado_role', 5 );
 
 /**
- * Sincroniza as capacidades do perfil em instalacoes ja existentes.
+ * Garante que o perfil "advogado" tenha exatamente as capacidades do modulo.
  *
- * O perfil pode ter sido criado antes de uma nova capacidade existir; o
- * numero de versao evita gravar no banco a cada requisicao.
+ * Roda a cada requisicao, de proposito: e idempotente e custa poucas
+ * consultas a um objeto de papel que o WordPress ja mantem em cache.
+ * Enquanto isto dependia de um numero de versao gravado em option, uma
+ * instalacao que ja tivesse o valor antigo nunca recebia as capacidades
+ * novas - e, sem "edit_setceb_sols", o proprio core nega a listagem.
  */
 function setceb_sol_sync_advogado_caps() {
-	if ( get_option( 'setceb_sol_caps_version' ) === SETCEB_SOL_CAPS_VERSION ) {
-		return;
-	}
-
 	$role = get_role( SETCEB_SOL_ROLE );
 
 	if ( ! $role ) {
@@ -113,7 +135,15 @@ function setceb_sol_sync_advogado_caps() {
 		}
 	}
 
-	update_option( 'setceb_sol_caps_version', SETCEB_SOL_CAPS_VERSION );
+	// As meta capabilities nao podem existir no perfil: com map_meta_cap
+	// ativo o core traduz edit_post/read_post/delete_post sozinho, e a
+	// concessao direta faz o WordPress emitir "_doing_it_wrong" em toda
+	// verificacao sem post especifico.
+	foreach ( setceb_sol_caps_proibidas() as $cap ) {
+		if ( $role->has_cap( $cap ) ) {
+			$role->remove_cap( $cap );
+		}
+	}
 }
 add_action( 'init', 'setceb_sol_sync_advogado_caps', 6 );
 
@@ -946,7 +976,8 @@ function setceb_sol_atendimento_save( $post_id ) {
 		return;
 	}
 
-	if ( ! current_user_can( 'edit_setceb_sol', $post_id ) ) {
+	// Forma idiomatica: quem verifica e o proprio post type.
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
 		return;
 	}
 
@@ -1982,6 +2013,12 @@ function setceb_sol_tela_permitida() {
 		return false;
 	}
 
+	// O proprio perfil do usuario: o link "Meu perfil" da barra de
+	// administracao aponta para ca. Nao expoe dados de outros usuarios.
+	if ( 'profile.php' === $pagenow ) {
+		return true;
+	}
+
 	return false;
 }
 
@@ -2010,8 +2047,36 @@ function setceb_sol_remover_menus() {
 		'profile.php',
 	);
 
+	// Pais cujo $submenu tambem precisa sair (ver comentario abaixo).
+	$pais = array(
+		'upload.php',
+		'link-manager.php',
+		'edit.php',
+		'edit-comments.php',
+		'tools.php',
+		'themes.php',
+		'plugins.php',
+		'users.php',
+		'options-general.php',
+	);
+
 	foreach ( $menus as $menu ) {
 		remove_menu_page( $menu );
+	}
+
+	/*
+	 * remove_menu_page() apaga apenas $menu. As entradas continuam em
+	 * $submenu, e user_can_access_admin_page() percorre $submenu[$parent]
+	 * procurando uma entrada cujo slug seja igual ao $pagenow para decidir
+	 * o acesso. Sem esta limpeza, a entrada "Todos os artigos" de
+	 * $submenu['edit.php'] responde por current_user_can('edit_posts') e
+	 * nega a listagem do modulo para quem nao possui as capacidades de
+	 * Posts - exatamente o caso da equipe juridica.
+	 */
+	foreach ( array_keys( (array) $GLOBALS['submenu'] ) as $pai ) {
+		if ( in_array( $pai, $pais, true ) ) {
+			unset( $GLOBALS['submenu'][ $pai ] );
+		}
 	}
 
 	remove_submenu_page( 'options-general.php', 'options-general.php' );
@@ -2022,201 +2087,15 @@ function setceb_sol_remover_menus() {
 add_action( 'admin_menu', 'setceb_sol_remover_menus', 999 );
 
 /**
- * O modo diagnostico esta ativo?
- *
- * Com setceb_debug=1 na URL, a equipe juridica ve na propria tela o
- * detalhamento da negativa em vez de ser redirecionada. Serve para
- * descobrir por que uma tela esta sendo bloqueada.
- *
- * @return bool
- */
-function setceb_sol_debug_ativo() {
-	if ( ! isset( $_GET['setceb_debug'] ) ) {
-		return false;
-	}
-
-	if ( ! setceb_sol_usuario_restrito() && ! current_user_can( 'manage_options' ) ) {
-		return false;
-	}
-
-	return true;
-}
-
-/**
- * Renderiza o detalhamento da negativa de acesso.
- *
- * @param string $origem Hook que disparou ('admin_page_access_denied' ou 'admin_init').
- */
-function setceb_sol_diagnostico( $origem ) {
-	global $pagenow, $plugin_page, $typenow, $menu, $submenu, $parent_file,
-		$_wp_menu_nopriv, $_wp_submenu_nopriv;
-
-	$user   = wp_get_current_user();
-	$parent = function_exists( 'get_admin_page_parent' ) ? get_admin_page_parent() : '(funcao ausente)';
-
-	// Reproduz as etapas de user_can_access_admin_page() para o modulo.
-	$menu_do_cpt   = array();
-	$submenu_do_cpt = array();
-
-	foreach ( (array) $menu as $item ) {
-		if ( isset( $item[2] ) && false !== strpos( (string) $item[2], SETCEB_SOL_CPT ) ) {
-			$menu_do_cpt[] = $item;
-		}
-	}
-
-	foreach ( (array) $submenu as $chave => $subs ) {
-		if ( false !== strpos( (string) $chave, SETCEB_SOL_CPT ) ) {
-			$submenu_do_cpt[ $chave ] = $subs;
-		}
-	}
-
-	$etapas = array();
-
-	$etapas[] = array(
-		'passo' => '$_wp_submenu_nopriv[$parent][$pagenow] esta definido?',
-		'valor' => isset( $_wp_submenu_nopriv[ $parent ][ $pagenow ] ) ? 'SIM (=> core retorna false)' : 'nao',
-	);
-
-	$casou = false;
-
-	foreach ( (array) ( $submenu[ $parent ] ?? array() ) as $item ) {
-		if ( isset( $item[2] ) && (string) $item[2] === (string) $pagenow ) {
-			$etapas[] = array(
-				'passo' => 'core casa $submenu[$parent][*][2] com $pagenow',
-				'valor' => 'SIM em "' . $item[0] . '" => current_user_can( "' . $item[1] . '" ) = ' . ( current_user_can( $item[1] ) ? 'true' : 'FALSE (=> core retorna false)' ),
-			);
-			$casou = true;
-			break;
-		}
-	}
-
-	if ( ! $casou ) {
-		$achou = false;
-
-		foreach ( (array) $menu as $item ) {
-			if ( isset( $item[2] ) && $item[2] === $parent ) {
-				$etapas[] = array(
-					'passo' => 'core cai no fallback: $menu[*][2] === $parent',
-					'valor' => 'SIM em "' . $item[0] . '" => current_user_can( "' . $item[1] . '" ) = ' . ( current_user_can( $item[1] ) ? 'true' : 'FALSE (=> core retorna false)' ),
-				);
-				$achou = true;
-				break;
-			}
-		}
-
-		if ( ! $achou ) {
-			$etapas[] = array(
-				'passo' => 'core cai no fallback: nenhum $menu[*][2] === $parent',
-				'valor' => 'NAO ENCONTRADO => core retorna true',
-			);
-		}
-	}
-
-	$relatorio = array(
-		'Disparado por'          => $origem,
-		'URL'                    => isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '',
-		'$pagenow'               => (string) $pagenow,
-		'$plugin_page'           => isset( $plugin_page ) ? (string) $plugin_page : '(vazio)',
-		'$typenow'               => (string) $typenow,
-		'$parent_file'           => (string) $parent_file,
-		'get_admin_page_parent()'=> (string) $parent,
-		'user_can_access_admin_page()' => user_can_access_admin_page() ? 'true' : 'FALSE',
-		'setceb_sol_tela_permitida()'  => setceb_sol_tela_permitida() ? 'true' : 'false',
-		'Usuario'                => $user->user_login . ' (ID ' . $user->ID . ')',
-		'Perfis'                 => implode( ', ', (array) $user->roles ),
-		'setceb_sol_usuario_restrito()' => setceb_sol_usuario_restrito() ? 'sim' : 'nao',
-	);
-
-	$caps = array();
-	foreach ( array( 'read', 'manage_options', 'edit_setceb_sols', 'edit_setceb_sol', 'create_setceb_sols', 'delete_setceb_sols', 'edit_posts', 'edit_others_setceb_sols', 'edit_published_setceb_sols' ) as $cap ) {
-		$caps[ $cap ] = current_user_can( $cap ) ? 'true' : 'false';
-	}
-	?>
-	<!DOCTYPE html>
-	<html lang="pt-BR">
-	<head>
-		<meta charset="utf-8">
-		<title>Diagnostico - Solicitacoes Juridicas</title>
-		<style>
-			body { font: 14px/1.6 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; margin: 24px; color: #0f172a; }
-			h1 { font-size: 20px; }
-			table { border-collapse: collapse; width: 100%; margin: 12px 0 24px; }
-			th, td { border: 1px solid #cbd5e1; padding: 7px 10px; text-align: left; vertical-align: top; }
-			th { background: #f1f5f9; width: 320px; font-weight: 600; }
-			code, pre { background: #f8fafc; padding: 2px 5px; border-radius: 4px; font-size: 12.5px; }
-			pre { padding: 10px; overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
-			.falso { color: #b91c1c; font-weight: 700; }
-			.verde { color: #15803d; font-weight: 700; }
-			button { padding: 10px 18px; font-size: 14px; cursor: pointer; }
-		</style>
-	</head>
-	<body>
-		<h1>Diagnostico de acesso - Solicitacoes Juridicas</h1>
-		<p>Pagina de diagnostico temporaria. Copie o conteudo abaixo e envie.</p>
-
-		<h2>Contexto</h2>
-		<table>
-			<?php foreach ( $relatorio as $rotulo => $valor ) : ?>
-				<tr>
-					<th><?php echo esc_html( $rotulo ); ?></th>
-					<td><?php echo esc_html( (string) $valor ); ?></td>
-				</tr>
-			<?php endforeach; ?>
-		</table>
-
-		<h2>Etapas de user_can_access_admin_page()</h2>
-		<table>
-			<tr><th>Passo</th><th>Resultado</th></tr>
-			<?php foreach ( $etapas as $etapa ) : ?>
-				<tr>
-					<td><?php echo esc_html( $etapa['passo'] ); ?></td>
-					<td class="<?php echo false !== strpos( $etapa['valor'], 'FALSE' ) ? 'falso' : ''; ?>"><?php echo esc_html( $etapa['valor'] ); ?></td>
-				</tr>
-			<?php endforeach; ?>
-		</table>
-
-		<h2>Capacidades do usuario</h2>
-		<table>
-			<tr><th>Capacidade</th><th>Tem?</th></tr>
-			<?php foreach ( $caps as $cap => $tem ) : ?>
-				<tr>
-					<td><code><?php echo esc_html( $cap ); ?></code></td>
-					<td class="<?php echo 'true' === $tem ? 'verde' : 'falso'; ?>"><?php echo esc_html( $tem ); ?></td>
-				</tr>
-			<?php endforeach; ?>
-		</table>
-
-		<h2>Menu do modulo em <code>$menu</code></h2>
-		<pre><?php echo esc_html( empty( $menu_do_cpt ) ? '(vazio)' : var_export( $menu_do_cpt, true ) ); ?></pre>
-
-		<h2>Submenus do modulo em <code>$submenu</code></h2>
-		<pre><?php echo esc_html( empty( $submenu_do_cpt ) ? '(vazio)' : var_export( $submenu_do_cpt, true ) ); ?></pre>
-
-		<h2><code>$_GET</code></h2>
-		<pre><?php echo esc_html( var_export( $_GET, true ) ); ?></pre>
-
-		<button onclick="navigator.clipboard.writeText(document.body.innerText)">Copiar tudo</button>
-	</body>
-	</html>
-	<?php
-	exit;
-}
-
-/**
  * Pagina exibida quando a equipe juridica cai em uma tela bloqueada.
  *
  * Nao redireciona: um redirect para a propria URL negada gera laco de
  * 302, e um redirect para a home esconde o motivo. Mostrar a tela
  * resolve os dois problemas de uma vez.
  *
- * @param string $origem   Hook que disparou.
  * @param string $mensagem Mensagem a exibir.
  */
-function setceb_sol_pagina_bloqueada( $origem, $mensagem ) {
-	if ( setceb_sol_debug_ativo() ) {
-		setceb_sol_diagnostico( $origem );
-	}
-
+function setceb_sol_pagina_bloqueada( $mensagem ) {
 	$lista = setceb_sol_admin_url();
 	?>
 	<!DOCTYPE html>
@@ -2232,9 +2111,6 @@ function setceb_sol_pagina_bloqueada( $origem, $mensagem ) {
 				border-top: 4px solid #0d8199; box-shadow: 0 12px 32px rgba(18,61,115,.10); }
 			h1 { margin: 0 0 12px; font-size: 20px; }
 			p { margin: 0 0 10px; color: #475569; }
-			code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
-			.detalhe { margin-top: 18px; padding: 14px 16px; background: #f8fafc; border-radius: 8px;
-				font-size: 12.5px; color: #64748b; word-break: break-word; }
 			.acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
 			a.btn { display: inline-block; padding: 11px 20px; font-size: 14px; text-decoration: none; border-radius: 8px; }
 			a.primaria { background: #0d8199; color: #fff; }
@@ -2246,12 +2122,6 @@ function setceb_sol_pagina_bloqueada( $origem, $mensagem ) {
 			<h1>Acesso restrito</h1>
 			<p><?php echo esc_html( $mensagem ); ?></p>
 			<p>Sua conta tem acesso apenas ao modulo <strong>Solicitacoes Juridicas</strong>.</p>
-
-			<div class="detalhe">
-				<strong>Para diagnostico</strong><br>
-				Adicione <code>?setceb_debug=1</code> a URL desta pagina para ver o detalhamento tecnico:
-				qual regra bloqueou e quais capacidades a conta possui.
-			</div>
 
 			<div class="acoes">
 				<a class="btn primaria" href="<?php echo esc_url( $lista ); ?>">Ir para Solicitacoes Juridicas</a>
@@ -2280,10 +2150,7 @@ function setceb_sol_acesso_negado() {
 		return;
 	}
 
-	setceb_sol_pagina_bloqueada(
-		'admin_page_access_denied',
-		'O WordPress recusou o acesso a esta tela antes mesmo das regras do modulo.'
-	);
+	setceb_sol_pagina_bloqueada( 'O WordPress recusou o acesso a esta tela antes mesmo das regras do modulo.' );
 }
 add_action( 'admin_page_access_denied', 'setceb_sol_acesso_negado' );
 
@@ -2291,6 +2158,8 @@ add_action( 'admin_page_access_denied', 'setceb_sol_acesso_negado' );
  * Bloqueia as telas fora do modulo.
  */
 function setceb_sol_bloquear_telas() {
+	global $pagenow;
+
 	if ( ! setceb_sol_usuario_restrito() ) {
 		return;
 	}
@@ -2299,12 +2168,32 @@ function setceb_sol_bloquear_telas() {
 		return;
 	}
 
-	setceb_sol_pagina_bloqueada(
-		'admin_init',
-		'Esta tela esta fora do modulo Solicitacoes Juridicas.'
-	);
+	/*
+	 * O Painel (index.php) e o destino padrao de quem entra no wp-admin,
+	 * inclusive pelo link "Painel" e por atalhos do proprio WordPress.
+	 * Para a equipe juridica ele leva a listagem; a trava abaixo impede
+	 * repetir a troca se a requisicao ja for a listagem, o que torna o
+	 * laco impossivel.
+	 */
+	if ( 'index.php' === $pagenow && ! setceb_sol_e_a_listagem() ) {
+		wp_safe_redirect( setceb_sol_admin_url() );
+		exit;
+	}
+
+	setceb_sol_pagina_bloqueada( 'Esta tela esta fora do modulo Solicitacoes Juridicas.' );
 }
 add_action( 'admin_init', 'setceb_sol_bloquear_telas' );
+
+/**
+ * A requisicao atual ja e a listagem do modulo?
+ *
+ * Trava anti-laco do redirecionamento aplicado ao Painel.
+ *
+ * @return bool
+ */
+function setceb_sol_e_a_listagem() {
+	return isset( $_GET['post_type'] ) && SETCEB_SOL_CPT === sanitize_key( wp_unslash( $_GET['post_type'] ) );
+}
 
 /**
  * Ao entrar, o advogado vai direto para as solicitacoes.
@@ -2351,6 +2240,12 @@ function setceb_sol_limpar_admin_bar( $barra ) {
 	foreach ( array( 'wp-logo', 'comments', 'new-content', 'updates', 'site-name' ) as $node ) {
 		$barra->remove_node( $node );
 	}
+
+	/*
+	 * Os nos "my-account" e "user-info" ja apontam para profile.php
+	 * (get_edit_profile_url() usa a propria conta), e o modulo libera
+	 * essa tela. Nao ha o que corrigir aqui.
+	 */
 }
 add_action( 'admin_bar_menu', 'setceb_sol_limpar_admin_bar', 999 );
 

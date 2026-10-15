@@ -90,6 +90,18 @@ function setceb_header_markup() {
 
 	$logged_in = is_user_logged_in();
 
+	/*
+	 * A equipe juridica nao usa a area do associado. Para ela o menu da
+	 * conta leva ao modulo de solicitacoes e o perfil passa a ser o do
+	 * proprio painel, que e a unica outra tela que a conta acessa.
+	 */
+	$eh_advogado   = $logged_in && setceb_is_advogado();
+	$area_modulo   = $eh_advogado ? setceb_sol_admin_url() : '';
+
+	if ( $eh_advogado ) {
+		$perfil = admin_url( 'profile.php' );
+	}
+
 	if ( $logged_in ) {
 		$user      = wp_get_current_user();
 		$full_name = trim( (string) $user->display_name );
@@ -137,11 +149,17 @@ function setceb_header_markup() {
 									<?php echo $user_icon; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 									<div class="setceb-header__account-id-text">
 										<span class="setceb-header__account-name"><?php echo esc_html( $full_name ); ?></span>
-										<span class="setceb-header__account-role">Associado</span>
+										<span class="setceb-header__account-role"><?php echo esc_html( $eh_advogado ? 'Advogado' : 'Associado' ); ?></span>
 									</div>
 								</div>
 
 								<div class="setceb-header__account-links">
+									<?php if ( $eh_advogado ) : ?>
+										<a href="<?php echo esc_url( $area_modulo ); ?>" role="menuitem">
+											<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M9 13h6"></path><path d="M9 17h4"></path></svg>
+											Solicitações Jurídicas
+										</a>
+									<?php endif; ?>
 									<a href="<?php echo esc_url( $perfil ); ?>" role="menuitem">
 										<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"></path></svg>
 										Meu perfil
