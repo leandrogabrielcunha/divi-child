@@ -2022,22 +2022,246 @@ function setceb_sol_remover_menus() {
 add_action( 'admin_menu', 'setceb_sol_remover_menus', 999 );
 
 /**
- * Destino seguro para os redirecionamentos da equipe juridica.
+ * O modo diagnostico esta ativo?
  *
- * O destino normal e a listagem de solicitacoes. Como o redirect acontece
- * de dentro do proprio admin, uma segunda tentativa cairia na mesma URL e
- * geraria um laco de 302. Por isso a primeira tentativa leva um marcador
- * na query string: se ele ja estiver presente, o destino vira a home do
- * site, que e sempre acessivel.
+ * Com setceb_debug=1 na URL, a equipe juridica ve na propria tela o
+ * detalhamento da negativa em vez de ser redirecionada. Serve para
+ * descobrir por que uma tela esta sendo bloqueada.
  *
- * @return string
+ * @return bool
  */
-function setceb_sol_destino_redirecionamento() {
-	if ( ! empty( $_GET['setceb_redir'] ) ) {
-		return home_url( '/' );
+function setceb_sol_debug_ativo() {
+	if ( ! isset( $_GET['setceb_debug'] ) ) {
+		return false;
 	}
 
-	return add_query_arg( 'setceb_redir', '1', setceb_sol_admin_url() );
+	if ( ! setceb_sol_usuario_restrito() && ! current_user_can( 'manage_options' ) ) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Renderiza o detalhamento da negativa de acesso.
+ *
+ * @param string $origem Hook que disparou ('admin_page_access_denied' ou 'admin_init').
+ */
+function setceb_sol_diagnostico( $origem ) {
+	global $pagenow, $plugin_page, $typenow, $menu, $submenu, $parent_file,
+		$_wp_menu_nopriv, $_wp_submenu_nopriv;
+
+	$user   = wp_get_current_user();
+	$parent = function_exists( 'get_admin_page_parent' ) ? get_admin_page_parent() : '(funcao ausente)';
+
+	// Reproduz as etapas de user_can_access_admin_page() para o modulo.
+	$menu_do_cpt   = array();
+	$submenu_do_cpt = array();
+
+	foreach ( (array) $menu as $item ) {
+		if ( isset( $item[2] ) && false !== strpos( (string) $item[2], SETCEB_SOL_CPT ) ) {
+			$menu_do_cpt[] = $item;
+		}
+	}
+
+	foreach ( (array) $submenu as $chave => $subs ) {
+		if ( false !== strpos( (string) $chave, SETCEB_SOL_CPT ) ) {
+			$submenu_do_cpt[ $chave ] = $subs;
+		}
+	}
+
+	$etapas = array();
+
+	$etapas[] = array(
+		'passo' => '$_wp_submenu_nopriv[$parent][$pagenow] esta definido?',
+		'valor' => isset( $_wp_submenu_nopriv[ $parent ][ $pagenow ] ) ? 'SIM (=> core retorna false)' : 'nao',
+	);
+
+	$casou = false;
+
+	foreach ( (array) ( $submenu[ $parent ] ?? array() ) as $item ) {
+		if ( isset( $item[2] ) && (string) $item[2] === (string) $pagenow ) {
+			$etapas[] = array(
+				'passo' => 'core casa $submenu[$parent][*][2] com $pagenow',
+				'valor' => 'SIM em "' . $item[0] . '" => current_user_can( "' . $item[1] . '" ) = ' . ( current_user_can( $item[1] ) ? 'true' : 'FALSE (=> core retorna false)' ),
+			);
+			$casou = true;
+			break;
+		}
+	}
+
+	if ( ! $casou ) {
+		$achou = false;
+
+		foreach ( (array) $menu as $item ) {
+			if ( isset( $item[2] ) && $item[2] === $parent ) {
+				$etapas[] = array(
+					'passo' => 'core cai no fallback: $menu[*][2] === $parent',
+					'valor' => 'SIM em "' . $item[0] . '" => current_user_can( "' . $item[1] . '" ) = ' . ( current_user_can( $item[1] ) ? 'true' : 'FALSE (=> core retorna false)' ),
+				);
+				$achou = true;
+				break;
+			}
+		}
+
+		if ( ! $achou ) {
+			$etapas[] = array(
+				'passo' => 'core cai no fallback: nenhum $menu[*][2] === $parent',
+				'valor' => 'NAO ENCONTRADO => core retorna true',
+			);
+		}
+	}
+
+	$relatorio = array(
+		'Disparado por'          => $origem,
+		'URL'                    => isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '',
+		'$pagenow'               => (string) $pagenow,
+		'$plugin_page'           => isset( $plugin_page ) ? (string) $plugin_page : '(vazio)',
+		'$typenow'               => (string) $typenow,
+		'$parent_file'           => (string) $parent_file,
+		'get_admin_page_parent()'=> (string) $parent,
+		'user_can_access_admin_page()' => user_can_access_admin_page() ? 'true' : 'FALSE',
+		'setceb_sol_tela_permitida()'  => setceb_sol_tela_permitida() ? 'true' : 'false',
+		'Usuario'                => $user->user_login . ' (ID ' . $user->ID . ')',
+		'Perfis'                 => implode( ', ', (array) $user->roles ),
+		'setceb_sol_usuario_restrito()' => setceb_sol_usuario_restrito() ? 'sim' : 'nao',
+	);
+
+	$caps = array();
+	foreach ( array( 'read', 'manage_options', 'edit_setceb_sols', 'edit_setceb_sol', 'create_setceb_sols', 'delete_setceb_sols', 'edit_posts', 'edit_others_setceb_sols', 'edit_published_setceb_sols' ) as $cap ) {
+		$caps[ $cap ] = current_user_can( $cap ) ? 'true' : 'false';
+	}
+	?>
+	<!DOCTYPE html>
+	<html lang="pt-BR">
+	<head>
+		<meta charset="utf-8">
+		<title>Diagnostico - Solicitacoes Juridicas</title>
+		<style>
+			body { font: 14px/1.6 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; margin: 24px; color: #0f172a; }
+			h1 { font-size: 20px; }
+			table { border-collapse: collapse; width: 100%; margin: 12px 0 24px; }
+			th, td { border: 1px solid #cbd5e1; padding: 7px 10px; text-align: left; vertical-align: top; }
+			th { background: #f1f5f9; width: 320px; font-weight: 600; }
+			code, pre { background: #f8fafc; padding: 2px 5px; border-radius: 4px; font-size: 12.5px; }
+			pre { padding: 10px; overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
+			.falso { color: #b91c1c; font-weight: 700; }
+			.verde { color: #15803d; font-weight: 700; }
+			button { padding: 10px 18px; font-size: 14px; cursor: pointer; }
+		</style>
+	</head>
+	<body>
+		<h1>Diagnostico de acesso - Solicitacoes Juridicas</h1>
+		<p>Pagina de diagnostico temporaria. Copie o conteudo abaixo e envie.</p>
+
+		<h2>Contexto</h2>
+		<table>
+			<?php foreach ( $relatorio as $rotulo => $valor ) : ?>
+				<tr>
+					<th><?php echo esc_html( $rotulo ); ?></th>
+					<td><?php echo esc_html( (string) $valor ); ?></td>
+				</tr>
+			<?php endforeach; ?>
+		</table>
+
+		<h2>Etapas de user_can_access_admin_page()</h2>
+		<table>
+			<tr><th>Passo</th><th>Resultado</th></tr>
+			<?php foreach ( $etapas as $etapa ) : ?>
+				<tr>
+					<td><?php echo esc_html( $etapa['passo'] ); ?></td>
+					<td class="<?php echo false !== strpos( $etapa['valor'], 'FALSE' ) ? 'falso' : ''; ?>"><?php echo esc_html( $etapa['valor'] ); ?></td>
+				</tr>
+			<?php endforeach; ?>
+		</table>
+
+		<h2>Capacidades do usuario</h2>
+		<table>
+			<tr><th>Capacidade</th><th>Tem?</th></tr>
+			<?php foreach ( $caps as $cap => $tem ) : ?>
+				<tr>
+					<td><code><?php echo esc_html( $cap ); ?></code></td>
+					<td class="<?php echo 'true' === $tem ? 'verde' : 'falso'; ?>"><?php echo esc_html( $tem ); ?></td>
+				</tr>
+			<?php endforeach; ?>
+		</table>
+
+		<h2>Menu do modulo em <code>$menu</code></h2>
+		<pre><?php echo esc_html( empty( $menu_do_cpt ) ? '(vazio)' : var_export( $menu_do_cpt, true ) ); ?></pre>
+
+		<h2>Submenus do modulo em <code>$submenu</code></h2>
+		<pre><?php echo esc_html( empty( $submenu_do_cpt ) ? '(vazio)' : var_export( $submenu_do_cpt, true ) ); ?></pre>
+
+		<h2><code>$_GET</code></h2>
+		<pre><?php echo esc_html( var_export( $_GET, true ) ); ?></pre>
+
+		<button onclick="navigator.clipboard.writeText(document.body.innerText)">Copiar tudo</button>
+	</body>
+	</html>
+	<?php
+	exit;
+}
+
+/**
+ * Pagina exibida quando a equipe juridica cai em uma tela bloqueada.
+ *
+ * Nao redireciona: um redirect para a propria URL negada gera laco de
+ * 302, e um redirect para a home esconde o motivo. Mostrar a tela
+ * resolve os dois problemas de uma vez.
+ *
+ * @param string $origem   Hook que disparou.
+ * @param string $mensagem Mensagem a exibir.
+ */
+function setceb_sol_pagina_bloqueada( $origem, $mensagem ) {
+	if ( setceb_sol_debug_ativo() ) {
+		setceb_sol_diagnostico( $origem );
+	}
+
+	$lista = setceb_sol_admin_url();
+	?>
+	<!DOCTYPE html>
+	<html lang="pt-BR">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Acesso restrito</title>
+		<style>
+			body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+				font: 15px/1.6 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: #0f172a; background: #eef2f7; }
+			.box { max-width: 520px; margin: 24px; padding: 32px; background: #fff; border-radius: 14px;
+				border-top: 4px solid #0d8199; box-shadow: 0 12px 32px rgba(18,61,115,.10); }
+			h1 { margin: 0 0 12px; font-size: 20px; }
+			p { margin: 0 0 10px; color: #475569; }
+			code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+			.detalhe { margin-top: 18px; padding: 14px 16px; background: #f8fafc; border-radius: 8px;
+				font-size: 12.5px; color: #64748b; word-break: break-word; }
+			.acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+			a.btn { display: inline-block; padding: 11px 20px; font-size: 14px; text-decoration: none; border-radius: 8px; }
+			a.primaria { background: #0d8199; color: #fff; }
+			a.secundaria { background: #f1f5f9; color: #334155; }
+		</style>
+	</head>
+	<body>
+		<div class="box">
+			<h1>Acesso restrito</h1>
+			<p><?php echo esc_html( $mensagem ); ?></p>
+			<p>Sua conta tem acesso apenas ao modulo <strong>Solicitacoes Juridicas</strong>.</p>
+
+			<div class="detalhe">
+				<strong>Para diagnostico</strong><br>
+				Adicione <code>?setceb_debug=1</code> a URL desta pagina para ver o detalhamento tecnico:
+				qual regra bloqueou e quais capacidades a conta possui.
+			</div>
+
+			<div class="acoes">
+				<a class="btn primaria" href="<?php echo esc_url( $lista ); ?>">Ir para Solicitacoes Juridicas</a>
+				<a class="btn secundaria" href="<?php echo esc_url( home_url( '/' ) ); ?>">Ir para o site</a>
+			</div>
+		</div>
+	</body>
+	</html>
+	<?php
+	exit;
 }
 
 /**
@@ -2056,8 +2280,10 @@ function setceb_sol_acesso_negado() {
 		return;
 	}
 
-	wp_safe_redirect( setceb_sol_destino_redirecionamento() );
-	exit;
+	setceb_sol_pagina_bloqueada(
+		'admin_page_access_denied',
+		'O WordPress recusou o acesso a esta tela antes mesmo das regras do modulo.'
+	);
 }
 add_action( 'admin_page_access_denied', 'setceb_sol_acesso_negado' );
 
@@ -2073,8 +2299,10 @@ function setceb_sol_bloquear_telas() {
 		return;
 	}
 
-	wp_safe_redirect( setceb_sol_destino_redirecionamento() );
-	exit;
+	setceb_sol_pagina_bloqueada(
+		'admin_init',
+		'Esta tela esta fora do modulo Solicitacoes Juridicas.'
+	);
 }
 add_action( 'admin_init', 'setceb_sol_bloquear_telas' );
 
@@ -2356,30 +2584,12 @@ function setceb_sol_bloquear_criacao() {
 		return;
 	}
 
-	wp_safe_redirect( setceb_sol_admin_url() );
-	exit;
+	setceb_sol_pagina_bloqueada(
+		'admin_init',
+		'Solicitacoes juridicas nao sao criadas manualmente: elas nascem na Area do Associado.'
+	);
 }
 add_action( 'admin_init', 'setceb_sol_bloquear_criacao', 5 );
-
-/**
- * Limpa o marcador de redirecionamento assim que a listagem abre com
- * sucesso, para o "&voltar;" seguinte partir limpo.
- */
-function setceb_sol_limpar_marcador() {
-	if ( empty( $_GET['setceb_redir'] ) ) {
-		return;
-	}
-
-	if ( ! setceb_sol_usuario_restrito() ) {
-		return;
-	}
-
-	$url = remove_query_arg( 'setceb_redir', setceb_sol_admin_url() );
-
-	wp_safe_redirect( $url );
-	exit;
-}
-add_action( 'admin_init', 'setceb_sol_limpar_marcador', 6 );
 
 /**
  * Garante que o menu de nivel superior do modulo exista.
