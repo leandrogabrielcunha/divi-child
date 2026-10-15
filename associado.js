@@ -19,6 +19,12 @@
 		panels[panel.id.replace('panel-', '')] = panel;
 	});
 	var panelsBox = root.querySelector('.assoc-panels');
+	var navDetails = root.querySelector('.assoc-nav__details');
+
+	/* Menu de modulos recolhido em telas pequenas (o resumo abre a lista). */
+	if (navDetails && window.matchMedia && window.matchMedia('(max-width: 1024px)').matches) {
+		navDetails.removeAttribute('open');
+	}
 
 	function activatePanel(key, options) {
 		options = options || {};
@@ -51,6 +57,11 @@
 	tabs.forEach(function (tab, index) {
 		tab.addEventListener('click', function () {
 			activatePanel(tab.getAttribute('data-panel'));
+
+			/* No mobile o menu volta a ficar recolhido apos a escolha. */
+			if (navDetails && window.matchMedia('(max-width: 1024px)').matches) {
+				navDetails.removeAttribute('open');
+			}
 		});
 
 		tab.addEventListener('keydown', function (event) {
@@ -343,6 +354,65 @@
 			window.setTimeout(paginatePlanilhas, 0);
 		});
 	}
+
+	/* ============================================================
+	 * Juridico: lista de solicitacoes + painel da conversa
+	 * ============================================================ */
+	var solLinks = qsa('[data-sol-link]');
+	var solPanes = qsa('[data-sol-pane]');
+
+	function activateSolicitacao(id, options) {
+		options = options || {};
+
+		var alvo = String(id);
+		var existe = solPanes.some(function (pane) {
+			return pane.getAttribute('data-sol-pane') === alvo;
+		});
+
+		if (!existe) {
+			return false;
+		}
+
+		solLinks.forEach(function (link) {
+			var ativo = link.getAttribute('data-sol-link') === alvo;
+			link.classList.toggle('is-active', ativo);
+			link.setAttribute('aria-current', ativo ? 'true' : 'false');
+		});
+
+		solPanes.forEach(function (pane) {
+			pane.hidden = pane.getAttribute('data-sol-pane') !== alvo;
+		});
+
+		if (options.url && window.history && window.history.replaceState) {
+			window.history.replaceState(null, '', options.url);
+		}
+
+		/* Em telas empilhadas (lista acima da conversa) leva a conversa
+		   para a area visivel. */
+		if (options.scroll && window.matchMedia && window.matchMedia('(max-width: 1200px)').matches) {
+			var paneAlvo = root.querySelector('[data-sol-pane="' + alvo + '"]');
+
+			if (paneAlvo && typeof paneAlvo.scrollIntoView === 'function') {
+				paneAlvo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			}
+		}
+
+		return true;
+	}
+
+	solLinks.forEach(function (link) {
+		link.addEventListener('click', function (event) {
+			var aberto = activateSolicitacao(link.getAttribute('data-sol-link'), {
+				url: link.getAttribute('href'),
+				scroll: true
+			});
+
+			/* Sem JS o proprio link (?sol_id=N#juridico) abre a solicitacao. */
+			if (aberto && window.history && window.history.replaceState) {
+				event.preventDefault();
+			}
+		});
+	});
 
 	/* ============================================================
 	 * Seletor de ano (listbox acessivel)

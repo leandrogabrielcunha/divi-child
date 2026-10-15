@@ -6,6 +6,10 @@
  * dos associados e concentra os servicos: emissao de boletos, planilhas,
  * relatorios, convencoes coletivas, simuladores, juridico e fale conosco.
  *
+ * Layout em duas areas: barra lateral (perfil, modulos e atendimento) e
+ * area principal (acesso rapido + paginas de cada modulo). O modulo
+ * Juridico usa duas colunas: solicitacoes a esquerda e conversa a direita.
+ *
  * Usa o fluxo padrao do Divi (get_header/get_footer) para exibir o
  * header e o footer globais. O header customizado e renderizado pelo
  * hook et_before_main_content (mesmo mecanismo das demais paginas).
@@ -73,18 +77,85 @@ if ( ! $notice && function_exists( 'setceb_sol_notice' ) ) {
 $minhas_solicitacoes = function_exists( 'setceb_sol_listar' ) ? setceb_sol_listar( array( 'usuario_id' => get_current_user_id() ) ) : array();
 $sol_aberta          = isset( $_GET['sol_id'] ) ? absint( $_GET['sol_id'] ) : 0;
 
-$active_panel = $notice ? $notice['forma'] : 'recentes';
+/* Painel visivel: aviso de formulario > solicitacao da URL > acesso rapido. */
+$active_panel = 'visao-geral';
 
-$atalhos = array(
-	'recentes'         => 'Recentes',
-	'planilhas'        => 'Planilhas',
-	'relatorios'       => 'Relatórios',
-	'convencoes'       => 'Convenções Coletivas',
-	'outros-materiais' => 'Outros Materiais',
-	'simuladores'      => 'Simuladores',
-	'juridico'         => 'Jurídico',
-	'financeiro'       => 'Financeiro',
-	'fale-conosco'     => 'Fale Conosco',
+if ( $notice ) {
+	$active_panel = $notice['forma'];
+} elseif ( $sol_aberta ) {
+	$active_panel = 'juridico';
+}
+
+/* Modulos da area do associado: rotulo, icone (dashicon) e descricao.
+   A ordem define a navegacao lateral, a grade de acesso rapido e o
+   cabecalho de cada modulo. */
+$modulos = array(
+	'recentes'         => array(
+		'rotulo' => 'Conteúdos recentes',
+		'icone'  => 'dashicons-megaphone',
+		'desc'   => 'Últimas publicações disponibilizadas para os associados.',
+	),
+	'planilhas'        => array(
+		'rotulo' => 'Planilhas',
+		'icone'  => 'dashicons-media-spreadsheet',
+		'desc'   => 'Arquivos e ferramentas de apoio por categoria de transporte.',
+	),
+	'relatorios'       => array(
+		'rotulo' => 'Relatórios',
+		'icone'  => 'dashicons-chart-bar',
+		'desc'   => 'Relatórios mensais por categoria de transporte.',
+	),
+	'convencoes'       => array(
+		'rotulo' => 'Convenções coletivas',
+		'icone'  => 'dashicons-media-document',
+		'desc'   => 'Documentos oficiais das convenções coletivas da categoria.',
+	),
+	'outros-materiais' => array(
+		'rotulo' => 'Outros materiais',
+		'icone'  => 'dashicons-portfolio',
+		'desc'   => 'Materiais complementares e documentos diversos.',
+	),
+	'simuladores'      => array(
+		'rotulo' => 'Simuladores',
+		'icone'  => 'dashicons-performance',
+		'desc'   => 'Ferramentas online de cálculo e simulação.',
+	),
+	'juridico'         => array(
+		'rotulo' => 'Jurídico',
+		'icone'  => 'dashicons-book',
+		'desc'   => 'Abra solicitações e converse com a equipe jurídica do SETCEB.',
+	),
+	'financeiro'       => array(
+		'rotulo' => 'Financeiro',
+		'icone'  => 'dashicons-money-alt',
+		'desc'   => 'Geração de boletos e recursos financeiros do associado.',
+	),
+	'fale-conosco'     => array(
+		'rotulo' => 'Fale conosco',
+		'icone'  => 'dashicons-format-chat',
+		'desc'   => 'Envie dúvidas, sugestões ou solicitações para o SETCEB.',
+	),
+);
+
+/* Cartao de acesso rapido: "Emitir boleto" abre o Financeiro, onde os
+   links de emissao ficam. Cada modulo abre o proprio painel. */
+$quick_cards = array_merge(
+	array(
+		'emitir-boleto' => array(
+			'rotulo' => 'Emitir boleto',
+			'icone'  => 'dashicons-tickets-alt',
+			'desc'   => '2ª via e pagamentos',
+			'painel' => 'financeiro',
+		),
+	),
+	array_map(
+		function ( $modulo, $chave ) {
+			$modulo['painel'] = $chave;
+			return $modulo;
+		},
+		$modulos,
+		array_keys( $modulos )
+	)
 );
 
 $boleto_icons = array(
@@ -96,6 +167,38 @@ $boleto_icons = array(
 $user_name  = trim( $user->first_name . ' ' . $user->last_name );
 $user_name  = '' !== trim( $user_name ) ? $user_name : $user->display_name;
 $user_email = $user->user_email;
+$user_login = $user->user_login;
+$perfil_url = setceb_associado_perfil_url();
+$senha_url  = wp_lostpassword_url( $perfil_url );
+
+/* Iniciais do associado (avatar sem foto cadastrada): primeira letra do
+   primeiro nome + primeira letra do ultimo nome. */
+$nome_partes = array_values( array_filter( (array) preg_split( '/\s+/', trim( $user_name ) ) ) );
+$iniciais    = '';
+
+if ( ! empty( $nome_partes ) ) {
+	$iniciais = mb_substr( $nome_partes[0], 0, 1 );
+
+	if ( count( $nome_partes ) > 1 ) {
+		$iniciais .= mb_substr( $nome_partes[ count( $nome_partes ) - 1 ], 0, 1 );
+	}
+}
+
+if ( '' === $iniciais ) {
+	$iniciais = mb_substr( $user_login, 0, 2 );
+}
+
+$iniciais = mb_strtoupper( $iniciais );
+
+/* Solicitacao aberta no painel do juridico (primeira da lista como padrao). */
+$sol_ids   = array_map(
+	function ( $sol_item ) {
+		return (int) $sol_item['id'];
+	},
+	$minhas_solicitacoes
+);
+$sol_ativa = in_array( (int) $sol_aberta, $sol_ids, true ) ? (int) $sol_aberta : ( ! empty( $sol_ids ) ? (int) $sol_ids[0] : 0 );
+$sol_total = count( $minhas_solicitacoes );
 
 /**
  * Painel ativo por padrao (classe/aria dos botoes e secoes).
@@ -106,6 +209,35 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 	}
 
 	return $panel === $active_panel ? 'true' : 'false';
+}
+
+/**
+ * Cabecalho do modulo: retorno ao acesso rapido, icone, titulo e descricao.
+ *
+ * @param string $key     Chave do modulo.
+ * @param array  $modulos Mapa de modulos da area do associado.
+ */
+function setceb_modulo_cabecalho( $key, $modulos ) {
+	if ( ! isset( $modulos[ $key ] ) ) {
+		return;
+	}
+
+	$modulo = $modulos[ $key ];
+	?>
+	<header class="assoc-mod">
+		<button type="button" class="assoc-mod__back" data-open-panel="visao-geral">
+			<span class="dashicons dashicons-arrow-left-alt2" aria-hidden="true"></span>
+			Voltar ao acesso rápido
+		</button>
+		<div class="assoc-mod__main">
+			<span class="assoc-mod__icon"><span class="dashicons <?php echo esc_attr( $modulo['icone'] ); ?>" aria-hidden="true"></span></span>
+			<div class="assoc-mod__body">
+				<h2 class="assoc-mod__title"><?php echo esc_html( $modulo['rotulo'] ); ?></h2>
+				<p class="assoc-mod__desc"><?php echo esc_html( $modulo['desc'] ); ?></p>
+			</div>
+		</div>
+	</header>
+	<?php
 }
 ?>
 <div id="main-content">
@@ -139,19 +271,82 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 
 			<?php else : ?>
 
-				<!-- Seletor de ano + emissao de boletos -->
-				<div class="assoc-toolbar">
-							<div class="assoc-year">
-								<button type="button" class="assoc-year__btn" aria-haspopup="listbox" aria-expanded="false" aria-label="Selecionar ano de referência">
-									<span class="dashicons dashicons-calendar-alt" aria-hidden="true"></span>
-									<span class="assoc-year__current"><?php echo esc_html( $ano_atual ); ?></span>
+				<div class="assoc-shell">
+
+					<aside class="assoc-sidebar">
+
+						<!-- Perfil do associado -->
+						<div class="assoc-profile">
+							<div class="assoc-profile__cover" aria-hidden="true"></div>
+							<div class="assoc-profile__body">
+								<span class="assoc-profile__avatar" aria-hidden="true"><?php echo esc_html( $iniciais ); ?></span>
+								<div class="assoc-profile__info">
+									<h2 class="assoc-profile__name"><?php echo esc_html( $user_name ); ?></h2>
+									<p class="assoc-profile__login">@<?php echo esc_html( $user_login ); ?></p>
+									<span class="assoc-profile__status">
+										<span class="dashicons dashicons-yes-alt" aria-hidden="true"></span>
+										<span class="assoc-profile__role"><?php echo current_user_can( 'manage_options' ) ? 'Administrador' : 'Associado'; ?></span>
+									</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Navegacao dos modulos -->
+						<nav class="assoc-nav" aria-label="Módulos da Área do Associado">
+							<details class="assoc-nav__details" open>
+								<summary class="assoc-nav__toggle">
+									<span class="dashicons dashicons-menu" aria-hidden="true"></span>
+									<span class="assoc-nav__toggle-label">Módulos</span>
 									<span class="dashicons dashicons-arrow-down-alt2" aria-hidden="true"></span>
-								</button>
-								<ul class="assoc-year__list" role="listbox" aria-label="Anos disponíveis" hidden>
-									<?php foreach ( $anos as $ano ) : ?>
-										<li class="assoc-year__option<?php echo (string) $ano === $ano_atual ? ' is-selected' : ''; ?>" role="option" tabindex="-1" data-ano="<?php echo esc_attr( $ano ); ?>" aria-selected="<?php echo (string) $ano === $ano_atual ? 'true' : 'false'; ?>"><?php echo esc_html( $ano ); ?></li>
+								</summary>
+
+								<div class="assoc-nav__list" role="tablist" aria-orientation="vertical" aria-label="Módulos da Área do Associado">
+									<button type="button" class="assoc-nav__item" id="tab-visao-geral" role="tab" data-panel="visao-geral" aria-controls="panel-visao-geral" aria-selected="<?php echo esc_attr( setceb_panel_active_attr( 'visao-geral', $active_panel, 'aria' ) ); ?>" tabindex="<?php echo 'visao-geral' === $active_panel ? '0' : '-1'; ?>">
+										<span class="dashicons dashicons-dashboard" aria-hidden="true"></span>
+										<span class="assoc-nav__label">Visão geral</span>
+									</button>
+									<?php foreach ( $modulos as $key => $modulo ) : ?>
+										<button type="button" class="assoc-nav__item" id="tab-<?php echo esc_attr( $key ); ?>" role="tab" data-panel="<?php echo esc_attr( $key ); ?>" aria-controls="panel-<?php echo esc_attr( $key ); ?>" aria-selected="<?php echo esc_attr( setceb_panel_active_attr( $key, $active_panel, 'aria' ) ); ?>" tabindex="<?php echo $key === $active_panel ? '0' : '-1'; ?>">
+											<span class="dashicons <?php echo esc_attr( $modulo['icone'] ); ?>" aria-hidden="true"></span>
+											<span class="assoc-nav__label"><?php echo esc_html( $modulo['rotulo'] ); ?></span>
+										</button>
 									<?php endforeach; ?>
-								</ul>
+								</div>
+							</details>
+						</nav>
+
+						<!-- Atendimento -->
+						<div class="assoc-help">
+							<span class="dashicons dashicons-sos assoc-help__icon" aria-hidden="true"></span>
+							<div class="assoc-help__body">
+								<h2 class="assoc-help__title">Precisa de ajuda?</h2>
+								<p class="assoc-help__text">A equipe do SETCEB está disponível para atender você.</p>
+							</div>
+							<button type="button" class="assoc-help__btn" data-open-panel="fale-conosco">
+								Falar com atendimento
+								<span class="dashicons dashicons-arrow-right-alt2" aria-hidden="true"></span>
+							</button>
+						</div>
+					</aside>
+
+					<div class="assoc-main">
+
+						<!-- Filtro de ano + emissao de boletos -->
+						<div class="assoc-toolbar">
+							<div class="assoc-toolbar__group">
+								<span class="assoc-toolbar__label">Ano de referência</span>
+								<div class="assoc-year">
+									<button type="button" class="assoc-year__btn" aria-haspopup="listbox" aria-expanded="false" aria-label="Selecionar ano de referência">
+										<span class="dashicons dashicons-calendar-alt" aria-hidden="true"></span>
+										<span class="assoc-year__current"><?php echo esc_html( $ano_atual ); ?></span>
+										<span class="dashicons dashicons-arrow-down-alt2" aria-hidden="true"></span>
+									</button>
+									<ul class="assoc-year__list" role="listbox" aria-label="Anos disponíveis" hidden>
+										<?php foreach ( $anos as $ano ) : ?>
+											<li class="assoc-year__option<?php echo (string) $ano === $ano_atual ? ' is-selected' : ''; ?>" role="option" tabindex="-1" data-ano="<?php echo esc_attr( $ano ); ?>" aria-selected="<?php echo (string) $ano === $ano_atual ? 'true' : 'false'; ?>"><?php echo esc_html( $ano ); ?></li>
+										<?php endforeach; ?>
+									</ul>
+								</div>
 							</div>
 
 							<button type="button" class="assoc-btn assoc-btn--boletos" data-open-panel="financeiro">
@@ -160,23 +355,43 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 							</button>
 						</div>
 
-						<!-- Atalhos -->
-						<div class="assoc-shortcuts" role="tablist" aria-label="Atalhos da área do associado">
-							<?php foreach ( $atalhos as $key => $label ) : ?>
-								<button type="button" class="assoc-tab" id="tab-<?php echo esc_attr( $key ); ?>" role="tab" data-panel="<?php echo esc_attr( $key ); ?>" aria-controls="panel-<?php echo esc_attr( $key ); ?>" aria-selected="<?php echo esc_attr( setceb_panel_active_attr( $key, $active_panel, 'aria' ) ); ?>" tabindex="<?php echo $key === $active_panel ? '0' : '-1'; ?>"><?php echo esc_html( $label ); ?></button>
-							<?php endforeach; ?>
-						</div>
-
 						<noscript><style>.assoc-panel{display:block!important}</style></noscript>
 
 						<div class="assoc-panels">
 
+							<!-- VISAO GERAL -->
+							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'visao-geral', $active_panel, 'class' ) ) ); ?>" id="panel-visao-geral" role="tabpanel" aria-labelledby="tab-visao-geral" tabindex="0">
+								<div class="assoc-home">
+									<h2 class="assoc-home__title">Acesso rápido</h2>
+									<p class="assoc-home__sub">O que você precisa está a um clique.</p>
+								</div>
+
+								<div class="assoc-quick">
+									<?php $quick_primeiro = true; ?>
+									<?php foreach ( $quick_cards as $quick_key => $quick ) : ?>
+										<button type="button" class="assoc-quick__card<?php echo $quick_primeiro ? ' assoc-quick__card--pri' : ''; ?>" data-open-panel="<?php echo esc_attr( $quick['painel'] ); ?>">
+											<span class="assoc-quick__icon"><span class="dashicons <?php echo esc_attr( $quick['icone'] ); ?>" aria-hidden="true"></span></span>
+											<span class="assoc-quick__title"><?php echo esc_html( $quick['rotulo'] ); ?></span>
+											<span class="assoc-quick__desc"><?php echo esc_html( $quick['desc'] ); ?></span>
+											<span class="dashicons dashicons-arrow-right-alt2 assoc-quick__arrow" aria-hidden="true"></span>
+										</button>
+										<?php $quick_primeiro = false; ?>
+									<?php endforeach; ?>
+								</div>
+
+								<div class="assoc-security">
+									<span class="assoc-security__icon"><span class="dashicons dashicons-lock" aria-hidden="true"></span></span>
+									<div class="assoc-security__text">
+										<h3 class="assoc-security__title">Segurança da conta</h3>
+										<p>Recomendamos alterar a senha periodicamente. Enviaremos um link de redefinição para o e-mail cadastrado na sua conta.</p>
+									</div>
+									<a class="assoc-btn assoc-security__btn" href="<?php echo esc_url( $senha_url ); ?>">Alterar senha</a>
+								</div>
+							</section>
+
 							<!-- RECENTES -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'recentes', $active_panel, 'class' ) ) ); ?>" id="panel-recentes" role="tabpanel" aria-labelledby="tab-recentes" tabindex="0">
-								<div class="assoc-panel__header">
-									<h2 class="assoc-panel__title">Conteúdos recentes</h2>
-								</div>
-								<p class="assoc-panel__intro">As publicações mais recentes disponibilizadas para os associados.</p>
+								<?php setceb_modulo_cabecalho( 'recentes', $modulos ); ?>
 
 								<?php if ( ! empty( $recentes ) ) : ?>
 									<ul class="assoc-list">
@@ -215,10 +430,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 
 							<!-- PLANILHAS -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'planilhas', $active_panel, 'class' ) ) ); ?>" id="panel-planilhas" role="tabpanel" aria-labelledby="tab-planilhas" tabindex="0">
-								<div class="assoc-panel__header">
-									<h2 class="assoc-panel__title">Planilhas</h2>
-								</div>
-								<p class="assoc-panel__intro">Arquivos e ferramentas de apoio organizados por categoria de transporte. Use os filtros abaixo.</p>
+								<?php setceb_modulo_cabecalho( 'planilhas', $modulos ); ?>
 
 								<?php if ( ! empty( $planilhas ) ) : ?>
 									<div class="assoc-filters" role="group" aria-label="Filtrar planilhas por categoria">
@@ -281,8 +493,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 
 							<!-- RELATORIOS -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'relatorios', $active_panel, 'class' ) ) ); ?>" id="panel-relatorios" role="tabpanel" aria-labelledby="tab-relatorios" tabindex="0">
-								<h2 class="assoc-panel__title">Relatórios</h2>
-								<p class="assoc-panel__intro">Relatórios mensais por categoria de transporte. Use o seletor de ano para filtrar.</p>
+								<?php setceb_modulo_cabecalho( 'relatorios', $modulos ); ?>
 
 								<?php if ( ! empty( $relatorios ) ) : ?>
 									<ul class="assoc-list">
@@ -334,8 +545,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 
 							<!-- CONVENCOES COLETIVAS -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'convencoes', $active_panel, 'class' ) ) ); ?>" id="panel-convencoes" role="tabpanel" aria-labelledby="tab-convencoes" tabindex="0">
-								<h2 class="assoc-panel__title">Convenções Coletivas</h2>
-								<p class="assoc-panel__intro">Documentos oficiais das convenções coletivas da categoria.</p>
+								<?php setceb_modulo_cabecalho( 'convencoes', $modulos ); ?>
 
 								<?php if ( ! empty( $convencoes ) ) : ?>
 									<ul class="assoc-list">
@@ -370,8 +580,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 
 							<!-- OUTROS MATERIAIS -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'outros-materiais', $active_panel, 'class' ) ) ); ?>" id="panel-outros-materiais" role="tabpanel" aria-labelledby="tab-outros-materiais" tabindex="0">
-								<h2 class="assoc-panel__title">Outros Materiais</h2>
-								<p class="assoc-panel__intro">Materiais complementares e documentos diversos disponibilizados para os associados.</p>
+								<?php setceb_modulo_cabecalho( 'outros-materiais', $modulos ); ?>
 
 								<?php if ( ! empty( $outros_materiais ) ) : ?>
 									<ul class="assoc-list">
@@ -416,8 +625,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 
 							<!-- SIMULADORES -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'simuladores', $active_panel, 'class' ) ) ); ?>" id="panel-simuladores" role="tabpanel" aria-labelledby="tab-simuladores" tabindex="0">
-								<h2 class="assoc-panel__title">Simuladores</h2>
-								<p class="assoc-panel__intro">Ferramentas online de cálculo e simulação disponibilizadas para os associados.</p>
+								<?php setceb_modulo_cabecalho( 'simuladores', $modulos ); ?>
 
 								<?php if ( ! empty( $simuladores ) ) : ?>
 									<ul class="assoc-list">
@@ -462,15 +670,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 
 							<!-- JURIDICO -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'juridico', $active_panel, 'class' ) ) ); ?>" id="panel-juridico" role="tabpanel" aria-labelledby="tab-juridico" tabindex="0">
-								<h2 class="assoc-panel__title">Jurídico</h2>
-
-								<div class="assoc-callout">
-									<span class="dashicons dashicons-book assoc-callout__icon" aria-hidden="true"></span>
-									<div>
-										<h3>Assessoria Jurídica</h3>
-										<p>Registre sua dúvida como uma solicitação. A equipe jurídica recebe um aviso por e-mail, atende o caso e você acompanha tudo por aqui, com resposta e histórico de cada interação.</p>
-									</div>
-								</div>
+								<?php setceb_modulo_cabecalho( 'juridico', $modulos ); ?>
 
 								<?php if ( $notice && 'juridico' === $notice['forma'] ) : ?>
 									<div class="assoc-notice assoc-notice--<?php echo esc_attr( $notice['tipo'] ); ?>" role="<?php echo 'sucesso' === $notice['tipo'] ? 'status' : 'alert'; ?>">
@@ -479,156 +679,201 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 									</div>
 								<?php endif; ?>
 
-								<!-- Minhas solicitações -->
-								<h3 class="assoc-panel__subtitle">Minhas solicitações</h3>
+								<div class="assoc-sol">
 
-								<?php if ( ! empty( $minhas_solicitacoes ) ) : ?>
-									<div class="assoc-sol">
-										<?php foreach ( $minhas_solicitacoes as $sol ) : ?>
-											<?php
-											$sol_aberta_esta = ( $sol_aberta === (int) $sol['id'] )
-												|| ( 0 === $sol_aberta && count( $minhas_solicitacoes ) === 1 );
-											?>
-											<article class="assoc-sol__item">
-												<header class="assoc-sol__head">
-													<span class="assoc-sol__icon" style="--setceb-sol-cor:<?php echo esc_attr( $sol['status_cor'] ); ?>">
-														<span class="dashicons <?php echo esc_attr( $sol['status_icone'] ); ?>" aria-hidden="true"></span>
-													</span>
-													<div class="assoc-sol__head-info">
-														<h4 class="assoc-sol__titulo">
-															Solicitação <?php echo esc_html( $sol['protocolo'] ); ?>
-														</h4>
-														<span class="assoc-sol__meta">
-															Registrada em <?php echo esc_html( setceb_sol_data( $sol['data'] ) ); ?>
-															<?php if ( '' !== $sol['advogado'] ) : ?>
-																&middot; <?php echo esc_html( $sol['advogado'] ); ?>
-															<?php endif; ?>
+									<aside class="assoc-sol__side">
+										<div class="assoc-sol__side-head">
+											<h3 class="assoc-sol__side-title">Solicitações</h3>
+											<span class="assoc-sol__count"><?php echo esc_html( $sol_total . ' ' . ( 1 === $sol_total ? 'protocolo' : 'protocolos' ) ); ?></span>
+										</div>
+
+										<details class="assoc-sol__nova"<?php echo empty( $minhas_solicitacoes ) ? ' open' : ''; ?>>
+											<summary class="assoc-sol__nova-btn">
+												<span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span>
+												<span class="assoc-sol__nova-label">Nova solicitação</span>
+											</summary>
+
+											<div class="assoc-sol__nova-body">
+												<form class="assoc-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-assoc-form>
+													<input type="hidden" name="action" value="setceb_juridico">
+													<?php wp_nonce_field( 'setceb_form_juridico' ); ?>
+
+													<p class="assoc-hp" aria-hidden="true">
+														<label>Site<input type="text" name="setceb_website" tabindex="-1" autocomplete="off"></label>
+													</p>
+
+													<p class="assoc-form__field">
+														<label for="assoc-jur-nome">Nome completo <span aria-hidden="true">*</span></label>
+														<input type="text" id="assoc-jur-nome" name="setceb_nome" value="<?php echo esc_attr( $user_name ); ?>" required autocomplete="name">
+													</p>
+													<p class="assoc-form__field">
+														<label for="assoc-jur-email">E-mail <span aria-hidden="true">*</span></label>
+														<input type="email" id="assoc-jur-email" name="setceb_email" value="<?php echo esc_attr( $user_email ); ?>" required autocomplete="email">
+													</p>
+													<p class="assoc-form__field">
+														<label for="assoc-jur-fone">Telefone</label>
+														<input type="tel" id="assoc-jur-fone" name="setceb_telefone" autocomplete="tel">
+													</p>
+													<p class="assoc-form__field">
+														<label for="assoc-jur-empresa">Empresa</label>
+														<input type="text" id="assoc-jur-empresa" name="setceb_empresa" autocomplete="organization">
+													</p>
+
+													<p class="assoc-form__field">
+														<label for="assoc-jur-msg">Sua dúvida <span aria-hidden="true">*</span></label>
+														<textarea id="assoc-jur-msg" name="setceb_mensagem" rows="5" required placeholder="Descreva sua dúvida para o assessor jurídico..."></textarea>
+													</p>
+
+													<button type="submit" class="assoc-btn">
+														<span class="assoc-btn__label">Registrar solicitação</span>
+													</button>
+													<p class="assoc-form__note">Campos com <span aria-hidden="true">*</span> são obrigatórios.</p>
+												</form>
+											</div>
+										</details>
+
+										<?php if ( ! empty( $minhas_solicitacoes ) ) : ?>
+											<ul class="assoc-sol__list">
+												<?php foreach ( $minhas_solicitacoes as $sol ) : ?>
+													<?php $sol_esta_ativa = ( (int) $sol['id'] === $sol_ativa ); ?>
+													<li>
+														<a class="assoc-sol__link<?php echo $sol_esta_ativa ? ' is-active' : ''; ?>"
+															id="sol-tab-<?php echo (int) $sol['id']; ?>"
+															href="<?php echo esc_url( add_query_arg( 'sol_id', (int) $sol['id'], $perfil_url ) . '#juridico' ); ?>"
+															data-sol-link="<?php echo (int) $sol['id']; ?>"
+															aria-current="<?php echo $sol_esta_ativa ? 'true' : 'false'; ?>">
+															<span class="assoc-sol__link-icon" style="--setceb-sol-cor:<?php echo esc_attr( $sol['status_cor'] ); ?>">
+																<span class="dashicons <?php echo esc_attr( $sol['status_icone'] ); ?>" aria-hidden="true"></span>
+															</span>
+															<span class="assoc-sol__link-main">
+																<span class="assoc-sol__link-title"><?php echo esc_html( $sol['titulo'] ); ?></span>
+																<span class="assoc-sol__link-meta">
+																	Protocolo <?php echo esc_html( $sol['protocolo'] ); ?>
+																	<?php if ( '' !== setceb_sol_tempo_relativo( $sol['atualizada'] ) ) : ?>
+																		&middot; atualizada <?php echo esc_html( setceb_sol_tempo_relativo( $sol['atualizada'] ) ); ?>
+																	<?php endif; ?>
+																</span>
+															</span>
+															<span class="assoc-badge" style="--setceb-sol-cor:<?php echo esc_attr( $sol['status_cor'] ); ?>">
+																<span class="dashicons <?php echo esc_attr( $sol['status_icone'] ); ?>" aria-hidden="true"></span>
+																<?php echo esc_html( $sol['status_rotulo'] ); ?>
+															</span>
+														</a>
+													</li>
+												<?php endforeach; ?>
+											</ul>
+										<?php endif; ?>
+									</aside>
+
+									<?php if ( empty( $minhas_solicitacoes ) ) : ?>
+
+										<div class="assoc-empty assoc-sol__vazio">
+											<span class="dashicons dashicons-book assoc-empty__icon" aria-hidden="true"></span>
+											<p>Você ainda não possui solicitações. Use o botão <strong>Nova solicitação</strong> para enviar sua primeira dúvida.</p>
+										</div>
+
+									<?php else : ?>
+
+										<div class="assoc-sol__panes">
+											<?php foreach ( $minhas_solicitacoes as $sol ) : ?>
+												<?php $sol_esta_ativa = ( (int) $sol['id'] === $sol_ativa ); ?>
+												<article class="assoc-sol__pane" id="sol-pane-<?php echo (int) $sol['id']; ?>" data-sol-pane="<?php echo (int) $sol['id']; ?>" aria-labelledby="sol-tab-<?php echo (int) $sol['id']; ?>"<?php echo $sol_esta_ativa ? '' : ' hidden'; ?>>
+													<header class="assoc-sol__pane-head">
+														<div class="assoc-sol__pane-heading">
+															<h3 class="assoc-sol__pane-title"><?php echo esc_html( $sol['titulo'] ); ?></h3>
+															<p class="assoc-sol__pane-meta">
+																Protocolo <?php echo esc_html( $sol['protocolo'] ); ?>
+																&middot; Aberta em <?php echo esc_html( setceb_sol_data( $sol['data'] ) ); ?>
+																<?php if ( '' !== $sol['advogado'] ) : ?>
+																	&middot; Responsável: <?php echo esc_html( $sol['advogado'] ); ?>
+																<?php endif; ?>
+															</p>
+														</div>
+														<span class="assoc-badge" style="--setceb-sol-cor:<?php echo esc_attr( $sol['status_cor'] ); ?>">
+															<span class="dashicons <?php echo esc_attr( $sol['status_icone'] ); ?>" aria-hidden="true"></span>
+															<?php echo esc_html( $sol['status_rotulo'] ); ?>
 														</span>
-													</div>
-													<span class="assoc-badge" style="--setceb-sol-cor:<?php echo esc_attr( $sol['status_cor'] ); ?>">
-														<?php echo esc_html( $sol['status_rotulo'] ); ?>
-													</span>
-												</header>
+													</header>
 
-												<details class="assoc-sol__details"<?php echo $sol_aberta_esta ? ' open' : ''; ?>>
-													<summary class="assoc-sol__summary">
-														Detalhes e histórico
-														<span class="dashicons dashicons-arrow-down-alt2" aria-hidden="true"></span>
-													</summary>
-
-													<div class="assoc-sol__body">
-														<div class="assoc-sol__msg">
-															<span class="assoc-sol__msg-tag">Sua solicitação</span>
-															<p><?php echo nl2br( esc_html( $sol['mensagem'] ) ); ?></p>
+													<div class="assoc-thread">
+														<div class="assoc-thread__msg assoc-thread__msg--assoc">
+															<div class="assoc-thread__who">
+																<strong><?php echo esc_html( '' !== $sol['nome'] ? $sol['nome'] : $user_name ); ?></strong>
+																<span class="assoc-thread__role">Associado &middot; <?php echo esc_html( setceb_sol_data( $sol['data'] ) ); ?></span>
+															</div>
+															<div class="assoc-thread__bubble">
+																<p><?php echo nl2br( esc_html( $sol['mensagem'] ) ); ?></p>
+															</div>
 														</div>
 
-														<?php if ( ! empty( $sol['historico'] ) ) : ?>
-															<ol class="assoc-timeline">
-																<?php foreach ( $sol['historico'] as $registro ) : ?>
-																	<li class="assoc-timeline__item assoc-timeline__item--<?php echo esc_attr( $registro['tipo'] ); ?>">
-																		<span class="assoc-timeline__meta">
-																			<span class="dashicons <?php echo esc_attr( $registro['icone'] ); ?>" aria-hidden="true"></span>
-																			<strong><?php echo esc_html( $registro['autor'] ); ?></strong>
-																			<?php echo esc_html( $registro['rotulo'] ); ?>
+														<?php foreach ( $sol['historico'] as $registro ) : ?>
+															<?php if ( 'resposta' === $registro['tipo'] || 'mensagem' === $registro['tipo'] ) : ?>
+																<?php $registro_assoc = ( 'mensagem' === $registro['tipo'] ); ?>
+																<div class="assoc-thread__msg assoc-thread__msg--<?php echo $registro_assoc ? 'assoc' : 'equipe'; ?>">
+																	<div class="assoc-thread__who">
+																		<strong><?php echo esc_html( $registro['autor'] ); ?></strong>
+																		<span class="assoc-thread__role">
+																			<?php echo $registro_assoc ? 'Associado' : 'Assessoria Jurídica'; ?>
 																			<?php if ( '' !== $registro['data_txt'] ) : ?>
 																				&middot; <?php echo esc_html( $registro['data_txt'] ); ?>
 																			<?php endif; ?>
 																		</span>
-																		<?php if ( '' !== $registro['texto'] ) : ?>
-																			<p class="assoc-timeline__texto"><?php echo nl2br( esc_html( $registro['texto'] ) ); ?></p>
-																		<?php endif; ?>
-																	</li>
-																<?php endforeach; ?>
-															</ol>
-														<?php endif; ?>
-
-														<?php if ( $sol['mensagens'] ) : ?>
-															<form class="assoc-form assoc-form--resposta" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-assoc-form>
-																<input type="hidden" name="action" value="setceb_juridico_mensagem">
-																<input type="hidden" name="setceb_sol_id" value="<?php echo (int) $sol['id']; ?>">
-																<?php wp_nonce_field( 'setceb_juridico_mensagem_' . (int) $sol['id'] ); ?>
-
-																<p class="assoc-hp" aria-hidden="true">
-																	<label>Site<input type="text" name="setceb_website" tabindex="-1" autocomplete="off"></label>
+																	</div>
+																	<div class="assoc-thread__bubble">
+																		<p><?php echo nl2br( esc_html( $registro['texto'] ) ); ?></p>
+																	</div>
+																</div>
+															<?php else : ?>
+																<p class="assoc-thread__event">
+																	<span class="dashicons <?php echo esc_attr( $registro['icone'] ); ?>" aria-hidden="true"></span>
+																	<?php echo esc_html( $registro['rotulo'] ); ?>
+																	<?php if ( '' !== $registro['data_txt'] ) : ?>
+																		&middot; <?php echo esc_html( $registro['data_txt'] ); ?>
+																	<?php endif; ?>
 																</p>
-
-																<p class="assoc-form__field">
-																	<label for="assoc-sol-msg-<?php echo (int) $sol['id']; ?>">Nova mensagem <?php echo esc_html( $sol['protocolo'] ); ?> <span aria-hidden="true">*</span></label>
-																	<textarea id="assoc-sol-msg-<?php echo (int) $sol['id']; ?>" name="setceb_mensagem" rows="4" required placeholder="Escreva sua mensagem para a Assessoria Jurídica..."></textarea>
-																</p>
-
-																<button type="submit" class="assoc-btn">
-																	<span class="assoc-btn__label">Enviar mensagem</span>
-																</button>
-															</form>
-														<?php else : ?>
-															<p class="assoc-sol__encerrada">
-																Este atendimento está <?php echo esc_html( mb_strtolower( $sol['status_rotulo'] ) ); ?>. Abra uma nova solicitação se precisar de mais um atendimento.
-															</p>
-														<?php endif; ?>
+															<?php endif; ?>
+														<?php endforeach; ?>
 													</div>
-												</details>
-											</article>
-										<?php endforeach; ?>
-									</div>
-								<?php else : ?>
-									<div class="assoc-empty">
-										<span class="dashicons dashicons-book assoc-empty__icon" aria-hidden="true"></span>
-										<p>Você ainda não possui solicitações. Envie sua primeira dúvida pelo formulário abaixo.</p>
-									</div>
-								<?php endif; ?>
 
-								<!-- Nova solicitação -->
-								<h3 class="assoc-panel__subtitle">Nova solicitação</h3>
+													<?php if ( $sol['mensagens'] ) : ?>
+														<form class="assoc-form assoc-form--resposta" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-assoc-form>
+															<input type="hidden" name="action" value="setceb_juridico_mensagem">
+															<input type="hidden" name="setceb_sol_id" value="<?php echo (int) $sol['id']; ?>">
+															<?php wp_nonce_field( 'setceb_juridico_mensagem_' . (int) $sol['id'] ); ?>
 
-								<form class="assoc-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-assoc-form>
-									<input type="hidden" name="action" value="setceb_juridico">
-									<?php wp_nonce_field( 'setceb_form_juridico' ); ?>
+															<p class="assoc-hp" aria-hidden="true">
+																<label>Site<input type="text" name="setceb_website" tabindex="-1" autocomplete="off"></label>
+															</p>
 
-									<p class="assoc-hp" aria-hidden="true">
-										<label>Site<input type="text" name="setceb_website" tabindex="-1" autocomplete="off"></label>
-									</p>
+															<p class="assoc-form__field">
+																<label for="assoc-sol-msg-<?php echo (int) $sol['id']; ?>">Responder à solicitação <?php echo esc_html( $sol['protocolo'] ); ?> <span aria-hidden="true">*</span></label>
+																<textarea id="assoc-sol-msg-<?php echo (int) $sol['id']; ?>" name="setceb_mensagem" rows="3" required placeholder="Escreva sua resposta para a Assessoria Jurídica…"></textarea>
+															</p>
 
-									<div class="assoc-form__row">
-										<p class="assoc-form__field">
-											<label for="assoc-jur-nome">Nome completo <span aria-hidden="true">*</span></label>
-											<input type="text" id="assoc-jur-nome" name="setceb_nome" value="<?php echo esc_attr( $user_name ); ?>" required autocomplete="name">
-										</p>
-										<p class="assoc-form__field">
-											<label for="assoc-jur-email">E-mail <span aria-hidden="true">*</span></label>
-											<input type="email" id="assoc-jur-email" name="setceb_email" value="<?php echo esc_attr( $user_email ); ?>" required autocomplete="email">
-										</p>
-									</div>
+															<button type="submit" class="assoc-btn">
+																<span class="assoc-btn__label">Enviar mensagem</span>
+																<span class="dashicons dashicons-arrow-right-alt2" aria-hidden="true"></span>
+															</button>
+														</form>
+													<?php else : ?>
+														<p class="assoc-sol__encerrada">
+															<span class="dashicons dashicons-lock" aria-hidden="true"></span>
+															Este atendimento está <?php echo esc_html( mb_strtolower( $sol['status_rotulo'] ) ); ?>. Abra uma nova solicitação se precisar de mais um atendimento.
+														</p>
+													<?php endif; ?>
+												</article>
+											<?php endforeach; ?>
+										</div>
 
-									<div class="assoc-form__row">
-										<p class="assoc-form__field">
-											<label for="assoc-jur-fone">Telefone</label>
-											<input type="tel" id="assoc-jur-fone" name="setceb_telefone" autocomplete="tel">
-										</p>
-										<p class="assoc-form__field">
-											<label for="assoc-jur-empresa">Empresa</label>
-											<input type="text" id="assoc-jur-empresa" name="setceb_empresa" autocomplete="organization">
-										</p>
-									</div>
+									<?php endif; ?>
 
-									<p class="assoc-form__field">
-										<label for="assoc-jur-msg">Sua dúvida <span aria-hidden="true">*</span></label>
-										<textarea id="assoc-jur-msg" name="setceb_mensagem" rows="5" required placeholder="Descreva sua dúvida para o assessor jurídico..."></textarea>
-									</p>
-
-									<button type="submit" class="assoc-btn">
-										<span class="assoc-btn__label">Registrar solicitação</span>
-									</button>
-									<p class="assoc-form__note">Campos com <span aria-hidden="true">*</span> são obrigatórios.</p>
-								</form>
+								</div>
 							</section>
 
 							<!-- FINANCEIRO -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'financeiro', $active_panel, 'class' ) ) ); ?>" id="panel-financeiro" role="tabpanel" aria-labelledby="tab-financeiro" tabindex="0">
-								<h2 class="assoc-panel__title">Financeiro</h2>
-								<p class="assoc-panel__intro">Geração de boletos e recursos financeiros do associado.</p>
+								<?php setceb_modulo_cabecalho( 'financeiro', $modulos ); ?>
 
-								<h3 class="assoc-panel__subtitle">Geração de boletos</h3>
 								<div class="setceb-perfil__boletos">
 									<?php foreach ( $boletos as $boleto ) : ?>
 										<a class="setceb-perfil__boleto"
@@ -644,7 +889,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 
 							<!-- FALE CONOSCO -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'fale-conosco', $active_panel, 'class' ) ) ); ?>" id="panel-fale-conosco" role="tabpanel" aria-labelledby="tab-fale-conosco" tabindex="0">
-								<h2 class="assoc-panel__title">Fale Conosco</h2>
+								<?php setceb_modulo_cabecalho( 'fale-conosco', $modulos ); ?>
 
 								<?php if ( $notice && 'fale-conosco' === $notice['forma'] ) : ?>
 									<div class="assoc-notice assoc-notice--<?php echo esc_attr( $notice['tipo'] ); ?>" role="<?php echo 'sucesso' === $notice['tipo'] ? 'status' : 'alert'; ?>">
@@ -653,7 +898,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 									</div>
 								<?php endif; ?>
 
-								<form class="assoc-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-assoc-form>
+								<form class="assoc-form assoc-form--card" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-assoc-form>
 									<input type="hidden" name="action" value="setceb_fale_conosco">
 									<?php wp_nonce_field( 'setceb_form_fale-conosco' ); ?>
 
@@ -695,6 +940,10 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 							</section>
 
 						</div><!-- /.assoc-panels -->
+
+					</div><!-- /.assoc-main -->
+
+				</div><!-- /.assoc-shell -->
 
 			<?php endif; ?>
 		</div>
