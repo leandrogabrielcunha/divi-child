@@ -261,7 +261,9 @@ function setceb_sol_register_cpt() {
 			'public'          => false,
 			'show_ui'         => true,
 			'show_in_menu'    => true,
-			'menu_icon'       => 'dashicons-scale',
+			// "feedback" e um dashicon real (balão de solicitações) e não
+			// conflita com os icones das demais paginas da area do associado.
+			'menu_icon'       => 'dashicons-feedback',
 			'menu_position'   => 36,
 			'capability_type' => SETCEB_SOL_CAP,
 			'map_meta_cap'    => true,
