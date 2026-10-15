@@ -2022,6 +2022,25 @@ function setceb_sol_remover_menus() {
 add_action( 'admin_menu', 'setceb_sol_remover_menus', 999 );
 
 /**
+ * Destino seguro para os redirecionamentos da equipe juridica.
+ *
+ * O destino normal e a listagem de solicitacoes. Como o redirect acontece
+ * de dentro do proprio admin, uma segunda tentativa cairia na mesma URL e
+ * geraria um laco de 302. Por isso a primeira tentativa leva um marcador
+ * na query string: se ele ja estiver presente, o destino vira a home do
+ * site, que e sempre acessivel.
+ *
+ * @return string
+ */
+function setceb_sol_destino_redirecionamento() {
+	if ( ! empty( $_GET['setceb_redir'] ) ) {
+		return home_url( '/' );
+	}
+
+	return add_query_arg( 'setceb_redir', '1', setceb_sol_admin_url() );
+}
+
+/**
  * Redireciona a equipe juridica quando o acesso a uma tela e negado.
  *
  * O core checa user_can_access_admin_page() dentro de wp-admin/menu.php,
@@ -2037,7 +2056,7 @@ function setceb_sol_acesso_negado() {
 		return;
 	}
 
-	wp_safe_redirect( setceb_sol_admin_url() );
+	wp_safe_redirect( setceb_sol_destino_redirecionamento() );
 	exit;
 }
 add_action( 'admin_page_access_denied', 'setceb_sol_acesso_negado' );
@@ -2054,7 +2073,7 @@ function setceb_sol_bloquear_telas() {
 		return;
 	}
 
-	wp_safe_redirect( setceb_sol_admin_url() );
+	wp_safe_redirect( setceb_sol_destino_redirecionamento() );
 	exit;
 }
 add_action( 'admin_init', 'setceb_sol_bloquear_telas' );
@@ -2341,6 +2360,26 @@ function setceb_sol_bloquear_criacao() {
 	exit;
 }
 add_action( 'admin_init', 'setceb_sol_bloquear_criacao', 5 );
+
+/**
+ * Limpa o marcador de redirecionamento assim que a listagem abre com
+ * sucesso, para o "&voltar;" seguinte partir limpo.
+ */
+function setceb_sol_limpar_marcador() {
+	if ( empty( $_GET['setceb_redir'] ) ) {
+		return;
+	}
+
+	if ( ! setceb_sol_usuario_restrito() ) {
+		return;
+	}
+
+	$url = remove_query_arg( 'setceb_redir', setceb_sol_admin_url() );
+
+	wp_safe_redirect( $url );
+	exit;
+}
+add_action( 'admin_init', 'setceb_sol_limpar_marcador', 6 );
 
 /**
  * Garante que o menu de nivel superior do modulo exista.
