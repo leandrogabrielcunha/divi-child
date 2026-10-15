@@ -714,8 +714,10 @@ function setceb_sol_meta_box_atendimento( $post ) {
 	}
 
 	$status   = $solicitacao['status'];
-	$advogado = $solicitacao['advogado_id'];
-	$info     = setceb_sol_status_info( $status );
+	// O responsavel nunca aparece vazio: sem atribuicao, responde o padrao.
+	$advogado      = setceb_sol_advogado_responsavel( $post->ID );
+	$advogado_nome = $advogado ? get_the_author_meta( 'display_name', $advogado ) : '';
+	$info          = setceb_sol_status_info( $status );
 
 	// O campo de resposta e um compositor e comeca sempre vazio: cada
 	// texto salvo vira uma mensagem da conversa no historico. Respostas
@@ -740,10 +742,10 @@ function setceb_sol_meta_box_atendimento( $post ) {
 				Aberta <?php echo esc_html( setceb_sol_tempo_relativo( $solicitacao['data'] ) ); ?>
 				<span class="setceb-sol-cabecalho__exato"><?php echo esc_html( setceb_sol_data( $solicitacao['data'] ) ); ?></span>
 			</li>
-			<?php if ( '' !== $solicitacao['advogado'] ) : ?>
+			<?php if ( '' !== $advogado_nome ) : ?>
 				<li>
 					<span class="dashicons dashicons-businessman" aria-hidden="true"></span>
-					<?php echo esc_html( $solicitacao['advogado'] ); ?>
+					<?php echo esc_html( $advogado_nome ); ?>
 				</li>
 			<?php endif; ?>
 			<li>
@@ -786,18 +788,29 @@ function setceb_sol_meta_box_atendimento( $post ) {
 		</div>
 
 		<div class="setceb-sol-bloco setceb-sol-bloco--linha">
-			<div class="setceb-sol-bloco__campo">
-				<label for="setceb-sol-advogado">
-					<span class="setceb-sol-bloco__titulo">Advogado responsavel</span>
-					<span class="setceb-sol-bloco__dica">Quem recebe os avisos desta solicitacao.</span>
-				</label>
-				<select id="setceb-sol-advogado" name="setceb_sol_advogado">
-					<option value="0" <?php selected( 0, $advogado ); ?>>Nao atribuido</option>
-					<?php foreach ( setceb_sol_advogados() as $adv ) : ?>
-						<option value="<?php echo (int) $adv->ID; ?>" <?php selected( $advogado, $adv->ID ); ?>><?php echo esc_html( $adv->display_name ); ?></option>
-					<?php endforeach; ?>
-				</select>
-			</div>
+			<?php
+			/*
+			 * A equipe juridica nao escolhe o responsavel: ela recebe o que esta
+			 * atribuido a ela. O campo fica com quem administra a distribuicao.
+			 */
+			?>
+			<?php if ( ! setceb_sol_usuario_restrito() ) : ?>
+				<div class="setceb-sol-bloco__campo">
+					<label for="setceb-sol-advogado">
+						<span class="setceb-sol-bloco__titulo">Advogado responsavel</span>
+						<span class="setceb-sol-bloco__dica">Quem recebe os avisos desta solicitacao.</span>
+					</label>
+					<select id="setceb-sol-advogado" name="setceb_sol_advogado">
+						<?php /* Com padrao definido nao existe "sem responsavel". */ ?>
+						<?php if ( ! setceb_sol_advogado_padrao_id() ) : ?>
+							<option value="0" <?php selected( 0, $advogado ); ?>>Nao atribuido</option>
+						<?php endif; ?>
+						<?php foreach ( setceb_sol_advogados() as $adv ) : ?>
+							<option value="<?php echo (int) $adv->ID; ?>" <?php selected( $advogado, $adv->ID ); ?>><?php echo esc_html( $adv->display_name ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</div>
+			<?php endif; ?>
 
 			<div class="setceb-sol-bloco__campo">
 				<label for="setceb-sol-titulo">
@@ -811,7 +824,6 @@ function setceb_sol_meta_box_atendimento( $post ) {
 		<div class="setceb-sol-bloco">
 			<div class="setceb-sol-bloco__rotulo">
 				<label for="setceb-sol-resposta" class="setceb-sol-bloco__titulo">Nova resposta</label>
-				<span class="setceb-sol-bloco__dica">Cada resposta vira uma mensagem da conversa e o campo volta vazio.</span>
 			</div>
 
 			<div class="setceb-sol-editor">
@@ -1001,7 +1013,9 @@ function setceb_sol_atendimento_save( $post_id ) {
 		$status = $antes['status'];
 	}
 
-	$advogado = isset( $_POST['setceb_sol_advogado'] ) ? absint( wp_unslash( $_POST['setceb_sol_advogado'] ) ) : 0;
+	// A equipe juridica nao envia este campo (ele nem aparece para ela):
+	// sem o campo no POST, a atribuicao atual e mantida.
+	$advogado = isset( $_POST['setceb_sol_advogado'] ) ? absint( wp_unslash( $_POST['setceb_sol_advogado'] ) ) : $antes['advogado_id'];
 	$resposta = isset( $_POST['setceb_sol_resposta'] ) ? sanitize_textarea_field( wp_unslash( $_POST['setceb_sol_resposta'] ) ) : '';
 
 	// ------------------------------------------------------------
@@ -1146,7 +1160,10 @@ function setceb_sol_column_content( $coluna, $post_id ) {
 			break;
 
 		case 'advogado':
-			echo esc_html( '' !== $solicitacao['advogado'] ? $solicitacao['advogado'] : '—' );
+			$responsavel = setceb_sol_advogado_responsavel( $post_id );
+			$nome        = $responsavel ? get_the_author_meta( 'display_name', $responsavel ) : '';
+
+			echo esc_html( '' !== $nome ? $nome : '—' );
 			break;
 	}
 }
@@ -1387,6 +1404,21 @@ function setceb_sol_advogados_da_solicitacao( $post_id ) {
  */
 function setceb_sol_advogado_padrao_id() {
 	return (int) get_option( 'setceb_sol_advogado_padrao', 0 );
+}
+
+/**
+ * Advogado responsavel por uma solicitacao.
+ *
+ * Sem responsavel gravado, responde o advogado padrao do modulo: enquanto
+ * houver padrao definido, nenhuma solicitacao fica sem dono.
+ *
+ * @param int $post_id ID da solicitacao.
+ * @return int ID do usuario responsavel (0 quando nao ha nenhum).
+ */
+function setceb_sol_advogado_responsavel( $post_id ) {
+	$responsavel = (int) get_post_meta( $post_id, '_setceb_sol_advogado', true );
+
+	return $responsavel ? $responsavel : setceb_sol_advogado_padrao_id();
 }
 
 /**
@@ -2530,11 +2562,18 @@ function setceb_sol_indicadores() {
 	$hoje       = current_time( 'timestamp' );
 	$desde_30   = gmdate( 'Y-m-d H:i:s', $hoje - ( 30 * DAY_IN_SECONDS ) );
 	$ini_mes    = current_time( 'Y-m-01 00:00:00' );
+	$padrao     = setceb_sol_advogado_padrao_id();
 
 	foreach ( $linhas as $linha ) {
 		$status   = '' !== (string) $linha['status'] ? (string) $linha['status'] : setceb_sol_status_padrao();
 		$advogado = (int) $linha['advogado'];
 		$data     = (string) $linha['post_date'];
+
+		// Mesmo criterio da tela de atendimento: sem responsavel gravado,
+		// a solicitacao pertence ao advogado padrao.
+		if ( ! $advogado ) {
+			$advogado = $padrao;
+		}
 
 		if ( ! isset( $por_status[ $status ] ) ) {
 			$por_status[ $status ] = 0;
