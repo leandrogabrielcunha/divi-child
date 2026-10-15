@@ -522,13 +522,6 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 															<p><?php echo nl2br( esc_html( $sol['mensagem'] ) ); ?></p>
 														</div>
 
-														<?php if ( '' !== $sol['resposta'] ) : ?>
-															<div class="assoc-sol__msg assoc-sol__msg--resposta">
-																<span class="assoc-sol__msg-tag">Resposta da Assessoria Jurídica</span>
-																<p><?php echo nl2br( esc_html( $sol['resposta'] ) ); ?></p>
-															</div>
-														<?php endif; ?>
-
 														<?php if ( ! empty( $sol['historico'] ) ) : ?>
 															<ol class="assoc-timeline">
 																<?php foreach ( $sol['historico'] as $registro ) : ?>

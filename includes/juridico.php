@@ -358,7 +358,6 @@ function setceb_sol_obter( $post_id ) {
 		'usuario_id'    => (int) $post->post_author,
 		'advogado_id'   => $advogado,
 		'advogado'      => ( $usuario && $usuario->exists() ) ? $usuario->display_name : '',
-		'resposta'      => (string) get_post_meta( $post->ID, '_setceb_sol_resposta', true ),
 		'data'          => $post->post_date,
 		'atualizada'    => '' !== $atualizada ? $atualizada : $post->post_date,
 		'historico'     => setceb_sol_historico( $post->ID ),
@@ -626,6 +625,8 @@ function setceb_sol_historico_add( $post_id, $tipo, $texto, $autor_id = 0, $inte
  * Registra as metaboxes da solicitacao.
  */
 function setceb_sol_meta_boxes() {
+	// Coluna principal: a tela de atendimento, que e onde o advogado
+	// trabalha e o que precisa de espaco.
 	add_meta_box(
 		'setceb_sol_atendimento',
 		'Atendimento',
@@ -635,12 +636,14 @@ function setceb_sol_meta_boxes() {
 		'high'
 	);
 
+	// Coluna lateral: dados de quem solicitou e historico. Sao informacoes
+	// de consulta, nao de trabalho, e ocupam bem o espaco vazio da direita.
 	add_meta_box(
 		'setceb_sol_solicitante',
 		'Solicitante',
 		'setceb_sol_meta_box_solicitante',
 		SETCEB_SOL_CPT,
-		'normal',
+		'side',
 		'high'
 	);
 
@@ -649,7 +652,7 @@ function setceb_sol_meta_boxes() {
 		'Historico',
 		'setceb_sol_meta_box_historico',
 		SETCEB_SOL_CPT,
-		'normal',
+		'side',
 		'default'
 	);
 }
@@ -671,11 +674,13 @@ function setceb_sol_meta_box_atendimento( $post ) {
 
 	$status   = $solicitacao['status'];
 	$advogado = $solicitacao['advogado_id'];
-	$resposta = $solicitacao['resposta'];
 	$info     = setceb_sol_status_info( $status );
 
-	// O status muda junto com a resposta; o aviso acompanha o caso real.
-	$sem_resposta = '' === trim( $resposta );
+	// O campo de resposta e um compositor e comeca sempre vazio: cada
+	// texto salvo vira uma mensagem da conversa no historico.
+	$placeholder = $solicitacao['ativo']
+		? 'Escreva a resposta para ' . $solicitacao['nome'] . '...'
+		: 'Esta solicitacao esta ' . mb_strtolower( $info['rotulo'] ) . '. Envie uma nova solicitacao pela Area do Associado.';
 	?>
 	<div class="setceb-sol-cabecalho" style="--setceb-sol-cor:<?php echo esc_attr( $info['cor'] ); ?>">
 		<div class="setceb-sol-cabecalho__topo">
@@ -762,37 +767,31 @@ function setceb_sol_meta_box_atendimento( $post ) {
 
 		<div class="setceb-sol-bloco">
 			<div class="setceb-sol-bloco__rotulo">
-				<label for="setceb-sol-resposta" class="setceb-sol-bloco__titulo">Resposta ao associado</label>
-				<span class="setceb-sol-bloco__dica">O texto enviado por e-mail e exibido na Area do Associado.</span>
+				<label for="setceb-sol-resposta" class="setceb-sol-bloco__titulo">Nova resposta</label>
+				<span class="setceb-sol-bloco__dica">Cada resposta vira uma mensagem da conversa e o campo volta vazio.</span>
 			</div>
 
 			<div class="setceb-sol-editor">
 				<textarea
 					id="setceb-sol-resposta"
 					name="setceb_sol_resposta"
-					rows="12"
-					placeholder="Escreva a resposta da Assessoria Juridica..."
+					rows="5"
+					placeholder="<?php echo esc_attr( $placeholder ); ?>"
 					spellcheck="true"
-				><?php echo esc_textarea( $resposta ); ?></textarea>
+					<?php echo $solicitacao['ativo'] ? '' : 'readonly'; ?>
+				></textarea>
 			</div>
 
 			<p class="setceb-sol-aviso setceb-sol-aviso--envio">
 				<span class="dashicons dashicons-email-alt" aria-hidden="true"></span>
-				<?php if ( $sem_resposta ) : ?>
-					Ao salvar com uma resposta, o associado recebe um e-mail, a interacao entra no historico
-					e a solicitacao passa para <strong>Respondida</strong>.
-				<?php else : ?>
-					A resposta atual foi enviada ao associado. Alterar o texto aqui dispara um novo aviso por e-mail.
-				<?php endif; ?>
+				Ao salvar, a resposta entra no <strong>Historico</strong>, o associado recebe um e-mail
+				com o texto e a solicitacao passa para <strong>Respondida</strong>.
 			</p>
 		</div>
 
 		<div class="setceb-sol-acoes">
-			<input type="submit" name="save" class="button button-primary button-hero" value="Salvar atendimento">
+			<input type="submit" name="save" class="button button-primary button-hero" value="Salvar e enviar">
 			<a class="button" href="<?php echo esc_url( setceb_sol_admin_url() ); ?>">Voltar para a lista</a>
-			<span class="setceb-sol-acoes__dica">
-				<?php echo $sem_resposta ? 'Nada sera enviado ao asociado.' : 'O associado sera notificado desta resposta.'; ?>
-			</span>
 		</div>
 	</div>
 	<?php
@@ -891,6 +890,41 @@ function setceb_sol_meta_box_historico( $post ) {
 }
 
 /**
+ * A ultima resposta registrada e identica a que esta sendo enviada agora?
+ *
+ * Como a caixa limpa apos cada envio, um clique duplo no botao arrives
+ * com o mesmo texto duas vezes. Aqui a segunda e descartada para nao
+ * duplicar o registro no historico nem o e-mail ao associado.
+ *
+ * @param int    $post_id   ID da solicitacao.
+ * @param string $resposta  Texto enviado.
+ * @param int    $autor_id  Autor do envio.
+ * @return bool
+ */
+function setceb_sol_resposta_repetida( $post_id, $resposta, $autor_id ) {
+	$bruto = get_post_meta( $post_id, '_setceb_sol_historico', true );
+
+	if ( ! is_array( $bruto ) || empty( $bruto ) ) {
+		return false;
+	}
+
+	// Procura a resposta mais recente: depois dela ainda pode ter um
+	// registro de status (o ajuste automatico para "Respondida"), entao
+	// o ultimo item do historico nao e necessariamente a resposta.
+	foreach ( array_reverse( $bruto ) as $registro ) {
+		if ( ! is_array( $registro ) || 'resposta' !== ( isset( $registro['tipo'] ) ? $registro['tipo'] : '' ) ) {
+			continue;
+		}
+
+		return isset( $registro['texto'], $registro['autor_id'] )
+			&& $registro['texto'] === $resposta
+			&& (int) $registro['autor_id'] === (int) $autor_id;
+	}
+
+	return false;
+}
+
+/**
  * Salva o atendimento (status, responsavel e resposta).
  *
  * @param int $post_id ID da solicitacao.
@@ -934,10 +968,12 @@ function setceb_sol_atendimento_save( $post_id ) {
 
 	// ------------------------------------------------------------
 	// Resposta do juridico
+	//
+	// O campo e um compositor, nao um rascunho: cada texto salvo vira um
+	// registro no historico e a caixa volta vazia para a proxima resposta.
+	// O historico e a conversa completa, entao nada se perde.
 	// ------------------------------------------------------------
-	if ( '' !== $resposta && $resposta !== $antes['resposta'] ) {
-		update_post_meta( $post_id, '_setceb_sol_resposta', $resposta );
-
+	if ( '' !== $resposta && ! setceb_sol_resposta_repetida( $post_id, $resposta, $usuario_id ) ) {
 		setceb_sol_historico_add(
 			$post_id,
 			'resposta',
@@ -969,11 +1005,6 @@ function setceb_sol_atendimento_save( $post_id ) {
 		}
 
 		setceb_sol_email_associado( $post_id, $resposta );
-	} elseif ( '' !== $resposta ) {
-		update_post_meta( $post_id, '_setceb_sol_resposta', $resposta );
-	} else {
-		// Resposta apagada: o registro precisa sair do painel do associado.
-		delete_post_meta( $post_id, '_setceb_sol_resposta' );
 	}
 
 	// ------------------------------------------------------------
@@ -1916,13 +1947,24 @@ function setceb_sol_tela_permitida() {
 		return true;
 	}
 
+	// As subpaginas do modulo (Dashboard e Advogados) exigem manage_options.
+	// Um link direto para elas precisa ser barrado aqui, e nao pelo
+	// user_can_access_admin_page() do core, que responderia com um wp_die.
 	if ( 'edit.php' === $pagenow ) {
+		if ( ! empty( $_REQUEST['page'] ) ) {
+			return false;
+		}
+
 		$tipo = isset( $_REQUEST['post_type'] ) ? sanitize_key( wp_unslash( $_REQUEST['post_type'] ) ) : '';
 
 		return SETCEB_SOL_CPT === $tipo;
 	}
 
 	if ( 'post.php' === $pagenow ) {
+		if ( ! empty( $_REQUEST['page'] ) ) {
+			return false;
+		}
+
 		$tipo = isset( $_REQUEST['post_type'] ) ? sanitize_key( wp_unslash( $_REQUEST['post_type'] ) ) : '';
 
 		if ( SETCEB_SOL_CPT === $tipo ) {
@@ -1978,6 +2020,27 @@ function setceb_sol_remover_menus() {
 	remove_submenu_page( 'users.php', 'users.php' );
 }
 add_action( 'admin_menu', 'setceb_sol_remover_menus', 999 );
+
+/**
+ * Redireciona a equipe juridica quando o acesso a uma tela e negado.
+ *
+ * O core checa user_can_access_admin_page() dentro de wp-admin/menu.php,
+ * que roda ANTES de admin_init. Um link direto para uma subpagina do
+ * modulo (Dashboard, Advogados) chega la e resultaria em
+ * "Sorry, you are not allowed to access this page.".
+ *
+ * Este hook dispara imediatamente antes do wp_die do core, que e
+ * exatamente o ponto de interceptacao necessario.
+ */
+function setceb_sol_acesso_negado() {
+	if ( ! setceb_sol_usuario_restrito() ) {
+		return;
+	}
+
+	wp_safe_redirect( setceb_sol_admin_url() );
+	exit;
+}
+add_action( 'admin_page_access_denied', 'setceb_sol_acesso_negado' );
 
 /**
  * Bloqueia as telas fora do modulo.
