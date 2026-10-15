@@ -11,10 +11,9 @@
  * juridico e o historico das interacoes.
  *
  * Perfis envolvidos:
- * - "advogado": equipe juridica. Ao entrar no wp-admin ve somente o menu
- *   de Solicitacoes Juridicas. O Painel (index.php) encaminha para a
- *   listagem e as demais telas exibem o aviso de acesso restrito; o
- *   perfil do proprio usuario continua liberado.
+ * - "advogado": equipe juridica. Ve apenas o menu de Solicitacoes
+ *   Juridicas e a tela de perfil do proprio usuario; qualquer outro
+ *   endereco do wp-admin encaminha para a listagem.
  * - Administradores: cadastram os advogados em Solicitacoes Juridicas >
  *   Advogados e acompanham os indicadores no Dashboard.
  *
@@ -1951,7 +1950,7 @@ add_action( 'admin_post_setceb_juridico_mensagem', 'setceb_sol_process_mensagem'
 add_action( 'admin_post_nopriv_setceb_juridico_mensagem', 'setceb_sol_process_mensagem' );
 
 /* ------------------------------------------------------------
- * 10. Acesso restrito do advogado no painel
+ * 10. Acesso da equipe juridica ao painel
  * ------------------------------------------------------------ */
 
 /**
@@ -2023,116 +2022,73 @@ function setceb_sol_tela_permitida() {
 }
 
 /**
- * Remove os menus que nao pertencem a equipe juridica.
+ * Deixa no painel somente as entradas do modulo.
+ *
+ * Remover item a item nao basta. O core decide o acesso em
+ * user_can_access_admin_page() percorrendo $menu e $submenu, e
+ * remove_menu_page() apaga apenas $menu: a entrada "Todos os artigos" de
+ * $submenu['edit.php'] continuava respondendo por current_user_can(
+ * 'edit_posts') e negava a listagem do modulo. Reconstruir os dois
+ * arrays com as unicas entradas da conta elimina a negativa pela raiz,
+ * porque nada que o core compare deixa de ser acessivel.
  */
-function setceb_sol_remover_menus() {
+function setceb_sol_menu_minimo() {
+	global $menu, $submenu, $parent_file, $typenow, $_wp_submenu_nopriv;
+
 	if ( ! setceb_sol_usuario_restrito() ) {
 		return;
 	}
 
-	$menus = array(
-		'index.php',
-		'upload.php',
-		'link-manager.php',
-		'edit.php',
-		'edit-comments.php',
-		'tools.php',
-		'themes.php',
-		'plugins.php',
-		'users.php',
-		'user-new.php',
-		'options-general.php',
-		'nav-menus.php',
-		'widgets.php',
-		'profile.php',
-	);
+	$slug = 'edit.php?post_type=' . SETCEB_SOL_CPT;
+	$obj  = get_post_type_object( SETCEB_SOL_CPT );
 
-	// Pais cujo $submenu tambem precisa sair (ver comentario abaixo).
-	$pais = array(
-		'upload.php',
-		'link-manager.php',
-		'edit.php',
-		'edit-comments.php',
-		'tools.php',
-		'themes.php',
-		'plugins.php',
-		'users.php',
-		'options-general.php',
-	);
-
-	foreach ( $menus as $menu ) {
-		remove_menu_page( $menu );
+	if ( ! $obj || empty( $obj->cap->edit_posts ) ) {
+		return;
 	}
 
-	/*
-	 * remove_menu_page() apaga apenas $menu. As entradas continuam em
-	 * $submenu, e user_can_access_admin_page() percorre $submenu[$parent]
-	 * procurando uma entrada cujo slug seja igual ao $pagenow para decidir
-	 * o acesso. Sem esta limpeza, a entrada "Todos os artigos" de
-	 * $submenu['edit.php'] responde por current_user_can('edit_posts') e
-	 * nega a listagem do modulo para quem nao possui as capacidades de
-	 * Posts - exatamente o caso da equipe juridica.
-	 */
-	foreach ( array_keys( (array) $GLOBALS['submenu'] ) as $pai ) {
-		if ( in_array( $pai, $pais, true ) ) {
-			unset( $GLOBALS['submenu'][ $pai ] );
+	$cap  = $obj->cap->edit_posts;
+	$item = array(
+		$obj->labels->menu_name,
+		$cap,
+		$slug,
+		'',
+		'menu-top menu-icon-' . SETCEB_SOL_CPT,
+		'menu-' . SETCEB_SOL_CPT,
+		$obj->menu_icon ? $obj->menu_icon : 'dashicons-feedback',
+	);
+
+	// Mantem a entrada como o core a montou (titulo, icone, posicao).
+	foreach ( (array) $menu as $linha ) {
+		if ( isset( $linha[2] ) && $slug === $linha[2] ) {
+			$item = $linha;
+			break;
 		}
 	}
 
-	remove_submenu_page( 'options-general.php', 'options-general.php' );
-	remove_submenu_page( 'themes.php', 'themes.php' );
-	remove_submenu_page( 'tools.php', 'tools.php' );
-	remove_submenu_page( 'users.php', 'users.php' );
-}
-add_action( 'admin_menu', 'setceb_sol_remover_menus', 999 );
+	$menu    = array( 26 => $item );
+	$submenu = array( $slug => array( 5 => array( $obj->labels->all_items, $cap, $slug ) ) );
 
-/**
- * Pagina exibida quando a equipe juridica cai em uma tela bloqueada.
- *
- * Nao redireciona: um redirect para a propria URL negada gera laco de
- * 302, e um redirect para a home esconde o motivo. Mostrar a tela
- * resolve os dois problemas de uma vez.
- *
- * @param string $mensagem Mensagem a exibir.
- */
-function setceb_sol_pagina_bloqueada( $mensagem ) {
-	$lista = setceb_sol_admin_url();
-	?>
-	<!DOCTYPE html>
-	<html lang="pt-BR">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Acesso restrito</title>
-		<style>
-			body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
-				font: 15px/1.6 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: #0f172a; background: #eef2f7; }
-			.box { max-width: 520px; margin: 24px; padding: 32px; background: #fff; border-radius: 14px;
-				border-top: 4px solid #0d8199; box-shadow: 0 12px 32px rgba(18,61,115,.10); }
-			h1 { margin: 0 0 12px; font-size: 20px; }
-			p { margin: 0 0 10px; color: #475569; }
-			.acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
-			a.btn { display: inline-block; padding: 11px 20px; font-size: 14px; text-decoration: none; border-radius: 8px; }
-			a.primaria { background: #0d8199; color: #fff; }
-			a.secundaria { background: #f1f5f9; color: #334155; }
-		</style>
-	</head>
-	<body>
-		<div class="box">
-			<h1>Acesso restrito</h1>
-			<p><?php echo esc_html( $mensagem ); ?></p>
-			<p>Sua conta tem acesso apenas ao modulo <strong>Solicitacoes Juridicas</strong>.</p>
+	/*
+	 * O core registra em $_wp_submenu_nopriv cada add_submenu_page()
+	 * recusado por capacidade - inclusive as dos outros modulos do tema
+	 * (o de documentos registra na prioridade 99, antes daqui). Essas
+	 * entradas se referem a menus que nao existem mais para esta conta e
+	 * sao consultadas por user_can_access_admin_page(); zerar elimina a
+	 * ultima forma de o core negar uma tela do modulo.
+	 */
+	$_wp_submenu_nopriv = array();
 
-			<div class="acoes">
-				<a class="btn primaria" href="<?php echo esc_url( $lista ); ?>">Ir para Solicitacoes Juridicas</a>
-				<a class="btn secundaria" href="<?php echo esc_url( home_url( '/' ) ); ?>">Ir para o site</a>
-			</div>
-		</div>
-	</body>
-	</html>
-	<?php
-	exit;
+	/*
+	 * O item so aparece destacado quando $parent_file aponta para ele.
+	 * Como o submenu fica com uma unica entrada, o proprio core remove
+	 * $submenu[$slug] e nenhum $parent_file e definido sozinho.
+	 */
+	if ( SETCEB_SOL_CPT === $typenow || $slug === $parent_file ) {
+		$parent_file = $slug;
+	}
 }
+add_action( 'admin_menu', 'setceb_sol_menu_minimo', 9999 );
+
 
 /**
  * Redireciona a equipe juridica quando o acesso a uma tela e negado.
@@ -2150,7 +2106,13 @@ function setceb_sol_acesso_negado() {
 		return;
 	}
 
-	setceb_sol_pagina_bloqueada( 'O WordPress recusou o acesso a esta tela antes mesmo das regras do modulo.' );
+	// Nunca redireciona para a tela que ja esta sendo pedida.
+	if ( setceb_sol_e_a_listagem() ) {
+		return;
+	}
+
+	wp_safe_redirect( setceb_sol_admin_url() );
+	exit;
 }
 add_action( 'admin_page_access_denied', 'setceb_sol_acesso_negado' );
 
@@ -2158,8 +2120,6 @@ add_action( 'admin_page_access_denied', 'setceb_sol_acesso_negado' );
  * Bloqueia as telas fora do modulo.
  */
 function setceb_sol_bloquear_telas() {
-	global $pagenow;
-
 	if ( ! setceb_sol_usuario_restrito() ) {
 		return;
 	}
@@ -2169,18 +2129,18 @@ function setceb_sol_bloquear_telas() {
 	}
 
 	/*
-	 * O Painel (index.php) e o destino padrao de quem entra no wp-admin,
-	 * inclusive pelo link "Painel" e por atalhos do proprio WordPress.
-	 * Para a equipe juridica ele leva a listagem; a trava abaixo impede
-	 * repetir a troca se a requisicao ja for a listagem, o que torna o
-	 * laco impossivel.
+	 * Nao existe tela de erro: qualquer endereco fora do modulo termina
+	 * na listagem, inclusive o Painel (index.php), que e o destino padrao
+	 * de quem entra no wp-admin. Redirecionar para a listagem e seguro
+	 * porque ela e sempre liberada, e a trava abaixo impede repetir a
+	 * troca caso a requisicao ja seja a propria listagem.
 	 */
-	if ( 'index.php' === $pagenow && ! setceb_sol_e_a_listagem() ) {
-		wp_safe_redirect( setceb_sol_admin_url() );
-		exit;
+	if ( setceb_sol_e_a_listagem() ) {
+		return;
 	}
 
-	setceb_sol_pagina_bloqueada( 'Esta tela esta fora do modulo Solicitacoes Juridicas.' );
+	wp_safe_redirect( setceb_sol_admin_url() );
+	exit;
 }
 add_action( 'admin_init', 'setceb_sol_bloquear_telas' );
 
@@ -2192,7 +2152,12 @@ add_action( 'admin_init', 'setceb_sol_bloquear_telas' );
  * @return bool
  */
 function setceb_sol_e_a_listagem() {
-	return isset( $_GET['post_type'] ) && SETCEB_SOL_CPT === sanitize_key( wp_unslash( $_GET['post_type'] ) );
+	global $pagenow;
+
+	return 'edit.php' === $pagenow
+		&& empty( $_GET['page'] )
+		&& isset( $_GET['post_type'] )
+		&& SETCEB_SOL_CPT === sanitize_key( wp_unslash( $_GET['post_type'] ) );
 }
 
 /**
@@ -2479,10 +2444,9 @@ function setceb_sol_bloquear_criacao() {
 		return;
 	}
 
-	setceb_sol_pagina_bloqueada(
-		'admin_init',
-		'Solicitacoes juridicas nao sao criadas manualmente: elas nascem na Area do Associado.'
-	);
+	// Nao existe tela de erro: o acesso termina na listagem do modulo.
+	wp_safe_redirect( setceb_sol_admin_url() );
+	exit;
 }
 add_action( 'admin_init', 'setceb_sol_bloquear_criacao', 5 );
 
