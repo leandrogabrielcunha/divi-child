@@ -267,6 +267,14 @@ function setceb_sol_register_cpt() {
 			'menu_position'   => 36,
 			'capability_type' => SETCEB_SOL_CAP,
 			'map_meta_cap'    => true,
+			// As solicitacoes sao registradas exclusivamente pelos associados
+			// na Area do Associado. Negar "create_posts" remove o item
+			// "Registrar Solicitacao" do menu e o botao "Adicionar novo" da
+			// listagem, sem afetar a criacao programatica de
+			// setceb_sol_criar().
+			'capabilities'    => array(
+				'create_posts' => 'do_not_allow',
+			),
 			'supports'        => array( 'title' ),
 			'has_archive'     => false,
 			'hierarchical'    => false,
@@ -475,7 +483,6 @@ function setceb_sol_historico_rotulos() {
 			'mensagem' => array( 'rotulo' => 'Mensagem do associado', 'icone' => 'dashicons-format-chat' ),
 			'resposta' => array( 'rotulo' => 'Resposta do juridico', 'icone' => 'dashicons-email-alt' ),
 			'status'   => array( 'rotulo' => 'Atualizacao de status', 'icone' => 'dashicons-update' ),
-			'nota'     => array( 'rotulo' => 'Anotacao interna', 'icone' => 'dashicons-lock' ),
 		)
 	);
 }
@@ -502,20 +509,14 @@ function setceb_sol_historico( $post_id, $somente_publico = true ) {
 			continue;
 		}
 
-		// Anotacoes internas ficam visiveis apenas para a equipe juridica.
+		// Registros internos ficam visiveis apenas para a equipe juridica.
+		// O tipo "nota" tambem e coberto aqui porque anotacoes internas
+		// gravadas antes da remocao do campo ja existem no banco.
 		if ( $somente_publico && ( ! empty( $registro['interna'] ) || 'nota' === $registro['tipo'] ) ) {
 			continue;
 		}
 
-		$tipo = isset( $rotulos[ $registro['tipo'] ] ) ? $registro['tipo'] : '';
-
-		if ( '' === $tipo ) {
-			$tipo = ! empty( $rotulos ) ? (string) array_key_first( $rotulos ) : 'status';
-
-			if ( ! isset( $rotulos[ $tipo ] ) ) {
-				$tipo = 'status';
-			}
-		}
+		$tipo = isset( $rotulos[ $registro['tipo'] ] ) ? $registro['tipo'] : 'status';
 
 		$itens[] = array(
 			'tipo'     => $tipo,
@@ -525,10 +526,56 @@ function setceb_sol_historico( $post_id, $somente_publico = true ) {
 			'autor'    => isset( $registro['autor'] ) ? (string) $registro['autor'] : 'Sistema',
 			'data'     => isset( $registro['data'] ) ? (string) $registro['data'] : '',
 			'data_txt' => setceb_sol_data( isset( $registro['data'] ) ? $registro['data'] : '' ),
+			'relativo' => setceb_sol_tempo_relativo( isset( $registro['data'] ) ? $registro['data'] : '' ),
 		);
 	}
 
 	return $itens;
+}
+
+/**
+ * Tempo decorrido desde uma data, em linguagem natural.
+ *
+ * @param string $data Data em Y-m-d H:i:s.
+ * @return string
+ */
+function setceb_sol_tempo_relativo( $data ) {
+	if ( '' === (string) $data ) {
+		return '';
+	}
+
+	$timestamp = strtotime( (string) $data . ' UTC' );
+	$agora      = strtotime( current_time( 'mysql' ) . ' UTC' );
+
+	if ( ! $timestamp || ! $agora ) {
+		return '';
+	}
+
+	$segundos = $agora - $timestamp;
+
+	if ( $segundos < 0 ) {
+		return '';
+	}
+
+	if ( $segundos < HOUR_IN_SECONDS ) {
+		$minutos = max( 1, (int) round( $segundos / MINUTE_IN_SECONDS ) );
+
+		return sprintf( 'ha %d %s', $minutos, 1 === $minutos ? 'minuto' : 'minutos' );
+	}
+
+	if ( $segundos < DAY_IN_SECONDS ) {
+		$horas = (int) round( $segundos / HOUR_IN_SECONDS );
+
+		return sprintf( 'ha %d %s', $horas, 1 === $horas ? 'hora' : 'horas' );
+	}
+
+	$dias = (int) floor( $segundos / DAY_IN_SECONDS );
+
+	if ( $dias < 30 ) {
+		return sprintf( 'ha %d %s', $dias, 1 === $dias ? 'dia' : 'dias' );
+	}
+
+	return sprintf( 'ha %d %s', (int) floor( $dias / 30 ), (int) floor( $dias / 30 ) > 1 ? 'meses' : 'mes' );
 }
 
 /**
@@ -616,58 +663,137 @@ add_action( 'add_meta_boxes', 'setceb_sol_meta_boxes' );
 function setceb_sol_meta_box_atendimento( $post ) {
 	wp_nonce_field( 'setceb_sol_atendimento', 'setceb_sol_nonce' );
 
-	$status   = (string) get_post_meta( $post->ID, '_setceb_sol_status', true );
-	$advogado = (int) get_post_meta( $post->ID, '_setceb_sol_advogado', true );
-	$resposta = (string) get_post_meta( $post->ID, '_setceb_sol_resposta', true );
-	$nota     = (string) get_post_meta( $post->ID, '_setceb_sol_nota', true );
+	$solicitacao = setceb_sol_obter( $post->ID );
 
-	if ( '' === $status ) {
-		$status = setceb_sol_status_padrao();
+	if ( ! $solicitacao ) {
+		return;
 	}
-	?>
-	<div class="setceb-sol-campos">
-		<p class="setceb-sol-campo">
-			<label for="setceb-sol-titulo"><strong>Titulo</strong></label>
-			<input type="text" id="setceb-sol-titulo" name="post_title" class="widefat" value="<?php echo esc_attr( $post->post_title ); ?>">
-			<span class="description">Usado apenas na listagem do painel. O protocolo e o numero do registro (<?php echo esc_html( '#' . $post->ID ); ?>).</span>
-		</p>
 
-		<div class="setceb-sol-campo setceb-sol-campo--duplo">
-			<p>
-				<label for="setceb-sol-status"><strong>Status</strong></label>
-				<select id="setceb-sol-status" name="setceb_sol_status">
-					<?php foreach ( setceb_sol_status() as $slug => $info ) : ?>
-						<option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $slug, $status ); ?>><?php echo esc_html( $info['rotulo'] ); ?></option>
-					<?php endforeach; ?>
-				</select>
-			</p>
-			<p>
-				<label for="setceb-sol-advogado"><strong>Advogado responsavel</strong></label>
+	$status   = $solicitacao['status'];
+	$advogado = $solicitacao['advogado_id'];
+	$resposta = $solicitacao['resposta'];
+	$info     = setceb_sol_status_info( $status );
+
+	// O status muda junto com a resposta; o aviso acompanha o caso real.
+	$sem_resposta = '' === trim( $resposta );
+	?>
+	<div class="setceb-sol-cabecalho" style="--setceb-sol-cor:<?php echo esc_attr( $info['cor'] ); ?>">
+		<div class="setceb-sol-cabecalho__topo">
+			<span class="setceb-sol-cabecalho__protocolo"><?php echo esc_html( $solicitacao['protocolo'] ); ?></span>
+			<span class="setceb-sol-pill">
+				<span class="dashicons <?php echo esc_attr( $info['icone'] ); ?>" aria-hidden="true"></span>
+				<?php echo esc_html( $info['rotulo'] ); ?>
+			</span>
+		</div>
+		<h2 class="setceb-sol-cabecalho__titulo"><?php echo esc_html( $solicitacao['titulo'] ); ?></h2>
+		<ul class="setceb-sol-cabecalho__meta">
+			<li>
+				<span class="dashicons dashicons-clock" aria-hidden="true"></span>
+				Aberta <?php echo esc_html( setceb_sol_tempo_relativo( $solicitacao['data'] ) ); ?>
+				<span class="setceb-sol-cabecalho__exato"><?php echo esc_html( setceb_sol_data( $solicitacao['data'] ) ); ?></span>
+			</li>
+			<?php if ( '' !== $solicitacao['advogado'] ) : ?>
+				<li>
+					<span class="dashicons dashicons-businessman" aria-hidden="true"></span>
+					<?php echo esc_html( $solicitacao['advogado'] ); ?>
+				</li>
+			<?php endif; ?>
+			<li>
+				<span class="dashicons dashicons-update" aria-hidden="true"></span>
+				Atualizada <?php echo esc_html( setceb_sol_tempo_relativo( $solicitacao['atualizada'] ) ); ?>
+				<span class="setceb-sol-cabecalho__exato"><?php echo esc_html( setceb_sol_data( $solicitacao['atualizada'] ) ); ?></span>
+			</li>
+		</ul>
+	</div>
+
+	<div class="setceb-sol-pergunta setceb-sol-pergunta--destaque">
+		<span class="setceb-sol-pergunta__tag">
+			<span class="dashicons dashicons-format-quote" aria-hidden="true"></span>
+			Solicitacao de <?php echo esc_html( $solicitacao['nome'] ); ?>
+		</span>
+		<div class="setceb-sol-pergunta__texto"><?php echo nl2br( esc_html( $solicitacao['mensagem'] ) ); ?></div>
+	</div>
+
+	<div class="setceb-sol-campos">
+		<div class="setceb-sol-bloco">
+			<div class="setceb-sol-bloco__rotulo">
+				<span class="setceb-sol-bloco__titulo">Status do atendimento</span>
+				<span class="setceb-sol-bloco__dica">Clique no quadrado para alterar.</span>
+			</div>
+
+			<div class="setceb-sol-status" role="radiogroup" aria-label="Status do atendimento">
+				<?php foreach ( setceb_sol_status() as $slug => $rotulo ) : ?>
+					<label class="setceb-sol-status__item" style="--setceb-sol-cor:<?php echo esc_attr( $rotulo['cor'] ); ?>">
+						<input
+							type="radio"
+							name="setceb_sol_status"
+							value="<?php echo esc_attr( $slug ); ?>"
+							<?php checked( $slug, $status ); ?>
+						>
+						<span class="dashicons <?php echo esc_attr( $rotulo['icone'] ); ?>" aria-hidden="true"></span>
+						<span class="setceb-sol-status__texto"><?php echo esc_html( $rotulo['rotulo'] ); ?></span>
+					</label>
+				<?php endforeach; ?>
+			</div>
+		</div>
+
+		<div class="setceb-sol-bloco setceb-sol-bloco--linha">
+			<div class="setceb-sol-bloco__campo">
+				<label for="setceb-sol-advogado">
+					<span class="setceb-sol-bloco__titulo">Advogado responsavel</span>
+					<span class="setceb-sol-bloco__dica">Quem recebe os avisos desta solicitacao.</span>
+				</label>
 				<select id="setceb-sol-advogado" name="setceb_sol_advogado">
-					<option value="0">Nao atribuido</option>
+					<option value="0" <?php selected( 0, $advogado ); ?>>Nao atribuido</option>
 					<?php foreach ( setceb_sol_advogados() as $adv ) : ?>
 						<option value="<?php echo (int) $adv->ID; ?>" <?php selected( $advogado, $adv->ID ); ?>><?php echo esc_html( $adv->display_name ); ?></option>
 					<?php endforeach; ?>
 				</select>
+			</div>
+
+			<div class="setceb-sol-bloco__campo">
+				<label for="setceb-sol-titulo">
+					<span class="setceb-sol-bloco__titulo">Titulo interno</span>
+					<span class="setceb-sol-bloco__dica">Aparece so na listagem do painel. O padrao e os primeiros caracteres da solicitacao.</span>
+				</label>
+				<input type="text" id="setceb-sol-titulo" name="post_title" value="<?php echo esc_attr( $post->post_title ); ?>">
+			</div>
+		</div>
+
+		<div class="setceb-sol-bloco">
+			<div class="setceb-sol-bloco__rotulo">
+				<label for="setceb-sol-resposta" class="setceb-sol-bloco__titulo">Resposta ao associado</label>
+				<span class="setceb-sol-bloco__dica">O texto enviado por e-mail e exibido na Area do Associado.</span>
+			</div>
+
+			<div class="setceb-sol-editor">
+				<textarea
+					id="setceb-sol-resposta"
+					name="setceb_sol_resposta"
+					rows="12"
+					placeholder="Escreva a resposta da Assessoria Juridica..."
+					spellcheck="true"
+				><?php echo esc_textarea( $resposta ); ?></textarea>
+			</div>
+
+			<p class="setceb-sol-aviso setceb-sol-aviso--envio">
+				<span class="dashicons dashicons-email-alt" aria-hidden="true"></span>
+				<?php if ( $sem_resposta ) : ?>
+					Ao salvar com uma resposta, o associado recebe um e-mail, a interacao entra no historico
+					e a solicitacao passa para <strong>Respondida</strong>.
+				<?php else : ?>
+					A resposta atual foi enviada ao associado. Alterar o texto aqui dispara um novo aviso por e-mail.
+				<?php endif; ?>
 			</p>
 		</div>
 
-		<p class="setceb-sol-campo">
-			<label for="setceb-sol-resposta"><strong>Resposta do juridico</strong></label>
-			<textarea id="setceb-sol-resposta" name="setceb_sol_resposta" rows="8" class="widefat"><?php echo esc_textarea( $resposta ); ?></textarea>
-			<span class="description">Salvar uma resposta aqui registra a interacao, notifica o associado por e-mail e move a solicitacao para "Respondida" (quando ainda estiver em andamento).</span>
-		</p>
-
-		<p class="setceb-sol-campo">
-			<label for="setceb-sol-nota"><strong>Anotacao interna</strong></label>
-			<textarea id="setceb-sol-nota" name="setceb_sol_nota" rows="3" class="widefat"><?php echo esc_textarea( $nota ); ?></textarea>
-			<span class="description">Visivel apenas para a equipe juridica e para administradores. Nao e enviada por e-mail nem exibida ao associado.</span>
-		</p>
-
-		<p class="setceb-sol-acoes">
-			<input type="submit" name="save" class="button button-primary" value="Salvar atendimento">
+		<div class="setceb-sol-acoes">
+			<input type="submit" name="save" class="button button-primary button-hero" value="Salvar atendimento">
 			<a class="button" href="<?php echo esc_url( setceb_sol_admin_url() ); ?>">Voltar para a lista</a>
-		</p>
+			<span class="setceb-sol-acoes__dica">
+				<?php echo $sem_resposta ? 'Nada sera enviado ao asociado.' : 'O associado sera notificado desta resposta.'; ?>
+			</span>
+		</div>
 	</div>
 	<?php
 }
@@ -683,32 +809,41 @@ function setceb_sol_meta_box_solicitante( $post ) {
 	if ( ! $solicitacao ) {
 		return;
 	}
-
-	$campos = array(
-		'Protocolo'  => $solicitacao['protocolo'],
-		'Nome'       => $solicitacao['nome'],
-		'E-mail'     => $solicitacao['email'],
-		'Telefone'   => $solicitacao['telefone'],
-		'Empresa'    => $solicitacao['empresa'],
-		'Aberta em'  => setceb_sol_data( $solicitacao['data'] ),
-		'Atualizada' => setceb_sol_data( $solicitacao['atualizada'] ),
-	);
 	?>
-	<table class="widefat striped setceb-sol-tabela">
-		<tbody>
-			<?php foreach ( $campos as $rotulo => $valor ) : ?>
-				<tr>
-					<th scope="row" style="width:160px;"><?php echo esc_html( $rotulo ); ?></th>
-					<td><?php echo '' !== $valor ? esc_html( $valor ) : '<span class="description">nao informado</span>'; ?></td>
-				</tr>
-			<?php endforeach; ?>
-		</tbody>
-	</table>
+	<div class="setceb-sol-contato">
+		<div class="setceb-sol-contato__pessoa">
+			<span class="dashicons dashicons-businessman" aria-hidden="true"></span>
+			<div>
+				<strong><?php echo esc_html( '' !== $solicitacao['nome'] ? $solicitacao['nome'] : 'Sem nome' ); ?></strong>
+				<?php if ( '' !== $solicitacao['empresa'] ) : ?>
+					<span><?php echo esc_html( $solicitacao['empresa'] ); ?></span>
+				<?php endif; ?>
+			</div>
+		</div>
 
-	<p class="setceb-sol-pergunta">
-		<strong>Solicitacao:</strong><br>
-		<?php echo nl2br( esc_html( $solicitacao['mensagem'] ) ); ?>
-	</p>
+		<ul class="setceb-sol-contato__itens">
+			<?php if ( is_email( $solicitacao['email'] ) ) : ?>
+				<li>
+					<span class="dashicons dashicons-email" aria-hidden="true"></span>
+					<a href="mailto:<?php echo esc_attr( $solicitacao['email'] ); ?>"><?php echo esc_html( $solicitacao['email'] ); ?></a>
+				</li>
+			<?php endif; ?>
+
+			<?php if ( '' !== $solicitacao['telefone'] ) : ?>
+				<li>
+					<span class="dashicons dashicons-phone" aria-hidden="true"></span>
+					<a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $solicitacao['telefone'] ) ); ?>"><?php echo esc_html( $solicitacao['telefone'] ); ?></a>
+				</li>
+			<?php endif; ?>
+
+			<?php if ( ! $solicitacao['usuario_id'] ) : ?>
+				<li>
+					<span class="dashicons dashicons-warning" aria-hidden="true"></span>
+					Conta de associado nao encontrada
+				</li>
+			<?php endif; ?>
+		</ul>
+	</div>
 	<?php
 }
 
@@ -728,17 +863,27 @@ function setceb_sol_meta_box_historico( $post ) {
 	<ol class="setceb-sol-timeline">
 		<?php foreach ( array_reverse( $historico ) as $registro ) : ?>
 			<li class="setceb-sol-timeline__item setceb-sol-timeline__item--<?php echo esc_attr( $registro['tipo'] ); ?>">
-				<span class="setceb-sol-timeline__meta">
-					<span class="dashicons <?php echo esc_attr( $registro['icone'] ); ?>" aria-hidden="true"></span>
-					<strong><?php echo esc_html( $registro['autor'] ); ?></strong>
-					<?php echo esc_html( $registro['rotulo'] ); ?>
-					<?php if ( '' !== $registro['data_txt'] ) : ?>
-						&middot; <?php echo esc_html( $registro['data_txt'] ); ?>
-					<?php endif; ?>
+				<span class="setceb-sol-timeline__marca" aria-hidden="true">
+					<span class="dashicons <?php echo esc_attr( $registro['icone'] ); ?>"></span>
 				</span>
-				<?php if ( '' !== $registro['texto'] ) : ?>
-					<p class="setceb-sol-timeline__texto"><?php echo nl2br( esc_html( $registro['texto'] ) ); ?></p>
-				<?php endif; ?>
+
+				<div class="setceb-sol-timeline__conteudo">
+					<p class="setceb-sol-timeline__meta">
+						<strong><?php echo esc_html( $registro['autor'] ); ?></strong>
+						<span class="setceb-sol-timeline__rotulo"><?php echo esc_html( $registro['rotulo'] ); ?></span>
+						<?php if ( '' !== $registro['relativo'] ) : ?>
+							<time class="setceb-sol-timeline__quando"><?php echo esc_html( $registro['relativo'] ); ?></time>
+						<?php endif; ?>
+					</p>
+
+					<?php if ( '' !== $registro['texto'] ) : ?>
+						<div class="setceb-sol-timeline__texto"><?php echo nl2br( esc_html( $registro['texto'] ) ); ?></div>
+					<?php endif; ?>
+
+					<?php if ( '' !== $registro['data_txt'] ) : ?>
+						<p class="setceb-sol-timeline__exato"><?php echo esc_html( $registro['data_txt'] ); ?></p>
+					<?php endif; ?>
+				</div>
 			</li>
 		<?php endforeach; ?>
 	</ol>
@@ -746,7 +891,7 @@ function setceb_sol_meta_box_historico( $post ) {
 }
 
 /**
- * Salva o atendimento (status, responsavel, resposta e anotacao).
+ * Salva o atendimento (status, responsavel e resposta).
  *
  * @param int $post_id ID da solicitacao.
  */
@@ -786,7 +931,6 @@ function setceb_sol_atendimento_save( $post_id ) {
 
 	$advogado = isset( $_POST['setceb_sol_advogado'] ) ? absint( wp_unslash( $_POST['setceb_sol_advogado'] ) ) : 0;
 	$resposta = isset( $_POST['setceb_sol_resposta'] ) ? sanitize_textarea_field( wp_unslash( $_POST['setceb_sol_resposta'] ) ) : '';
-	$nota     = isset( $_POST['setceb_sol_nota'] ) ? sanitize_textarea_field( wp_unslash( $_POST['setceb_sol_nota'] ) ) : '';
 
 	// ------------------------------------------------------------
 	// Resposta do juridico
@@ -830,28 +974,6 @@ function setceb_sol_atendimento_save( $post_id ) {
 	} else {
 		// Resposta apagada: o registro precisa sair do painel do associado.
 		delete_post_meta( $post_id, '_setceb_sol_resposta' );
-	}
-
-	// ------------------------------------------------------------
-	// Anotacao interna
-	// ------------------------------------------------------------
-	if ( '' !== $nota ) {
-		update_post_meta( $post_id, '_setceb_sol_nota', $nota );
-
-		if ( $nota !== (string) get_post_meta( $post_id, '_setceb_sol_nota_enviada', true ) ) {
-			update_post_meta( $post_id, '_setceb_sol_nota_enviada', $nota );
-
-			setceb_sol_historico_add(
-				$post_id,
-				'nota',
-				$nota,
-				$usuario_id,
-				true
-			);
-		}
-	} else {
-		delete_post_meta( $post_id, '_setceb_sol_nota' );
-		delete_post_meta( $post_id, '_setceb_sol_nota_enviada' );
 	}
 
 	// ------------------------------------------------------------
@@ -1043,6 +1165,12 @@ function setceb_sol_links_status() {
 			</li>
 		<?php endforeach; ?>
 	</ul>
+
+	<p class="setceb-sol-origem">
+		<span class="dashicons dashicons-info" aria-hidden="true"></span>
+		As solicitacoes sao registradas exclusivamente pelos associados na
+		<strong>Area do Associado</strong>. Nao e possivel cria-las manualmente aqui.
+	</p>
 	<?php
 }
 add_action( 'manage_posts_extra_tablenav', 'setceb_sol_links_status' );
@@ -1286,16 +1414,13 @@ function setceb_sol_email_nova_solicitacao( $post_id ) {
 	if ( empty( $emails ) ) {
 		$emails[] = setceb_form_recipient( 'juridico' );
 
-		update_post_meta(
+		setceb_sol_historico_add(
 			$post_id,
-			'_setceb_sol_nota',
-			trim(
-				( (string) get_post_meta( $post_id, '_setceb_sol_nota', true ) ) . "\n" .
-				'[SETCEB] Nenhum advogado cadastrado. Notificacao enviada ao endereco administrativo.'
-			)
+			'status',
+			'[SETCEB] Nenhum advogado cadastrado. A notificacao foi enviada para o endereco administrativo.',
+			0,
+			true
 		);
-
-		update_post_meta( $post_id, '_setceb_sol_nota_enviada', get_post_meta( $post_id, '_setceb_sol_nota', true ) );
 	}
 
 	$linhas = array_merge(
@@ -2128,6 +2253,31 @@ function setceb_sol_menu() {
 	);
 }
 add_action( 'admin_menu', 'setceb_sol_menu', 20 );
+
+/**
+ * Bloqueia a tela de criacao de solicitacoes.
+ *
+ * O item de menu e o botao "Adicionar novo" ja somem porque o post type
+ * declara create_posts como "do_not_allow". Esta guarda cobre os acessos
+ * diretos pela URL (post-new.php), inclusive por administradores.
+ */
+function setceb_sol_bloquear_criacao() {
+	global $pagenow;
+
+	if ( 'post-new.php' !== $pagenow ) {
+		return;
+	}
+
+	$tipo = isset( $_REQUEST['post_type'] ) ? sanitize_key( wp_unslash( $_REQUEST['post_type'] ) ) : '';
+
+	if ( SETCEB_SOL_CPT !== $tipo ) {
+		return;
+	}
+
+	wp_safe_redirect( setceb_sol_admin_url() );
+	exit;
+}
+add_action( 'admin_init', 'setceb_sol_bloquear_criacao', 5 );
 
 /**
  * Garante que o menu de nivel superior do modulo exista.

@@ -61,72 +61,424 @@
 	margin: 10px 0 0;
 }
 
+.setceb-sol-origem {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 12px 0 0;
+	padding: 10px 14px;
+	font-size: 12.5px;
+	color: #475569;
+	background: #f1f5f9;
+	border-radius: 8px;
+}
+
+.setceb-sol-origem .dashicons {
+	flex-shrink: 0;
+	width: 17px;
+	height: 17px;
+	font-size: 17px;
+	color: #64748b;
+}
+
 /* ---------- Tela de atendimento ---------- */
-.setceb-sol-campos {
-	padding: 4px 0;
+
+/* O core renderiza "Publicar" e o titulo acima do editor. Ambos ficam
+   substituidos pelos controles dentro da box "Atendimento".
+   display:none nao desabilita os campos: o post_status e o post_title
+   continuam sendo enviados no POST. O post_title tambem e renderizado
+   aqui dentro da box, que aparece depois no documento e por isso tem
+   precedencia. */
+.setceb-sol-admin #submitdiv,
+.setceb-sol-admin #titlediv {
+	display: none;
 }
 
-.setceb-sol-campo {
-	margin: 0 0 18px;
+/* Cabecalho com protocolo, status e datas ---------- */
+.setceb-sol-cabecalho {
+	margin: -6px -12px 20px;
+	padding: 18px 24px;
+	background: linear-gradient(135deg, #f7fbfc 0%, #eef4f8 100%);
+	border-top: 3px solid var(--setceb-sol-cor, #0d8199);
 }
 
-.setceb-sol-campo > label {
-	display: block;
-	margin-bottom: 6px;
-}
-
-.setceb-sol-campo .description {
-	display: block;
-	margin-top: 6px;
-}
-
-.setceb-sol-campo--duplo {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 18px;
-}
-
-.setceb-sol-campo--duplo p {
-	margin: 0 0 18px;
-}
-
-.setceb-sol-campo--duplo label {
-	display: block;
-	margin-bottom: 6px;
-}
-
-.setceb-sol-campo select {
-	max-width: 420px;
-}
-
-.setceb-sol-campo textarea {
-	line-height: 1.6;
-}
-
-.setceb-sol-acoes {
+.setceb-sol-cabecalho__topo {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	margin: 4px 0 0;
-	padding-top: 16px;
-	border-top: 1px solid #f0f0f1;
+	flex-wrap: wrap;
+	margin-bottom: 6px;
 }
 
-.setceb-sol-tabela th {
-	font-weight: 600;
+.setceb-sol-cabecalho__protocolo {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 18px;
+	font-weight: 700;
+	letter-spacing: -0.5px;
+	color: var(--setceb-sol-cor, #0d8199);
 }
 
-.setceb-sol-pergunta {
-	margin: 16px 0 0;
-	padding: 14px 16px;
-	font-size: 13.5px;
-	line-height: 1.65;
-	background: #f7f9fb;
-	border-left: 4px solid #0d8199;
-	border-radius: 6px;
+.setceb-sol-cabecalho__titulo {
+	margin: 0 0 10px;
+	font-size: 18px;
+	line-height: 1.4;
+	color: #0f172a;
+}
+
+.setceb-sol-cabecalho__meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 20px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-size: 12.5px;
+	color: #64748b;
+}
+
+.setceb-sol-cabecalho__meta li {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.setceb-sol-cabecalho__meta .dashicons {
+	width: 15px;
+	height: 15px;
+	font-size: 15px;
+	color: #94a3b8;
+}
+
+.setceb-sol-cabecalho__exato {
+	color: #94a3b8;
+}
+
+/* Pergunta do associado em destaque ---------- */
+.setceb-sol-pergunta--destaque {
+	margin: 0 0 24px;
+	padding: 0;
+	overflow: hidden;
+	background: #fff;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.setceb-sol-pergunta__tag {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	padding: 10px 18px;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.4px;
+	text-transform: uppercase;
+	color: #0b6f84;
+	background: #e8f4f6;
+	border-bottom: 1px solid #d5e9ed;
+}
+
+.setceb-sol-pergunta__tag .dashicons {
+	width: 16px;
+	height: 16px;
+	font-size: 16px;
+}
+
+.setceb-sol-pergunta__texto {
+	padding: 18px;
+	font-size: 14.5px;
+	line-height: 1.7;
+	color: #0f172a;
+	white-space: normal;
 	overflow-wrap: anywhere;
 }
 
+/* Blocos de campo ---------- */
+.setceb-sol-campos {
+	display: flex;
+	flex-direction: column;
+	gap: 26px;
+}
+
+.setceb-sol-bloco__rotulo {
+	display: flex;
+	align-items: baseline;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin-bottom: 10px;
+}
+
+.setceb-sol-bloco__titulo {
+	display: block;
+	margin: 0;
+	font-size: 13.5px;
+	font-weight: 700;
+	color: #0f172a;
+}
+
+.setceb-sol-bloco__dica {
+	font-size: 12px;
+	color: #94a3b8;
+}
+
+.setceb-sol-bloco--linha {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 22px;
+}
+
+.setceb-sol-bloco__campo {
+	display: flex;
+	flex-direction: column;
+	gap: 7px;
+}
+
+.setceb-sol-bloco__campo .setceb-sol-bloco__dica {
+	margin-bottom: 2px;
+}
+
+.setceb-sol-bloco__campo select,
+.setceb-sol-bloco__campo input[type="text"] {
+	width: 100%;
+	max-width: none;
+	min-height: 40px;
+	border-radius: 8px;
+	border-color: #cbd5e1;
+}
+
+.setceb-sol-bloco__campo select:focus,
+.setceb-sol-bloco__campo input[type="text"]:focus {
+	border-color: #0d8199;
+	box-shadow: 0 0 0 3px rgba(13, 129, 153, 0.15);
+}
+
+.setceb-sol-bloco__valor {
+	display: block;
+	padding: 10px 12px;
+	font-size: 13px;
+	line-height: 1.5;
+	color: #475569;
+	background: #f8fafc;
+	border: 1px dashed #cbd5e1;
+	border-radius: 8px;
+	overflow-wrap: anywhere;
+}
+
+/* Status como opcoes clicaveis ---------- */
+.setceb-sol-status {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+	gap: 10px;
+}
+
+.setceb-sol-status__item {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	margin: 0;
+	padding: 13px 15px;
+	font-size: 13.5px;
+	font-weight: 600;
+	color: #334155;
+	background: #fff;
+	border: 1.5px solid #dbe2ea;
+	border-radius: 10px;
+	cursor: pointer;
+	transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.setceb-sol-status__item:hover {
+	border-color: var(--setceb-sol-cor, #0d8199);
+	background: #fbfdfe;
+}
+
+.setceb-sol-status__item input[type="radio"] {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+	margin: 0;
+}
+
+.setceb-sol-status__item .dashicons {
+	flex-shrink: 0;
+	width: 18px;
+	height: 18px;
+	font-size: 18px;
+	color: #94a3b8;
+	transition: color 0.15s ease;
+}
+
+.setceb-sol-status__texto {
+	line-height: 1.25;
+}
+
+.setceb-sol-status__item:has(input:checked) {
+	color: var(--setceb-sol-cor, #0d8199);
+	background: color-mix(in srgb, var(--setceb-sol-cor, #0d8199) 8%, #fff);
+	border-color: var(--setceb-sol-cor, #0d8199);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--setceb-sol-cor, #0d8199) 15%, transparent);
+}
+
+.setceb-sol-status__item:has(input:checked) .dashicons {
+	color: var(--setceb-sol-cor, #0d8199);
+}
+
+/* Foco visivel para navegacao por teclado. */
+.setceb-sol-status__item:has(input:focus-visible) {
+	outline: 2px solid #1d5b9f;
+	outline-offset: 2px;
+}
+
+@supports not selector(:has(*)) {
+	.setceb-sol-status__item input[type="radio"] {
+		position: static;
+		opacity: 1;
+		width: auto;
+		height: auto;
+		margin: 0;
+	}
+}
+
+/* Editor da resposta ---------- */
+.setceb-sol-editor textarea {
+	width: 100%;
+	min-height: 220px;
+	padding: 16px 18px;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	font-size: 14.5px;
+	line-height: 1.7;
+	color: #0f172a;
+	background: #fff;
+	border: 1.5px solid #cbd5e1;
+	border-radius: 10px;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.setceb-sol-editor textarea:focus {
+	border-color: #0d8199;
+	box-shadow: 0 0 0 4px rgba(13, 129, 153, 0.12);
+	outline: none;
+}
+
+.setceb-sol-aviso {
+	display: flex;
+	align-items: flex-start;
+	gap: 9px;
+	margin: 10px 0 0;
+	padding: 12px 14px;
+	font-size: 12.5px;
+	line-height: 1.6;
+	color: #475569;
+	background: #f8fafc;
+	border-left: 4px solid #0d8199;
+	border-radius: 8px;
+}
+
+.setceb-sol-aviso .dashicons {
+	flex-shrink: 0;
+	width: 17px;
+	height: 17px;
+	font-size: 17px;
+	color: #0d8199;
+}
+
+/* Acoes ---------- */
+.setceb-sol-acoes {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+	margin: 0;
+	padding-top: 22px;
+	border-top: 1px solid #eef2f6;
+}
+
+.setceb-sol-acoes .button-hero {
+	padding: 0 22px;
+	height: 42px;
+	line-height: 40px;
+	font-size: 14px;
+	border-radius: 8px;
+}
+
+.setceb-sol-acoes__dica {
+	font-size: 12.5px;
+	color: #94a3b8;
+}
+
+/* Contato do solicitante ---------- */
+.setceb-sol-contato {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 22px;
+	flex-wrap: wrap;
+}
+
+.setceb-sol-contato__pessoa {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.setceb-sol-contato__pessoa > .dashicons {
+	width: 34px;
+	height: 34px;
+	padding: 7px;
+	font-size: 34px;
+	color: #0d8199;
+	background: #e8f4f6;
+	border-radius: 50%;
+}
+
+.setceb-sol-contato__pessoa strong {
+	display: block;
+	font-size: 14.5px;
+	color: #0f172a;
+}
+
+.setceb-sol-contato__pessoa span {
+	display: block;
+	font-size: 12.5px;
+	color: #64748b;
+}
+
+.setceb-sol-contato__itens {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 20px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-size: 13px;
+}
+
+.setceb-sol-contato__itens li {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	color: #475569;
+}
+
+.setceb-sol-contato__itens .dashicons {
+	width: 16px;
+	height: 16px;
+	font-size: 16px;
+	color: #94a3b8;
+}
+
+.setceb-sol-contato__itens a {
+	color: #0b6f84;
+	text-decoration: none;
+}
+
+.setceb-sol-contato__itens a:hover {
+	text-decoration: underline;
+}
+
+/* Linha do tempo ---------- */
 .setceb-sol-timeline {
 	margin: 0;
 	padding: 0;
@@ -135,79 +487,120 @@
 
 .setceb-sol-timeline__item {
 	position: relative;
-	padding: 0 0 14px 22px;
-	border-left: 2px solid #e5e7eb;
+	display: flex;
+	gap: 14px;
+	padding-bottom: 20px;
+}
+
+/* Trilho vertical ligando os eventos. */
+.setceb-sol-timeline__item:not(:last-child)::before {
+	content: "";
+	position: absolute;
+	top: 30px;
+	bottom: 0;
+	left: 15px;
+	width: 2px;
+	background: #e2e8f0;
 }
 
 .setceb-sol-timeline__item:last-child {
 	padding-bottom: 0;
-	border-left-color: transparent;
 }
 
-.setceb-sol-timeline__item::before {
-	content: "";
-	position: absolute;
-	top: 5px;
-	left: -6px;
-	width: 10px;
-	height: 10px;
+.setceb-sol-timeline__marca {
+	position: relative;
+	z-index: 1;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
 	background: #fff;
 	border: 2px solid #cbd5e1;
 	border-radius: 50%;
 }
 
-.setceb-sol-timeline__item--resposta::before {
+.setceb-sol-timeline__marca .dashicons {
+	width: 16px;
+	height: 16px;
+	font-size: 16px;
+	color: #94a3b8;
+}
+
+.setceb-sol-timeline__item--resposta .setceb-sol-timeline__marca {
 	background: #0d8199;
 	border-color: #0d8199;
 }
 
-.setceb-sol-timeline__item--mensagem::before {
+.setceb-sol-timeline__item--resposta .setceb-sol-timeline__marca .dashicons {
+	color: #fff;
+}
+
+.setceb-sol-timeline__item--mensagem .setceb-sol-timeline__marca {
 	border-color: #1d5b9f;
 }
 
-.setceb-sol-timeline__item--status::before {
+.setceb-sol-timeline__item--mensagem .setceb-sol-timeline__marca .dashicons {
+	color: #1d5b9f;
+}
+
+.setceb-sol-timeline__item--status .setceb-sol-timeline__marca {
 	border-color: #b8860b;
 }
 
-.setceb-sol-timeline__item--nota {
-	opacity: 0.85;
+.setceb-sol-timeline__item--status .setceb-sol-timeline__marca .dashicons {
+	color: #b8860b;
+}
+
+.setceb-sol-timeline__conteudo {
+	flex: 1 1 auto;
+	min-width: 0;
+	padding-top: 4px;
 }
 
 .setceb-sol-timeline__meta {
 	display: flex;
-	align-items: center;
+	align-items: baseline;
+	gap: 8px;
 	flex-wrap: wrap;
-	gap: 5px;
-	font-size: 12.5px;
-	color: #64748b;
+	margin: 0;
+	font-size: 13px;
 }
 
 .setceb-sol-timeline__meta strong {
-	color: #1f2937;
+	color: #0f172a;
 }
 
-.setceb-sol-timeline__meta .dashicons {
-	font-size: 15px;
-	width: 15px;
-	height: 15px;
-	color: #0d8199;
+.setceb-sol-timeline__rotulo {
+	color: #475569;
+}
+
+.setceb-sol-timeline__quando {
+	color: #94a3b8;
+	font-size: 12px;
 }
 
 .setceb-sol-timeline__texto {
-	margin: 6px 0 0;
-	padding: 10px 12px;
-	font-size: 13px;
-	line-height: 1.6;
-	background: #f7f9fb;
-	border-radius: 6px;
+	margin-top: 7px;
+	padding: 12px 14px;
+	font-size: 13.5px;
+	line-height: 1.65;
+	color: #1e293b;
+	background: #f8fafc;
+	border-radius: 8px;
 	overflow-wrap: anywhere;
 }
 
-/* O box "Publicar" e substituido pelos controles do atendimento. */
-.setceb-sol-admin #submitdiv {
-	display: none;
+.setceb-sol-timeline__item--resposta .setceb-sol-timeline__texto {
+	background: #e8f4f6;
 }
 
+.setceb-sol-timeline__exato {
+	margin: 6px 0 0;
+	font-size: 11.5px;
+	color: #b0bccd;
+}
 /* ---------- Dashboard ---------- */
 .setceb-sol-cards {
 	display: grid;
@@ -363,9 +756,22 @@
 }
 
 /* ---------- Telas estreitas ---------- */
-@media screen and (max-width: 782px) {
-	.setceb-sol-campo--duplo {
+@media screen and (max-width: 960px) {
+	.setceb-sol-bloco--linha {
 		grid-template-columns: 1fr;
+		gap: 18px;
+	}
+}
+
+@media screen and (max-width: 782px) {
+	.setceb-sol-status {
+		grid-template-columns: 1fr 1fr;
+	}
+
+	.setceb-sol-contato {
+		align-items: flex-start;
+		flex-direction: column;
+		gap: 14px;
 	}
 
 	.setceb-sol-barras__item a {
@@ -374,5 +780,21 @@
 
 	.setceb-sol-barras__trilho {
 		grid-column: 1 / -1;
+	}
+
+	.setceb-sol-cabecalho {
+		margin: -6px -12px 18px;
+		padding: 16px;
+	}
+}
+
+@media screen and (max-width: 560px) {
+	.setceb-sol-status {
+		grid-template-columns: 1fr;
+	}
+
+	.setceb-sol-acoes .button-hero {
+		width: 100%;
+		text-align: center;
 	}
 }
