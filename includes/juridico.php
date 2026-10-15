@@ -184,39 +184,50 @@ function setceb_sol_usuario_restrito() {
 /**
  * Status possiveis de uma solicitacao.
  *
- * @return array slug => array( rotulo, icone, cor, ativo )
+ * "ativo" indica atendimento em andamento (usado nos indicadores) e
+ * "mensagens" indica que a conversa aceita novas mensagens. Sao coisas
+ * diferentes: uma solicitacao "respondida" ja foi atendida, mas continua
+ * aberta para o advogado responder de novo e para o associado
+ * complementar. Apenas "encerrada" fecha a conversa.
+ *
+ * @return array slug => array( rotulo, icone, cor, ativo, mensagens )
  */
 function setceb_sol_status() {
 	$status = array(
-		'aberta'              => array(
-			'rotulo' => 'Aberta',
-			'icone'  => 'dashicons-marker',
-			'cor'    => '#1D5B9F',
-			'ativo'  => true,
+		'aberta'               => array(
+			'rotulo'    => 'Aberta',
+			'icone'     => 'dashicons-marker',
+			'cor'       => '#1D5B9F',
+			'ativo'     => true,
+			'mensagens' => true,
 		),
-		'em_analise'          => array(
-			'rotulo' => 'Em analise',
-			'icone'  => 'dashicons-hourglass',
-			'cor'    => '#0d8199',
-			'ativo'  => true,
+		'em_analise'           => array(
+			'rotulo'    => 'Em analise',
+			'icone'     => 'dashicons-hourglass',
+			'cor'       => '#0d8199',
+			'ativo'     => true,
+			'mensagens' => true,
 		),
 		'aguardando_associado' => array(
-			'rotulo' => 'Aguardando associado',
-			'icone'  => 'dashicons-backup',
-			'cor'    => '#B8860B',
-			'ativo'  => true,
+			'rotulo'    => 'Aguardando associado',
+			'icone'     => 'dashicons-backup',
+			'cor'       => '#B8860B',
+			'ativo'     => true,
+			'mensagens' => true,
 		),
-		'respondida'          => array(
-			'rotulo' => 'Respondida',
-			'icone'  => 'dashicons-yes-alt',
-			'cor'    => '#1E7D46',
-			'ativo'  => false,
+		'respondida'           => array(
+			'rotulo'    => 'Respondida',
+			'icone'     => 'dashicons-yes-alt',
+			'cor'       => '#1E7D46',
+			'ativo'     => false,
+			'mensagens' => true,
 		),
-		'encerrada'           => array(
-			'rotulo' => 'Encerrada',
-			'icone'  => 'dashicons-archive',
-			'cor'    => '#64748B',
-			'ativo'  => false,
+		'encerrada'            => array(
+			'rotulo'    => 'Encerrada',
+			'icone'     => 'dashicons-archive',
+			'cor'       => '#64748B',
+			'ativo'     => false,
+			'mensagens' => false,
 		),
 	);
 
@@ -380,6 +391,7 @@ function setceb_sol_obter( $post_id ) {
 		'status_cor'    => $info['cor'],
 		'status_icone'  => $info['icone'],
 		'ativo'         => ! empty( $info['ativo'] ),
+		'mensagens'     => ! empty( $info['mensagens'] ),
 		'nome'          => (string) get_post_meta( $post->ID, '_setceb_sol_nome', true ),
 		'email'         => (string) get_post_meta( $post->ID, '_setceb_sol_email', true ),
 		'telefone'      => (string) get_post_meta( $post->ID, '_setceb_sol_telefone', true ),
@@ -706,10 +718,12 @@ function setceb_sol_meta_box_atendimento( $post ) {
 	$info     = setceb_sol_status_info( $status );
 
 	// O campo de resposta e um compositor e comeca sempre vazio: cada
-	// texto salvo vira uma mensagem da conversa no historico.
-	$placeholder = $solicitacao['ativo']
+	// texto salvo vira uma mensagem da conversa no historico. Respostas
+	// novas sao permitidas sempre que a conversa esta aberta - inclusive
+	// depois de uma resposta anterior.
+	$placeholder = $solicitacao['mensagens']
 		? 'Escreva a resposta para ' . $solicitacao['nome'] . '...'
-		: 'Esta solicitacao esta ' . mb_strtolower( $info['rotulo'] ) . '. Envie uma nova solicitacao pela Area do Associado.';
+		: 'Este atendimento esta fechado para novas respostas. Altere o status para responder.';
 	?>
 	<div class="setceb-sol-cabecalho" style="--setceb-sol-cor:<?php echo esc_attr( $info['cor'] ); ?>">
 		<div class="setceb-sol-cabecalho__topo">
@@ -807,15 +821,9 @@ function setceb_sol_meta_box_atendimento( $post ) {
 					rows="5"
 					placeholder="<?php echo esc_attr( $placeholder ); ?>"
 					spellcheck="true"
-					<?php echo $solicitacao['ativo'] ? '' : 'readonly'; ?>
+					<?php echo $solicitacao['mensagens'] ? '' : 'readonly'; ?>
 				></textarea>
 			</div>
-
-			<p class="setceb-sol-aviso setceb-sol-aviso--envio">
-				<span class="dashicons dashicons-email-alt" aria-hidden="true"></span>
-				Ao salvar, a resposta entra no <strong>Historico</strong>, o associado recebe um e-mail
-				com o texto e a solicitacao passa para <strong>Respondida</strong>.
-			</p>
 		</div>
 
 		<div class="setceb-sol-acoes">
@@ -1172,15 +1180,26 @@ function setceb_sol_contagem_status() {
 }
 
 /**
- * Links de filtro por status no topo da listagem.
+ * Filtro por status no topo da listagem.
  *
  * Todas as solicitacoes usam post_status "publish", portanto as views
  * nativas (Todas / Publicadas / Lixeira) nao agregam informacao e sao
- * substituidas pelos status do modulo. O WordPress removeu o filtro
- * "views_edit-{$post_type}" em 6.5, entao os links sao renderizados em
+ * substituidas pelos status do atendimento. O WordPress removeu o filtro
+ * "views_edit-{$post_type}" em 6.5, entao o filtro e renderizado em
  * "manage_posts_extra_tablenav", que e estavel desde o WP 4.4.
+ *
+ * A barra existe no topo e na base da tabela: o filtro aparece apenas no
+ * topo. O select fica dentro do formulario "posts-filter" da listagem,
+ * que ja carrega o post_type, e envia o proprio formulario ao trocar de
+ * valor - sem JavaScript basta o botao "Filtrar".
+ *
+ * @param string $qual Topo ("top") ou base ("bottom") da barra.
  */
-function setceb_sol_links_status() {
+function setceb_sol_links_status( $qual ) {
+	if ( 'top' !== $qual ) {
+		return;
+	}
+
 	$screen = get_current_screen();
 
 	if ( ! $screen || SETCEB_SOL_CPT !== $screen->post_type ) {
@@ -1193,48 +1212,47 @@ function setceb_sol_links_status() {
 
 	$atual    = isset( $_GET['status_sol'] ) ? sanitize_key( wp_unslash( $_GET['status_sol'] ) ) : '';
 	$contagem = setceb_sol_contagem_status();
-	$base     = setceb_sol_admin_url();
+	$total    = 0;
 
-	$itens = array(
-		array(
-			'url'    => esc_url( $base ),
-			'rotulo' => __( 'Todas', 'default' ),
-			'numero' => (int) array_sum( $contagem ),
-			'atual'  => '' === $atual,
-		),
-	);
-
-	foreach ( setceb_sol_status() as $slug => $info ) {
-		$itens[] = array(
-			'url'    => esc_url( add_query_arg( 'status_sol', $slug, $base ) ),
-			'rotulo' => $info['rotulo'],
-			'numero' => isset( $contagem[ $slug ] ) ? (int) $contagem[ $slug ] : 0,
-			'atual'  => $slug === $atual,
-		);
+	foreach ( $contagem as $numero ) {
+		$total += (int) $numero;
 	}
 	?>
-	<ul class="subsubsub setceb-sol-subsubsub">
-		<?php foreach ( $itens as $item ) : ?>
-			<li>
-				<a href="<?php echo $item['url']; ?>"<?php echo $item['atual'] ? ' class="current"' : ''; ?>>
-					<?php echo esc_html( $item['rotulo'] ); ?>
-					<span class="count">(<?php echo (int) $item['numero']; ?>)</span>
-					<?php if ( $item['atual'] ) : ?>
-						<span class="screen-reader-text"><?php esc_html_e( 'Current', 'default' ); ?></span>
-					<?php endif; ?>
-				</a>
-			</li>
-		<?php endforeach; ?>
-	</ul>
-
-	<p class="setceb-sol-origem">
-		<span class="dashicons dashicons-info" aria-hidden="true"></span>
-		As solicitacoes sao registradas exclusivamente pelos associados na
-		<strong>Area do Associado</strong>. Nao e possivel cria-las manualmente aqui.
-	</p>
+	<div class="setceb-sol-filtro">
+		<label class="screen-reader-text" for="setceb-sol-status"><?php esc_html_e( 'Filtrar por status', 'default' ); ?></label>
+		<select id="setceb-sol-status" name="status_sol" onchange="this.form.submit()">
+			<option value="">Todas (<?php echo (int) $total; ?>)</option>
+			<?php foreach ( setceb_sol_status() as $slug => $info ) : ?>
+				<option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $slug, $atual ); ?>>
+					<?php echo esc_html( $info['rotulo'] . ' (' . ( isset( $contagem[ $slug ] ) ? (int) $contagem[ $slug ] : 0 ) . ')' ); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
+		<noscript><button type="submit" class="button"><?php esc_html_e( 'Filtrar', 'default' ); ?></button></noscript>
+	</div>
 	<?php
 }
 add_action( 'manage_posts_extra_tablenav', 'setceb_sol_links_status' );
+
+/**
+ * Remove as views nativas da listagem.
+ *
+ * Todas as solicitacoes usam post_status "publish", entao "Todas" e
+ * "Publicadas" repetem o recorte que o filtro de status do atendimento ja
+ * faz - e o core renderiza essa lista acima da tabela, separada do select.
+ * A lixeira e mantida porque nao tem equivalente no filtro do modulo.
+ *
+ * @param array $views Links nativos da listagem.
+ * @return array
+ */
+function setceb_sol_remover_views( $views ) {
+	foreach ( array( 'all', 'publish', 'draft', 'pending', 'private', 'future', 'mine', 'sticky' ) as $slug ) {
+		unset( $views[ $slug ] );
+	}
+
+	return $views;
+}
+add_filter( 'views_edit-' . SETCEB_SOL_CPT, 'setceb_sol_remover_views' );
 
 /**
  * Aplica o filtro de status na listagem.
@@ -1912,7 +1930,7 @@ function setceb_sol_process_mensagem() {
 		return;
 	}
 
-	if ( ! $solicitacao['ativo'] ) {
+	if ( ! $solicitacao['mensagens'] ) {
 		setceb_sol_redirecionar( 'encerrada', array( 'sol_id' => $post_id ) );
 		return;
 	}

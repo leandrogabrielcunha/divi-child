@@ -48,37 +48,15 @@
 	width: 16%;
 }
 
-/* Todas as solicitacoes usam post_status "publish", entao as views nativas
-   (Todas / Publicadas / Lixeira) nao agregam informacao. No lugar delas,
-   o modulo renderiza os status do atendimento (manage_posts_extra_tablenav).
-   O seletor e restrito ao cabecalho da tabela para nao afetar o menu de
-   "Screen Options", que tambem usa .subsubsub. */
-.setceb-sol-admin .wp-list-table .tablenav.top > .subsubsub {
-	display: none;
+/* Filtro de status da listagem ---------- */
+.setceb-sol-filtro {
+	display: inline-block;
+	margin: 4px 8px 4px 0;
+	vertical-align: middle;
 }
 
-.setceb-sol-subsubsub {
-	margin: 10px 0 0;
-}
-
-.setceb-sol-origem {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	margin: 12px 0 0;
-	padding: 10px 14px;
-	font-size: 12.5px;
-	color: #475569;
-	background: #f1f5f9;
-	border-radius: 8px;
-}
-
-.setceb-sol-origem .dashicons {
-	flex-shrink: 0;
-	width: 17px;
-	height: 17px;
-	font-size: 17px;
-	color: #64748b;
+.setceb-sol-filtro select {
+	max-width: 280px;
 }
 
 /* ---------- Tela de atendimento ---------- */
@@ -354,28 +332,6 @@
 	border-color: #0d8199;
 	box-shadow: 0 0 0 4px rgba(13, 129, 153, 0.12);
 	outline: none;
-}
-
-.setceb-sol-aviso {
-	display: flex;
-	align-items: flex-start;
-	gap: 9px;
-	margin: 10px 0 0;
-	padding: 12px 14px;
-	font-size: 12.5px;
-	line-height: 1.6;
-	color: #475569;
-	background: #f8fafc;
-	border-left: 4px solid #0d8199;
-	border-radius: 8px;
-}
-
-.setceb-sol-aviso .dashicons {
-	flex-shrink: 0;
-	width: 17px;
-	height: 17px;
-	font-size: 17px;
-	color: #0d8199;
 }
 
 /* Acoes ---------- */

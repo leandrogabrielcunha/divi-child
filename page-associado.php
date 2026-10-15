@@ -542,7 +542,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 															</ol>
 														<?php endif; ?>
 
-														<?php if ( $sol['ativo'] ) : ?>
+														<?php if ( $sol['mensagens'] ) : ?>
 															<form class="assoc-form assoc-form--resposta" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-assoc-form>
 																<input type="hidden" name="action" value="setceb_juridico_mensagem">
 																<input type="hidden" name="setceb_sol_id" value="<?php echo (int) $sol['id']; ?>">
