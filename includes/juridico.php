@@ -1775,8 +1775,15 @@ add_action( 'admin_post_nopriv_setceb_juridico_mensagem', 'setceb_sol_process_me
 function setceb_sol_tela_permitida() {
 	global $pagenow;
 
+	// Usa as constantes do core em vez dos atalhos wp_doing_ajax(),
+	// wp_doing_cron() e wp_doing_xmlrpc(): o ultimo so existe a partir do
+	// WordPress 5.6 e o portal roda uma versao anterior.
+	$ajax   = defined( 'DOING_AJAX' ) && DOING_AJAX;
+	$cron   = defined( 'DOING_CRON' ) && DOING_CRON;
+	$xmlrpc = defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST;
+
 	// Ajax, cron e XML-RPC nao passam pelo fluxo de telas do admin.
-	if ( wp_doing_ajax() || wp_doing_cron() || wp_doing_xmlrpc() ) {
+	if ( $ajax || $cron || $xmlrpc ) {
 		return true;
 	}
 
