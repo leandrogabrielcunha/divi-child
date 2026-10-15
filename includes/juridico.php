@@ -1170,7 +1170,11 @@ function setceb_sol_column_content( $coluna, $post_id ) {
 add_action( 'manage_' . SETCEB_SOL_CPT . '_posts_custom_column', 'setceb_sol_column_content', 10, 2 );
 
 /**
- * Contagem por status, reaproveitada pelas views e pelo Dashboard.
+ * Contagem por status na listagem.
+ *
+ * Respeita o recorte de quem esta logado: o advogado conta o que esta
+ * atribuido a ele mais o que ainda esta sem responsavel, exatamente como a
+ * propria listagem. A administracao continua contando tudo.
  *
  * @return array slug => total
  */
@@ -1181,10 +1185,16 @@ function setceb_sol_contagem_status() {
 		return $contagem;
 	}
 
+	$restrito = setceb_sol_usuario_restrito();
+	$eu       = get_current_user_id();
 	$contagem = array();
 
 	foreach ( setceb_sol_relatorio() as $linha ) {
 		$status = '' !== (string) $linha['status'] ? (string) $linha['status'] : setceb_sol_status_padrao();
+
+		if ( $restrito && (int) $linha['advogado'] && (int) $linha['advogado'] !== $eu ) {
+			continue;
+		}
 
 		if ( ! isset( $contagem[ $status ] ) ) {
 			$contagem[ $status ] = 0;
@@ -1200,15 +1210,14 @@ function setceb_sol_contagem_status() {
  * Filtro por status no topo da listagem.
  *
  * Todas as solicitacoes usam post_status "publish", portanto as views
- * nativas (Todas / Publicadas / Lixeira) nao agregam informacao e sao
- * substituidas pelos status do atendimento. O WordPress removeu o filtro
- * "views_edit-{$post_type}" em 6.5, entao o filtro e renderizado em
- * "manage_posts_extra_tablenav", que e estavel desde o WP 4.4.
+ * nativas (Todas / Publicadas) nao agregam informacao e sao removidas por
+ * "setceb_sol_remover_views" em "views_edit-{$post_type}". O select fica em
+ * "manage_posts_extra_tablenav" porque ali ele ja esta dentro do formulario
+ * "posts-filter" da listagem, que carrega o post_type.
  *
  * A barra existe no topo e na base da tabela: o filtro aparece apenas no
- * topo. O select fica dentro do formulario "posts-filter" da listagem,
- * que ja carrega o post_type, e envia o proprio formulario ao trocar de
- * valor - sem JavaScript basta o botao "Filtrar".
+ * topo. O select envia o proprio formulario ao trocar de valor - sem
+ * JavaScript basta o botao "Filtrar".
  *
  * @param string $qual Topo ("top") ou base ("bottom") da barra.
  */
@@ -1308,24 +1317,50 @@ function setceb_sol_filtro_status( $consulta ) {
 add_action( 'pre_get_posts', 'setceb_sol_filtro_status' );
 
 /**
- * Seletor de status no topo da listagem.
+ * Restringe a listagem ao que cabe a equipe juridica.
+ *
+ * O advogado responde pelo que esta atribuido a ele. Solicitacoes ainda sem
+ * responsavel continuam aparecendo para todos os advogados, para nao deixarem
+ * de ser atendidas enquanto a administracao nao distribuir.
+ *
+ * @param WP_Query $consulta Consulta da listagem.
  */
-function setceb_sol_filtro_dropdown() {
-	if ( ! isset( $_GET['post_type'] ) || SETCEB_SOL_CPT !== $_GET['post_type'] ) {
+function setceb_sol_filtro_advogado( $consulta ) {
+	if ( ! is_admin() || ! $consulta->is_main_query() ) {
 		return;
 	}
 
-	$atual = isset( $_GET['status_sol'] ) ? sanitize_key( wp_unslash( $_GET['status_sol'] ) ) : '';
-	?>
-	<select name="status_sol">
-		<option value="">Todos os status</option>
-		<?php foreach ( setceb_sol_status() as $slug => $info ) : ?>
-			<option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $slug, $atual ); ?>><?php echo esc_html( $info['rotulo'] ); ?></option>
-		<?php endforeach; ?>
-	</select>
-	<?php
+	if ( SETCEB_SOL_CPT !== $consulta->get( 'post_type' ) ) {
+		return;
+	}
+
+	if ( ! setceb_sol_usuario_restrito() ) {
+		return;
+	}
+
+	// Mescla com o que ja existir na consulta em vez de substituir.
+	$meta_query = (array) $consulta->get( 'meta_query' );
+
+	$meta_query[] = array(
+		'relation' => 'OR',
+		array(
+			'key'     => '_setceb_sol_advogado',
+			'value'   => array( '0', '' ),
+			'compare' => 'IN',
+		),
+		array(
+			'key'   => '_setceb_sol_advogado',
+			'value' => (string) get_current_user_id(),
+		),
+		array(
+			'key'     => '_setceb_sol_advogado',
+			'compare' => 'NOT EXISTS',
+		),
+	);
+
+	$consulta->set( 'meta_query', $meta_query );
 }
-add_action( 'restrict_manage_posts', 'setceb_sol_filtro_dropdown' );
+add_action( 'pre_get_posts', 'setceb_sol_filtro_advogado' );
 
 /**
  * Marca o post type na pagina de edicao (usado pelo CSS do admin).
