@@ -63,6 +63,16 @@ $recentes     = setceb_conteudos_recentes( 8 );
 $boletos      = setceb_boletos();
 $assuntos     = setceb_contato_assuntos();
 $notice       = setceb_associado_form_notice();
+
+/* Solicitações jurídicas (includes/juridico.php). O aviso do módulo
+   complementa o aviso padrão dos formulários da área do associado. */
+if ( ! $notice && function_exists( 'setceb_sol_notice' ) ) {
+	$notice = setceb_sol_notice();
+}
+
+$minhas_solicitacoes = function_exists( 'setceb_sol_listar' ) ? setceb_sol_listar( array( 'usuario_id' => get_current_user_id() ) ) : array();
+$sol_aberta          = isset( $_GET['sol_id'] ) ? absint( $_GET['sol_id'] ) : 0;
+
 $active_panel = $notice ? $notice['forma'] : 'recentes';
 
 $atalhos = array(
@@ -458,7 +468,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 									<span class="dashicons dashicons-book assoc-callout__icon" aria-hidden="true"></span>
 									<div>
 										<h3>Assessoria Jurídica</h3>
-										<p>Envie sua dúvida para o assessor jurídico da entidade. A resposta será encaminhada para o e-mail informado abaixo.</p>
+										<p>Registre sua dúvida como uma solicitação. A equipe jurídica recebe um aviso por e-mail, atende o caso e você acompanha tudo por aqui, com resposta e histórico de cada interação.</p>
 									</div>
 								</div>
 
@@ -468,6 +478,115 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 										<p><?php echo esc_html( $notice['texto'] ); ?></p>
 									</div>
 								<?php endif; ?>
+
+								<!-- Minhas solicitações -->
+								<h3 class="assoc-panel__subtitle">Minhas solicitações</h3>
+
+								<?php if ( ! empty( $minhas_solicitacoes ) ) : ?>
+									<div class="assoc-sol">
+										<?php foreach ( $minhas_solicitacoes as $sol ) : ?>
+											<?php
+											$sol_aberta_esta = ( $sol_aberta === (int) $sol['id'] )
+												|| ( 0 === $sol_aberta && count( $minhas_solicitacoes ) === 1 );
+											?>
+											<article class="assoc-sol__item">
+												<header class="assoc-sol__head">
+													<span class="assoc-sol__icon" style="--setceb-sol-cor:<?php echo esc_attr( $sol['status_cor'] ); ?>">
+														<span class="dashicons <?php echo esc_attr( $sol['status_icone'] ); ?>" aria-hidden="true"></span>
+													</span>
+													<div class="assoc-sol__head-info">
+														<h4 class="assoc-sol__titulo">
+															Solicitação <?php echo esc_html( $sol['protocolo'] ); ?>
+														</h4>
+														<span class="assoc-sol__meta">
+															Registrada em <?php echo esc_html( setceb_sol_data( $sol['data'] ) ); ?>
+															<?php if ( '' !== $sol['advogado'] ) : ?>
+																&middot; <?php echo esc_html( $sol['advogado'] ); ?>
+															<?php endif; ?>
+														</span>
+													</div>
+													<span class="assoc-badge" style="--setceb-sol-cor:<?php echo esc_attr( $sol['status_cor'] ); ?>">
+														<?php echo esc_html( $sol['status_rotulo'] ); ?>
+													</span>
+												</header>
+
+												<details class="assoc-sol__details"<?php echo $sol_aberta_esta ? ' open' : ''; ?>>
+													<summary class="assoc-sol__summary">
+														Detalhes e histórico
+														<span class="dashicons dashicons-arrow-down-alt2" aria-hidden="true"></span>
+													</summary>
+
+													<div class="assoc-sol__body">
+														<div class="assoc-sol__msg">
+															<span class="assoc-sol__msg-tag">Sua solicitação</span>
+															<p><?php echo nl2br( esc_html( $sol['mensagem'] ) ); ?></p>
+														</div>
+
+														<?php if ( '' !== $sol['resposta'] ) : ?>
+															<div class="assoc-sol__msg assoc-sol__msg--resposta">
+																<span class="assoc-sol__msg-tag">Resposta da Assessoria Jurídica</span>
+																<p><?php echo nl2br( esc_html( $sol['resposta'] ) ); ?></p>
+															</div>
+														<?php endif; ?>
+
+														<?php if ( ! empty( $sol['historico'] ) ) : ?>
+															<ol class="assoc-timeline">
+																<?php foreach ( $sol['historico'] as $registro ) : ?>
+																	<li class="assoc-timeline__item assoc-timeline__item--<?php echo esc_attr( $registro['tipo'] ); ?>">
+																		<span class="assoc-timeline__meta">
+																			<span class="dashicons <?php echo esc_attr( $registro['icone'] ); ?>" aria-hidden="true"></span>
+																			<strong><?php echo esc_html( $registro['autor'] ); ?></strong>
+																			<?php echo esc_html( $registro['rotulo'] ); ?>
+																			<?php if ( '' !== $registro['data_txt'] ) : ?>
+																				&middot; <?php echo esc_html( $registro['data_txt'] ); ?>
+																			<?php endif; ?>
+																		</span>
+																		<?php if ( '' !== $registro['texto'] ) : ?>
+																			<p class="assoc-timeline__texto"><?php echo nl2br( esc_html( $registro['texto'] ) ); ?></p>
+																		<?php endif; ?>
+																	</li>
+																<?php endforeach; ?>
+															</ol>
+														<?php endif; ?>
+
+														<?php if ( $sol['ativo'] ) : ?>
+															<form class="assoc-form assoc-form--resposta" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-assoc-form>
+																<input type="hidden" name="action" value="setceb_juridico_mensagem">
+																<input type="hidden" name="setceb_sol_id" value="<?php echo (int) $sol['id']; ?>">
+																<?php wp_nonce_field( 'setceb_juridico_mensagem_' . (int) $sol['id'] ); ?>
+
+																<p class="assoc-hp" aria-hidden="true">
+																	<label>Site<input type="text" name="setceb_website" tabindex="-1" autocomplete="off"></label>
+																</p>
+
+																<p class="assoc-form__field">
+																	<label for="assoc-sol-msg-<?php echo (int) $sol['id']; ?>">Nova mensagem <?php echo esc_html( $sol['protocolo'] ); ?> <span aria-hidden="true">*</span></label>
+																	<textarea id="assoc-sol-msg-<?php echo (int) $sol['id']; ?>" name="setceb_mensagem" rows="4" required placeholder="Escreva sua mensagem para a Assessoria Jurídica..."></textarea>
+																</p>
+
+																<button type="submit" class="assoc-btn">
+																	<span class="assoc-btn__label">Enviar mensagem</span>
+																</button>
+															</form>
+														<?php else : ?>
+															<p class="assoc-sol__encerrada">
+																Este atendimento está <?php echo esc_html( mb_strtolower( $sol['status_rotulo'] ) ); ?>. Abra uma nova solicitação se precisar de mais um atendimento.
+															</p>
+														<?php endif; ?>
+													</div>
+												</details>
+											</article>
+										<?php endforeach; ?>
+									</div>
+								<?php else : ?>
+									<div class="assoc-empty">
+										<span class="dashicons dashicons-book assoc-empty__icon" aria-hidden="true"></span>
+										<p>Você ainda não possui solicitações. Envie sua primeira dúvida pelo formulário abaixo.</p>
+									</div>
+								<?php endif; ?>
+
+								<!-- Nova solicitação -->
+								<h3 class="assoc-panel__subtitle">Nova solicitação</h3>
 
 								<form class="assoc-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-assoc-form>
 									<input type="hidden" name="action" value="setceb_juridico">
@@ -505,7 +624,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
 									</p>
 
 									<button type="submit" class="assoc-btn">
-										<span class="assoc-btn__label">Enviar dúvida ao jurídico</span>
+										<span class="assoc-btn__label">Registrar solicitação</span>
 									</button>
 									<p class="assoc-form__note">Campos com <span aria-hidden="true">*</span> são obrigatórios.</p>
 								</form>

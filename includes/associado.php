@@ -564,6 +564,15 @@ function setceb_associado_form_notice() {
 		),
 	);
 
+	/**
+	 * Permite que um modulo acrescente ou ajuste as mensagens exibidas
+	 * apos o envio de um formulario da area do associado.
+	 *
+	 * @param array  $mensagens Status => array( tipo, texto ).
+	 * @param string $forma     Contexto do formulario.
+	 */
+	$mensagens = apply_filters( 'setceb_assoc_form_notice_messages', $mensagens, $forma );
+
 	if ( ! isset( $mensagens[ $status ] ) || ! in_array( $forma, array( 'juridico', 'fale-conosco' ), true ) ) {
 		return null;
 	}

@@ -148,6 +148,17 @@ Ver includes/tabelas-valores.php
 require_once get_stylesheet_directory() . '/includes/tabelas-valores.php';
 
 /*================================================
+#SETCEB - Solicitacoes Juridicas
+O formulario Juridico da Area do Associado deixa de
+enviar e-mail e passa a registrar a solicitacao no painel
+(CPT setceb_solicitacao). Inclui o perfil "advogado" com
+acesso restrito ao modulo, as notificacoes por e-mail, o
+Dashboard de acompanhamento e o cadastro de advogados.
+Ver includes/juridico.php
+================================================*/
+require_once get_stylesheet_directory() . '/includes/juridico.php';
+
+/*================================================
 #SETCEB - Header global customizado
 Estrutura do cabecalho e menu principal.
 Ver includes/setceb-header.php

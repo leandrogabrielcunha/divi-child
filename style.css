@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.36.0
+Version: 1.37.0
 Template: Divi
 */
 
@@ -2879,5 +2879,284 @@ a partir de 641px volta a ser tabela de 3 colunas.
 
 	.setceb-tabela-valores__col-valor {
 		width: 23%;
+	}
+}
+
+/*============================================================
+SETCEB - Solicitacoes Juridicas (Area do Associado)
+Lista das solicitacoes do associado, linha do tempo das
+interacoes com a Assessoria Juridica e formulario de nova
+mensagem. Modulo juridico.php.
+============================================================*/
+.assoc-sol {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin: 16px 0 28px;
+}
+
+.assoc-sol__item {
+	background: #fff;
+	border: 1px solid var(--setceb-border);
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+.assoc-sol__head {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 14px 18px;
+}
+
+.assoc-sol__icon {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	font-size: 20px;
+	color: var(--setceb-sol-cor, var(--setceb-accent-dark));
+	background: var(--setceb-accent-tint);
+	border-radius: 10px;
+}
+
+@supports (color: color-mix(in srgb, red, blue)) {
+	.assoc-sol__icon {
+		background: color-mix(in srgb, var(--setceb-sol-cor, #0d8199) 12%, transparent);
+	}
+}
+
+.assoc-sol__icon .dashicons {
+	font-size: 20px;
+	width: 20px;
+	height: 20px;
+}
+
+.assoc-sol__head-info {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.assoc-sol__titulo {
+	margin: 0 0 2px;
+	font-size: 15px;
+	font-weight: 700;
+	color: var(--setceb-ink);
+}
+
+.assoc-sol__meta {
+	display: block;
+	font-size: 12.5px;
+	color: var(--setceb-muted);
+}
+
+/* ---------- Selo de status ---------- */
+.assoc-badge {
+	flex-shrink: 0;
+	padding: 4px 10px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.4px;
+	text-transform: uppercase;
+	color: #fff;
+	background: var(--setceb-sol-cor, var(--setceb-accent));
+	border-radius: 999px;
+	white-space: nowrap;
+}
+
+/* ---------- Detalhes / historico ---------- */
+.assoc-sol__details {
+	border-top: 1px solid var(--setceb-border);
+}
+
+.assoc-sol__summary {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding: 11px 18px;
+	font-size: 13.5px;
+	font-weight: 700;
+	color: var(--setceb-accent-dark);
+	cursor: pointer;
+	list-style: none;
+	user-select: none;
+	transition: background 0.15s ease;
+}
+
+.assoc-sol__summary::-webkit-details-marker {
+	display: none;
+}
+
+.assoc-sol__summary:hover {
+	background: #F7FAFD;
+}
+
+.assoc-sol__summary:focus-visible {
+	outline: 3px solid rgba(29, 91, 159, 0.35);
+	outline-offset: -3px;
+}
+
+.assoc-sol__summary .dashicons {
+	font-size: 18px;
+	width: 18px;
+	height: 18px;
+	transition: transform 0.18s ease;
+}
+
+.assoc-sol__details[open] .assoc-sol__summary .dashicons {
+	transform: rotate(180deg);
+}
+
+.assoc-sol__body {
+	padding: 4px 18px 18px;
+}
+
+/* ---------- Mensagens ---------- */
+.assoc-sol__msg {
+	padding: 14px 16px;
+	background: #F7FAFD;
+	border-left: 4px solid var(--setceb-blue-light);
+	border-radius: 10px;
+}
+
+.assoc-sol__msg + .assoc-sol__msg,
+.assoc-timeline,
+.assoc-form--resposta,
+.assoc-sol__encerrada {
+	margin-top: 14px;
+}
+
+.assoc-sol__msg--resposta {
+	background: var(--setceb-accent-tint);
+	border-left-color: var(--setceb-accent);
+}
+
+.assoc-sol__msg-tag {
+	display: block;
+	margin-bottom: 6px;
+	font-size: 11.5px;
+	font-weight: 700;
+	letter-spacing: 0.6px;
+	text-transform: uppercase;
+	color: var(--setceb-muted);
+}
+
+.assoc-sol__msg--resposta .assoc-sol__msg-tag {
+	color: var(--setceb-accent-deep);
+}
+
+.assoc-sol__msg p {
+	margin: 0;
+	font-size: 14.5px;
+	line-height: 1.6;
+	color: var(--setceb-ink);
+	overflow-wrap: anywhere;
+}
+
+/* ---------- Linha do tempo ---------- */
+.assoc-timeline {
+	padding: 0;
+	margin-bottom: 0;
+	list-style: none;
+	border-left: 2px solid var(--setceb-border);
+}
+
+.assoc-timeline__item {
+	position: relative;
+	padding: 0 0 14px 18px;
+}
+
+.assoc-timeline__item:last-child {
+	padding-bottom: 0;
+}
+
+.assoc-timeline__item::before {
+	content: "";
+	position: absolute;
+	top: 6px;
+	left: -6px;
+	width: 10px;
+	height: 10px;
+	background: #fff;
+	border: 2px solid var(--setceb-border);
+	border-radius: 50%;
+}
+
+.assoc-timeline__item--abertura::before {
+	border-color: var(--setceb-blue-light);
+}
+
+.assoc-timeline__item--resposta::before {
+	border-color: var(--setceb-accent);
+	background: var(--setceb-accent);
+}
+
+.assoc-timeline__item--mensagem::before {
+	border-color: var(--setceb-blue-light);
+}
+
+.assoc-timeline__item--status::before {
+	border-color: #B8860B;
+}
+
+.assoc-timeline__meta {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 5px;
+	font-size: 12.5px;
+	color: var(--setceb-muted);
+}
+
+.assoc-timeline__meta strong {
+	color: var(--setceb-ink);
+}
+
+.assoc-timeline__meta .dashicons {
+	font-size: 15px;
+	width: 15px;
+	height: 15px;
+	color: var(--setceb-accent);
+}
+
+.assoc-timeline__texto {
+	margin: 5px 0 0;
+	padding: 10px 12px;
+	font-size: 14px;
+	line-height: 1.6;
+	color: var(--setceb-ink);
+	background: #FAFBFD;
+	border-radius: 8px;
+	overflow-wrap: anywhere;
+}
+
+.assoc-sol__encerrada {
+	margin-bottom: 0;
+	font-size: 13.5px;
+	color: var(--setceb-muted);
+}
+
+.assoc-form--resposta {
+	padding-top: 14px;
+	border-top: 1px dashed var(--setceb-border);
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 700px) {
+	.assoc-sol__head {
+		flex-wrap: wrap;
+		gap: 10px;
+	}
+
+	.assoc-sol__head-info {
+		flex: 1 1 100%;
+		order: 3;
+	}
+
+	.assoc-badge {
+		margin-left: auto;
 	}
 }
