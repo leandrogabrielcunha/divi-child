@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.47.5
+Version: 1.47.6
 Template: Divi
 */
 
@@ -2277,18 +2277,15 @@ via fonte Dashicons.
 }
 
 @media (max-width: 359px) {
-	/* Telas muito estreitas (320px): o icone do modulo e o icone de
-	   calendario disputam espaco com o TITULO, que e a unica informacao
-	   que o usuario precisa ler ali. Medido: em 320px 'Relatorios' e
-	   'Planilhas' ficavam com 47px de largura e apareciam como
-	   'Relat...' - o titulo perde para o decorativo. */
+	/* Telas muito estreitas (320px): ainda sobra pouco depois do botao
+	   de voltar e do filtro de ano, entao o icone do modulo - que e
+	   decorativo - sai de vez e o espacamento aperta mais um pouco.
+	   O filtro de ano ja vem compacto do bloco de 700px abaixo. */
 	.assoc-mod {
 		gap: 8px;
 		padding: 7px 8px;
 	}
 
-	/* O icone do modulo e decorativo. Em 320px ele comia ~30px que o
-	   titulo precisa - e o titulo e a unica informacao util ali. */
 	.assoc-mod__icon {
 		display: none;
 	}
@@ -2304,18 +2301,6 @@ via fonte Dashicons.
 	.assoc-mod__back {
 		padding: 0 8px;
 		font-size: 13px;
-	}
-
-	/* O filtro de ano mostra so "2026 v"; o calendario e redundante
-	   quando o proprio titulo esta em risco de corte. */
-	.assoc-year__btn {
-		gap: 5px;
-		padding: 0 8px;
-		font-size: 14px;
-	}
-
-	.assoc-year__btn .dashicons-calendar-alt {
-		display: none;
 	}
 }
 
@@ -2342,7 +2327,11 @@ via fonte Dashicons.
 		justify-content: space-between;
 	}
 
-	.assoc-year__btn,
+	/* A barra de ferramentas usa o filtro de ano e o botao de boletos em
+	   largura total. O mesmo .assoc-year__btn aparece no cabecalho do
+	   modulo, onde 100% NAO faz sentido - o filtro divide a linha com o
+	   botao de voltar e o titulo. Por isso o filtro fica de fora daqui e
+	   recebe tratamento proprio abaixo. */
 	.assoc-btn--boletos {
 		width: 100%;
 	}
@@ -2412,6 +2401,31 @@ via fonte Dashicons.
 		gap: 12px;
 	}
 
+	.assoc-mod__icon .dashicons {
+		font-size: 17px;
+		width: 17px;
+		height: 17px;
+	}
+
+	/* Filtro de ano compacto no cabecalho do modulo.
+
+	   A 360px este era o gargalo do cabecalho: o icone de calendario
+	   empurrava o filtro de 67px para 90px e o titulo ficava com 17px de
+	   folga - 'Relatorios' aparecia como 'Relat...'. Como o calendario e
+	   redundante (o proprio filtro ja diz o ano), ele sai em todas as
+	   larguras de celular, nao so abaixo de 360px. Medido depois da
+	   correcao: folga minima de 51px entre 320 e 430px. */
+	.assoc-mod .assoc-year__btn {
+		gap: 5px;
+		padding: 0 10px;
+		font-size: 14px;
+	}
+
+	.assoc-mod .assoc-year__btn .dashicons-calendar-alt {
+		display: none;
+	}
+
+	/* O glifo dentro da caixa de 32px: a base usa 26px e fica desproporcional. */
 	.assoc-mod__icon .dashicons {
 		font-size: 17px;
 		width: 17px;

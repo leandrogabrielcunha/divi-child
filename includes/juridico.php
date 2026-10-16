@@ -537,10 +537,11 @@ function setceb_sol_listar( $args = array() ) {
  *     @type int    $por_pagina Itens por pagina.
  * }
  * @return array {
- *     @type array[] $itens   Objetos de setceb_sol_obter() da pagina.
- *     @type int     $total   Total de solicitacoes que atendem ao filtro.
- *     @type int     $paginas Quantidade total de paginas.
- *     @type int     $pagina  Pagina atual.
+ *     @type array[] $itens      Objetos de setceb_sol_obter() da pagina.
+ *     @type int     $total      Total de solicitacoes que atendem ao filtro.
+ *     @type int     $paginas    Quantidade total de paginas.
+ *     @type int     $pagina     Pagina atual.
+ *     @type int     $por_pagina Itens por pagina aplicados nesta consulta.
  * }
  */
 function setceb_sol_listagem_admin( $args = array() ) {
@@ -623,10 +624,11 @@ function setceb_sol_listagem_admin( $args = array() ) {
 	}
 
 	return array(
-		'itens'   => $itens,
-		'total'   => (int) $query->found_posts,
-		'paginas' => (int) $query->max_num_pages,
-		'pagina'  => $pagina,
+		'itens'      => $itens,
+		'total'      => (int) $query->found_posts,
+		'paginas'    => (int) $query->max_num_pages,
+		'pagina'     => $pagina,
+		'por_pagina' => $por_pagina,
 	);
 }
 
