@@ -1450,6 +1450,10 @@ function setceb_sol_column_content( $coluna, $post_id ) {
 
 			echo esc_html( '' !== $nome ? $nome : '—' );
 			break;
+
+		case 'data':
+			echo esc_html( setceb_sol_data( $solicitacao['data'] ) );
+			break;
 	}
 }
 add_action( 'manage_' . SETCEB_SOL_CPT . '_posts_custom_column', 'setceb_sol_column_content', 10, 2 );
