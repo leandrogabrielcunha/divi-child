@@ -203,8 +203,8 @@ function setceb_sol_status() {
 			'mensagens' => true,
 		),
 		'em_analise'           => array(
-			'rotulo'      => 'Em analise',
-			'rotulo_curto' => 'Analise',
+			'rotulo'      => 'Em análise',
+			'rotulo_curto' => 'Análise',
 			'icone'     => 'dashicons-hourglass',
 			'cor'       => '#0d8199',
 			'ativo'     => true,
@@ -314,36 +314,36 @@ function setceb_sol_status_info( $slug ) {
  * Registra o post type das solicitacoes juridicas.
  */
 function setceb_sol_register_cpt() {
-	$rotulo = 'Solicitacoes Juridicas';
+	$rotulo = 'Solicitações Jurídicas';
 
 	/* O menu de nivel superior do modulo se chama "Juridico" e a
 	   listagem e o primeiro submenu dele. Sao dois rotulos distintos de
 	   proposito: com os dois iguais, "Juridico > Solicitacoes Juridicas"
 	   e o proprio item de topo pareciam dois menus. */
-	$rotulo_menu = 'Juridico';
-	$rotulo_lista = 'Solicitacoes';
+	$rotulo_menu = 'Jurídico';
+	$rotulo_lista = 'Solicitações';
 
 	register_post_type(
 		SETCEB_SOL_CPT,
 		array(
 			'labels'          => array(
 				'name'                  => $rotulo,
-				'singular_name'         => 'Solicitacao Juridica',
+				'singular_name'         => 'Solicitação Jurídica',
 				'menu_name'             => $rotulo_menu,
-				'name_admin_bar'        => 'Solicitacao Juridica',
-				'add_new'               => 'Nova Solicitacao',
-				'add_new_item'          => 'Registrar Solicitacao',
-				'new_item'              => 'Nova Solicitacao',
-				'edit_item'             => 'Atender Solicitacao',
-				'view_item'             => 'Ver Solicitacao',
+				'name_admin_bar'        => 'Solicitação Jurídica',
+				'add_new'               => 'Nova Solicitação',
+				'add_new_item'          => 'Registrar Solicitação',
+				'new_item'              => 'Nova Solicitação',
+				'edit_item'             => 'Atender Solicitação',
+				'view_item'             => 'Ver Solicitação',
 				'search_items'          => 'Buscar em ' . $rotulo,
-				'not_found'             => 'Nenhuma solicitacao registrada.',
-				'not_found_in_trash'    => 'Nenhuma solicitacao na lixeira.',
+				'not_found'             => 'Nenhuma solicitação registrada.',
+				'not_found_in_trash'    => 'Nenhuma solicitação na lixeira.',
 				'all_items'             => $rotulo_lista,
 				'featured_image'        => '',
-				'items_list'            => 'Solicitacoes',
-				'item_published'        => 'Solicitacao registrada.',
-				'item_updated'          => 'Solicitacao atualizada.',
+				'items_list'            => 'Solicitações',
+				'item_published'        => 'Solicitação registrada.',
+				'item_updated'          => 'Solicitação atualizada.',
 			),
 			'public'          => false,
 			'show_ui'         => true,
@@ -722,7 +722,7 @@ function setceb_sol_render_conversa( $post_id ) {
 	$historico = setceb_sol_historico( $post_id, false );
 
 	if ( empty( $historico ) ) {
-		return '<p class="setceb-sol-vazio">Nenhuma interacao registrada.</p>';
+		return '<p class="setceb-sol-vazio">Nenhuma interação registrada.</p>';
 	}
 
 	$html = '<ol class="setceb-sol-timeline setceb-sol-timeline--leitura">';
@@ -767,7 +767,7 @@ function setceb_sol_ajax_conversa() {
 
 	if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
 		wp_send_json_error(
-			array( 'mensagem' => 'Sem permissao para ver esta solicitacao.' ),
+			array( 'mensagem' => 'Sem permissão para ver esta solicitação.' ),
 			403
 		);
 	}
@@ -777,7 +777,7 @@ function setceb_sol_ajax_conversa() {
 	$post = get_post( $post_id );
 
 	if ( ! $post || SETCEB_SOL_CPT !== $post->post_type ) {
-		wp_send_json_error( array( 'mensagem' => 'Solicitacao nao encontrada.' ), 404 );
+		wp_send_json_error( array( 'mensagem' => 'Solicitação não encontrada.' ), 404 );
 	}
 
 	$solicitacao = setceb_sol_obter( $post_id );
@@ -839,10 +839,10 @@ function setceb_sol_historico_rotulos() {
 	return apply_filters(
 		'setceb_sol_historico_rotulos',
 		array(
-			'abertura' => array( 'rotulo' => 'Solicitacao registrada', 'icone' => 'dashicons-marker' ),
+			'abertura' => array( 'rotulo' => 'Solicitação registrada', 'icone' => 'dashicons-marker' ),
 			'mensagem' => array( 'rotulo' => 'Mensagem do associado', 'icone' => 'dashicons-format-chat' ),
-			'resposta' => array( 'rotulo' => 'Resposta do juridico', 'icone' => 'dashicons-email-alt' ),
-			'status'   => array( 'rotulo' => 'Atualizacao de status', 'icone' => 'dashicons-update' ),
+			'resposta' => array( 'rotulo' => 'Resposta do jurídico', 'icone' => 'dashicons-email-alt' ),
+			'status'   => array( 'rotulo' => 'Atualização de status', 'icone' => 'dashicons-update' ),
 		)
 	);
 }
@@ -920,22 +920,22 @@ function setceb_sol_tempo_relativo( $data ) {
 	if ( $segundos < HOUR_IN_SECONDS ) {
 		$minutos = max( 1, (int) round( $segundos / MINUTE_IN_SECONDS ) );
 
-		return sprintf( 'ha %d %s', $minutos, 1 === $minutos ? 'minuto' : 'minutos' );
+		return sprintf( 'há %d %s', $minutos, 1 === $minutos ? 'minuto' : 'minutos' );
 	}
 
 	if ( $segundos < DAY_IN_SECONDS ) {
 		$horas = (int) round( $segundos / HOUR_IN_SECONDS );
 
-		return sprintf( 'ha %d %s', $horas, 1 === $horas ? 'hora' : 'horas' );
+		return sprintf( 'há %d %s', $horas, 1 === $horas ? 'hora' : 'horas' );
 	}
 
 	$dias = (int) floor( $segundos / DAY_IN_SECONDS );
 
 	if ( $dias < 30 ) {
-		return sprintf( 'ha %d %s', $dias, 1 === $dias ? 'dia' : 'dias' );
+		return sprintf( 'há %d %s', $dias, 1 === $dias ? 'dia' : 'dias' );
 	}
 
-	return sprintf( 'ha %d %s', (int) floor( $dias / 30 ), (int) floor( $dias / 30 ) > 1 ? 'meses' : 'mes' );
+	return sprintf( 'há %d %s', (int) floor( $dias / 30 ), (int) floor( $dias / 30 ) > 1 ? 'meses' : 'mes' );
 }
 
 /**
@@ -1010,7 +1010,7 @@ function setceb_sol_meta_boxes() {
 
 	add_meta_box(
 		'setceb_sol_historico',
-		'Historico',
+		'Histórico',
 		'setceb_sol_meta_box_historico',
 		SETCEB_SOL_CPT,
 		'side',
@@ -1045,7 +1045,7 @@ function setceb_sol_meta_box_atendimento( $post ) {
 	// depois de uma resposta anterior.
 	$placeholder = $solicitacao['mensagens']
 		? 'Escreva a resposta para ' . $solicitacao['nome'] . '...'
-		: 'Este atendimento esta fechado para novas respostas. Altere o status para responder.';
+		: 'Este atendimento está fechado para novas respostas. Altere o status para responder.';
 	?>
 	<div class="setceb-sol-cabecalho" style="--setceb-sol-cor:<?php echo esc_attr( $info['cor'] ); ?>">
 		<div class="setceb-sol-cabecalho__topo">
@@ -1079,7 +1079,7 @@ function setceb_sol_meta_box_atendimento( $post ) {
 	<div class="setceb-sol-pergunta setceb-sol-pergunta--destaque">
 		<span class="setceb-sol-pergunta__tag">
 			<span class="dashicons dashicons-format-quote" aria-hidden="true"></span>
-			Solicitacao de <?php echo esc_html( $solicitacao['nome'] ); ?>
+			Solicitação de <?php echo esc_html( $solicitacao['nome'] ); ?>
 		</span>
 		<div class="setceb-sol-pergunta__texto"><?php echo nl2br( esc_html( $solicitacao['mensagem'] ) ); ?></div>
 	</div>
@@ -1117,13 +1117,13 @@ function setceb_sol_meta_box_atendimento( $post ) {
 			<?php if ( ! setceb_sol_usuario_restrito() ) : ?>
 				<div class="setceb-sol-bloco__campo">
 					<label for="setceb-sol-advogado">
-						<span class="setceb-sol-bloco__titulo">Advogado responsavel</span>
-						<span class="setceb-sol-bloco__dica">Quem recebe os avisos desta solicitacao.</span>
+						<span class="setceb-sol-bloco__titulo">Advogado responsável</span>
+						<span class="setceb-sol-bloco__dica">Quem recebe os avisos desta solicitação.</span>
 					</label>
 					<select id="setceb-sol-advogado" name="setceb_sol_advogado">
 						<?php /* Com padrao definido nao existe "sem responsavel". */ ?>
 						<?php if ( ! setceb_sol_advogado_padrao_id() ) : ?>
-							<option value="0" <?php selected( 0, $advogado ); ?>>Nao atribuido</option>
+							<option value="0" <?php selected( 0, $advogado ); ?>>Não atribuído</option>
 						<?php endif; ?>
 						<?php foreach ( setceb_sol_advogados() as $adv ) : ?>
 							<option value="<?php echo (int) $adv->ID; ?>" <?php selected( $advogado, $adv->ID ); ?>><?php echo esc_html( $adv->display_name ); ?></option>
@@ -1134,8 +1134,8 @@ function setceb_sol_meta_box_atendimento( $post ) {
 
 			<div class="setceb-sol-bloco__campo">
 				<label for="setceb-sol-titulo">
-					<span class="setceb-sol-bloco__titulo">Titulo interno</span>
-					<span class="setceb-sol-bloco__dica">Aparece so na listagem do painel. O padrao e os primeiros caracteres da solicitacao.</span>
+					<span class="setceb-sol-bloco__titulo">Título interno</span>
+					<span class="setceb-sol-bloco__dica">Título da conversa, da coluna “Solicitação” da listagem e do Dashboard. O padrão são os primeiros caracteres da solicitação.</span>
 				</label>
 				<input type="text" id="setceb-sol-titulo" name="post_title" value="<?php echo esc_attr( $post->post_title ); ?>">
 			</div>
@@ -1207,7 +1207,7 @@ function setceb_sol_meta_box_solicitante( $post ) {
 			<?php if ( ! $solicitacao['usuario_id'] ) : ?>
 				<li>
 					<span class="dashicons dashicons-warning" aria-hidden="true"></span>
-					Conta de associado nao encontrada
+					Conta de associado não encontrada
 				</li>
 			<?php endif; ?>
 		</ul>
@@ -1224,7 +1224,7 @@ function setceb_sol_meta_box_historico( $post ) {
 	$historico = setceb_sol_historico( $post->ID, false );
 
 	if ( empty( $historico ) ) {
-		echo '<p class="description">Nenhuma interacao registrada.</p>';
+		echo '<p class="description">Nenhuma interação registrada.</p>';
 		return;
 	}
 	?>
@@ -1385,12 +1385,12 @@ function setceb_sol_atendimento_save( $post_id ) {
 	if ( $advogado !== $antes['advogado_id'] ) {
 		update_post_meta( $post_id, '_setceb_sol_advogado', $advogado );
 
-		$nome = $advogado ? get_the_author_meta( 'display_name', $advogado ) : 'nao atribuido';
+		$nome = $advogado ? get_the_author_meta( 'display_name', $advogado ) : 'não atribuído';
 
 		setceb_sol_historico_add(
 			$post_id,
 			'status',
-			'Advogado responsavel: ' . $nome . '.',
+			'Advogado responsável: ' . $nome . '.',
 			$usuario_id,
 			true
 		);
@@ -1438,7 +1438,7 @@ function setceb_sol_columns( $cols ) {
 		$data['cb'] = $cols['cb'];
 	}
 
-	$data['title']       = 'Solicitacao';
+	$data['title']       = 'Solicitação';
 	$data['status']      = 'Status';
 	$data['solicitante'] = 'Solicitante';
 	$data['advogado']    = 'Advogado';
@@ -1863,7 +1863,7 @@ function setceb_sol_url_conversa( $post_id ) {
  */
 function setceb_sol_email_identificacao( $solicitacao ) {
 	return array(
-		'Solicitacao: ' . $solicitacao['protocolo'] . ' - ' . $solicitacao['titulo'],
+		'Solicitação: ' . $solicitacao['protocolo'] . ' - ' . $solicitacao['titulo'],
 		'Solicitante: ' . $solicitacao['nome'],
 		'E-mail: ' . $solicitacao['email'],
 		'' !== $solicitacao['telefone'] ? 'Telefone: ' . $solicitacao['telefone'] : null,
@@ -1923,7 +1923,7 @@ function setceb_sol_email_nova_solicitacao( $post_id ) {
 		setceb_sol_historico_add(
 			$post_id,
 			'status',
-			'[SETCEB] Nenhum advogado cadastrado. A notificacao foi enviada para o endereco administrativo.',
+			'[SETCEB] Nenhum advogado cadastrado. A notificação foi enviada para o endereço administrativo.',
 			0,
 			true
 		);
@@ -2285,7 +2285,7 @@ function setceb_sol_criar( $dados, $usuario_id ) {
 	setceb_sol_historico_add(
 		$post_id,
 		'abertura',
-		'Solicitacao registrada pela Area do Associado.',
+		'Solicitação registrada pela Área do Associado.',
 		$usuario_id
 	);
 
@@ -2293,7 +2293,7 @@ function setceb_sol_criar( $dados, $usuario_id ) {
 		setceb_sol_historico_add(
 			$post_id,
 			'status',
-			'Atribuida a ' . get_the_author_meta( 'display_name', $advogado ) . '.',
+			'Atribuída a ' . get_the_author_meta( 'display_name', $advogado ) . '.',
 			$usuario_id,
 			true
 		);
@@ -2846,7 +2846,7 @@ function setceb_sol_remover_advogado( $user_id ) {
  */
 function setceb_sol_submenus( $listagem ) {
 	$obj = get_post_type_object( SETCEB_SOL_CPT );
-	$rotulo = ( $obj && ! empty( $obj->labels->all_items ) ) ? $obj->labels->all_items : 'Solicitacoes';
+	$rotulo = ( $obj && ! empty( $obj->labels->all_items ) ) ? $obj->labels->all_items : 'Solicitações';
 	$cap    = ( $obj && ! empty( $obj->cap->edit_posts ) ) ? $obj->cap->edit_posts : SETCEB_SOL_CAP;
 
 	/* A listagem entra aqui, e nao fica por conta do core.
@@ -2863,7 +2863,7 @@ function setceb_sol_submenus( $listagem ) {
 
 	add_submenu_page(
 		$listagem,
-		'Dashboard Juridico',
+		'Dashboard Jurídico',
 		'Dashboard',
 		'manage_options',
 		setceb_sol_dashboard_slug(),
@@ -3055,16 +3055,16 @@ function setceb_sol_filtro_periodo( $post_type ) {
 
 	$periodo = setceb_sol_periodo_url();
 	?>
-	<label class="screen-reader-text" for="sol_de">Solicitacoes a partir de</label>
+	<label class="screen-reader-text" for="sol_de">Solicitações a partir de</label>
 	<input type="date" id="sol_de" name="sol_de" class="setceb-sol-periodo"
 		value="<?php echo esc_attr( $periodo['de'] ); ?>" title="A partir de">
 
-	<label class="screen-reader-text" for="sol_ate">Solicitacoes ate</label>
+	<label class="screen-reader-text" for="sol_ate">Solicitações até</label>
 	<input type="date" id="sol_ate" name="sol_ate" class="setceb-sol-periodo"
-		value="<?php echo esc_attr( $periodo['ate'] ); ?>" title="Ate">
+		value="<?php echo esc_attr( $periodo['ate'] ); ?>" title="Até">
 
 	<?php if ( '' !== $periodo['de'] || '' !== $periodo['ate'] ) : ?>
-		<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=' . SETCEB_SOL_CPT ) ); ?>">Limpar periodo</a>
+		<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=' . SETCEB_SOL_CPT ) ); ?>">Limpar período</a>
 	<?php endif; ?>
 	<?php
 }
@@ -3204,7 +3204,7 @@ function setceb_sol_indicadores() {
 	}
 
 	foreach ( $por_adv as $chave => $dados ) {
-		$por_adv[ $chave ]['nome'] = isset( $nomes[ $chave ] ) ? $nomes[ $chave ] : 'Sem responsavel';
+		$por_adv[ $chave ]['nome'] = isset( $nomes[ $chave ] ) ? $nomes[ $chave ] : 'Sem responsável';
 	}
 
 	uasort(
@@ -3262,17 +3262,17 @@ function setceb_sol_pagina_dashboard() {
 	);
 	?>
 	<div class="wrap setceb-sol-wrap">
-		<h1 class="wp-heading-inline">Solicitacoes Juridicas</h1>
+		<h1 class="wp-heading-inline">Solicitações Jurídicas</h1>
 		<hr class="wp-header-end">
 
 		<p class="setceb-sol-subtitulo">
-			Acompanhamento dos atendimentos da Assessoria Juridica.
+			Acompanhamento dos atendimentos da Assessoria Jurídica.
 		</p>
 
 		<div class="setceb-sol-cards">
 			<div class="setceb-sol-card setceb-sol-card--destaque">
 				<span class="setceb-sol-card__numero"><?php echo (int) $dados['total']; ?></span>
-				<span class="setceb-sol-card__rotulo">Solicitacoes registradas</span>
+				<span class="setceb-sol-card__rotulo">Solicitações registradas</span>
 			</div>
 			<div class="setceb-sol-card">
 				<span class="setceb-sol-card__numero"><?php echo (int) $dados['abertas']; ?></span>
@@ -3294,7 +3294,7 @@ function setceb_sol_pagina_dashboard() {
 
 		<div class="setceb-sol-colunas">
 			<div class="setceb-sol-box">
-				<h2>Distribuicao por status</h2>
+				<h2>Distribuição por status</h2>
 				<ul class="setceb-sol-barras">
 					<?php foreach ( $status as $slug => $info ) : ?>
 						<?php
@@ -3320,7 +3320,7 @@ function setceb_sol_pagina_dashboard() {
 			<div class="setceb-sol-box">
 				<h2>Atendimentos por advogado</h2>
 				<?php if ( empty( $dados['por_advogado'] ) ) : ?>
-					<p class="description">Nenhuma solicitacao registrada.</p>
+					<p class="description">Nenhuma solicitação registrada.</p>
 				<?php else : ?>
 					<table class="widefat striped">
 						<thead>
@@ -3329,7 +3329,7 @@ function setceb_sol_pagina_dashboard() {
 								<th class="setceb-sol-num">Total</th>
 								<th class="setceb-sol-num">Em aberto</th>
 								<th class="setceb-sol-num">Respondidas</th>
-								<th>Ultima</th>
+								<th>Última</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -3355,7 +3355,7 @@ function setceb_sol_pagina_dashboard() {
 		</div>
 
 <div class="setceb-sol-box setceb-sol-box--lista">
-			<h2>Todas as solicitacoes</h2>
+			<h2>Todas as solicitações</h2>
 
 			<form class="setceb-sol-filtros" method="get">
 				<input type="hidden" name="post_type" value="<?php echo esc_attr( SETCEB_SOL_CPT ); ?>">
@@ -3375,7 +3375,7 @@ function setceb_sol_pagina_dashboard() {
 
 				<label class="setceb-sol-filtros__campo setceb-sol-filtros__campo--busca">
 					<span>Buscar</span>
-					<input type="search" name="s" value="<?php echo esc_attr( $sol_filtro_busca ); ?>" placeholder="Protocolo, titulo, nome ou e-mail">
+					<input type="search" name="s" value="<?php echo esc_attr( $sol_filtro_busca ); ?>" placeholder="Protocolo, título, nome ou e-mail">
 				</label>
 
 				<button type="submit" class="button">Filtrar</button>
@@ -3388,7 +3388,7 @@ function setceb_sol_pagina_dashboard() {
 			<p class="setceb-sol-contagem">
 				<?php
 				printf(
-					'%d solicitacao%s encontrada%s',
+					'%d solicitação%s encontrada%s',
 					(int) $sol_lista['total'],
 					1 === (int) $sol_lista['total'] ? '' : 's',
 					(int) $sol_lista['total'] > (int) $sol_lista['por_pagina'] ? 's' : ''
@@ -3400,7 +3400,7 @@ function setceb_sol_pagina_dashboard() {
 			</p>
 
 			<?php if ( empty( $sol_lista['itens'] ) ) : ?>
-				<p class="description">Nenhuma solicitacao encontrada com esses filtros.</p>
+				<p class="description">Nenhuma solicitação encontrada com esses filtros.</p>
 			<?php else : ?>
 				<table class="widefat striped setceb-sol-lista" data-nonce="<?php echo esc_attr( wp_create_nonce( 'setceb_sol_conversa' ) ); ?>">
 					<thead>
@@ -3470,7 +3470,7 @@ function setceb_sol_pagina_dashboard() {
 									'total'     => (int) $sol_lista['paginas'],
 									'type'      => 'plain',
 									'prev_text' => '&laquo; Anteriores',
-									'next_text' => 'Proximas &raquo;',
+									'next_text' => 'Próximas &raquo;',
 								)
 							)
 						);
@@ -3533,7 +3533,7 @@ function setceb_sol_pagina_advogados() {
 			if ( is_wp_error( $resultado ) ) {
 				$avisos[] = array( 'erro', $resultado->get_error_message() );
 			} else {
-				$avisos[] = array( 'ok', 'Advogado cadastrado com sucesso. Ele ja pode entrar no painel e ver apenas as solicitacoes juridicas.' );
+				$avisos[] = array( 'ok', 'Advogado cadastrado com sucesso. Ele já pode entrar no painel e ver apenas as solicitações jurídicas.' );
 			}
 		}
 
@@ -3542,7 +3542,7 @@ function setceb_sol_pagina_advogados() {
 
 			if ( setceb_is_advogado( $user_id ) ) {
 				update_option( 'setceb_sol_advogado_padrao', $user_id );
-				$avisos[] = array( 'ok', 'Advogado definido como responsavel padrao. As novas solicitacoes passam a ser atribuidas a ele.' );
+				$avisos[] = array( 'ok', 'Advogado definido como responsável padrão. As novas solicitações passam a ser atribuídas a ele.' );
 			}
 		}
 
@@ -3550,9 +3550,9 @@ function setceb_sol_pagina_advogados() {
 			$user_id = isset( $_POST['setceb_sol_user'] ) ? absint( wp_unslash( $_POST['setceb_sol_user'] ) ) : 0;
 
 			if ( setceb_sol_remover_advogado( $user_id ) ) {
-				$avisos[] = array( 'ok', 'Perfil de advogado removido do usuario.' );
+				$avisos[] = array( 'ok', 'Perfil de advogado removido do usuário.' );
 			} else {
-				$avisos[] = array( 'erro', 'Nao foi possivel remover o perfil deste usuario.' );
+				$avisos[] = array( 'erro', 'Não foi possível remover o perfil deste usuário.' );
 			}
 		}
 	}
@@ -3564,8 +3564,8 @@ function setceb_sol_pagina_advogados() {
 		<h1>Advogados</h1>
 
 		<p class="setceb-sol-subtitulo">
-			Cadastre a equipe juridica. O perfil <strong>Advogado</strong> da acesso
-			exclusivo ao menu de Solicitacoes Juridicas no painel.
+			Cadastre a equipe jurídica. O perfil <strong>Advogado</strong> dá acesso
+			exclusivo ao menu de Solicitações Jurídicas no painel.
 		</p>
 
 		<?php foreach ( $avisos as $aviso ) : ?>
@@ -3591,7 +3591,7 @@ function setceb_sol_pagina_advogados() {
 								<th scope="row"><label for="setceb-adv-email">E-mail (login)</label></th>
 								<td>
 									<input type="email" id="setceb-adv-email" name="setceb_sol_email" class="regular-text" required>
-									<p class="description">Se ja existir um usuario com este e-mail, ele e convertido em advogado.</p>
+									<p class="description">Se já existir um usuário com este e-mail, ele é convertido em advogado.</p>
 								</td>
 							</tr>
 							<tr>
@@ -3619,9 +3619,9 @@ function setceb_sol_pagina_advogados() {
 			</div>
 
 			<div class="setceb-sol-box">
-				<h2>Equipe juridica cadastrada</h2>
+				<h2>Equipe jurídica cadastrada</h2>
 				<?php if ( empty( $advogados ) ) : ?>
-					<p class="description">Nenhum advogado cadastrado. As solicitacoes serao notificadas no endereco administrativo.</p>
+					<p class="description">Nenhum advogado cadastrado. As solicitações serão notificadas no endereço administrativo.</p>
 				<?php else : ?>
 					<table class="widefat striped">
 						<thead>
@@ -3642,7 +3642,7 @@ function setceb_sol_pagina_advogados() {
 									<td>
 										<strong><?php echo esc_html( $advogado->display_name ); ?></strong>
 										<?php if ( $eh_padrao ) : ?>
-											<span class="setceb-sol-tag">Responsavel padrao</span>
+											<span class="setceb-sol-tag">Responsável padrão</span>
 										<?php endif; ?>
 										<?php if ( '' !== $oab ) : ?>
 											<br><span class="description"><?php echo esc_html( $oab ); ?></span>
@@ -3660,7 +3660,7 @@ function setceb_sol_pagina_advogados() {
 												<?php wp_nonce_field( 'setceb_sol_advogados' ); ?>
 												<input type="hidden" name="setceb_sol_acao" value="padrao">
 												<input type="hidden" name="setceb_sol_user" value="<?php echo (int) $advogado->ID; ?>">
-												<button type="submit" class="button button-small">Tornar padrao</button>
+												<button type="submit" class="button button-small">Tornar padrão</button>
 											</form>
 										<?php endif; ?>
 										<form method="post" action="<?php echo esc_url( setceb_sol_advogados_url() ); ?>" class="setceb-sol-inline-form">
