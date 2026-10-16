@@ -311,18 +311,6 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 							</details>
 						</nav>
 
-						<!-- Atendimento -->
-						<div class="assoc-help">
-							<span class="dashicons dashicons-sos assoc-help__icon" aria-hidden="true"></span>
-							<div class="assoc-help__body">
-								<h2 class="assoc-help__title">Precisa de ajuda?</h2>
-								<p class="assoc-help__text">A equipe do SETCEB está disponível para atender você.</p>
-							</div>
-							<button type="button" class="assoc-help__btn" data-open-panel="fale-conosco">
-								Falar com atendimento
-								<span class="dashicons dashicons-arrow-right-alt2" aria-hidden="true"></span>
-							</button>
-						</div>
 					</aside>
 
 					<div class="assoc-main">
@@ -345,7 +333,6 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 											<span class="assoc-quick__icon"><span class="dashicons <?php echo esc_attr( $quick['icone'] ); ?>" aria-hidden="true"></span></span>
 											<span class="assoc-quick__title"><?php echo esc_html( $quick['rotulo'] ); ?></span>
 											<span class="assoc-quick__desc"><?php echo esc_html( $quick['desc'] ); ?></span>
-											<span class="dashicons dashicons-arrow-right-alt2 assoc-quick__arrow" aria-hidden="true"></span>
 										</button>
 										<?php $quick_primeiro = false; ?>
 									<?php endforeach; ?>

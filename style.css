@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.46.1
+Version: 1.46.2
 Template: Divi
 */
 
@@ -1599,9 +1599,7 @@ via fonte Dashicons.
 	margin-bottom: 20px;
 	padding: 18px 20px 20px;
 	color: #fff;
-	background:
-		radial-gradient(circle at 92% 12%, rgba(31, 183, 201, 0.4) 0, rgba(31, 183, 201, 0) 45%),
-		linear-gradient(120deg, var(--setceb-blue) 0%, #17457f 65%, var(--setceb-accent-deep) 100%);
+	background: #173459;
 	border-radius: 18px;
 	box-shadow: 0 10px 26px rgba(18, 61, 115, 0.2);
 }
@@ -1704,15 +1702,15 @@ via fonte Dashicons.
 .assoc-quick {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
-	gap: 16px;
+	gap: 12px;
 }
 
 .assoc-quick__card {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
-	min-height: 150px;
-	padding: 18px;
+	min-height: 120px;
+	padding: 14px;
 	font-family: inherit;
 	text-align: left;
 	background: #fff;
@@ -1769,7 +1767,7 @@ via fonte Dashicons.
 }
 
 .assoc-quick__card--pri {
-	background: linear-gradient(150deg, var(--setceb-accent) 0%, var(--setceb-accent-deep) 100%);
+	background: #0d8199;
 	border-color: transparent;
 	box-shadow: 0 12px 26px rgba(8, 90, 109, 0.24);
 }
@@ -2297,7 +2295,18 @@ via fonte Dashicons.
 	}
 }
 
+@media (max-width: 1024px) {
+	.assoc-sidebar {
+		display: none;
+	}
+}
+
 @media (max-width: 700px) {
+	.assoc-quick {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 10px;
+	}
+
 	.assoc-toolbar {
 		flex-direction: column;
 		align-items: stretch;
