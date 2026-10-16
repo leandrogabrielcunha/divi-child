@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.47.2
+Version: 1.47.3
 Template: Divi
 */
 
@@ -2398,6 +2398,49 @@ via fonte Dashicons.
 
 @media (max-width: 1024px) {
 	.assoc-sidebar {
+		display: none;
+	}
+}
+
+@media (max-width: 359px) {
+	/* Telas muito estreitas (320px): o icone do modulo e o icone de
+	   calendario disputam espaco com o TITULO, que e a unica informacao
+	   que o usuario precisa ler ali. Medido: em 320px 'Relatorios' e
+	   'Planilhas' ficavam com 47px de largura e apareciam como
+	   'Relat...' - o titulo perde para o decorativo. */
+	.assoc-mod {
+		gap: 8px;
+		padding: 7px 8px;
+	}
+
+	/* O icone do modulo e decorativo. Em 320px ele comia ~30px que o
+	   titulo precisa - e o titulo e a unica informacao util ali. */
+	.assoc-mod__icon {
+		display: none;
+	}
+
+	.assoc-mod__main {
+		gap: 7px;
+	}
+
+	.assoc-mod__title {
+		font-size: 15px;
+	}
+
+	.assoc-mod__back {
+		padding: 0 8px;
+		font-size: 13px;
+	}
+
+	/* O filtro de ano mostra so "2026 v"; o calendario e redundante
+	   quando o proprio titulo esta em risco de corte. */
+	.assoc-year__btn {
+		gap: 5px;
+		padding: 0 8px;
+		font-size: 14px;
+	}
+
+	.assoc-year__btn .dashicons-calendar-alt {
 		display: none;
 	}
 }
