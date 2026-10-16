@@ -360,7 +360,7 @@
 	 * ============================================================ */
 	var solLinks = qsa('[data-sol-link]');
 	var solPanes = qsa('[data-sol-pane]');
-	var solNovaLink = root.querySelector('[data-sol-nova]');
+	var solNovaLinks = qsa('[data-sol-nova]');
 	var solBox = root.querySelector('.assoc-sol');
 
 	function activateSolicitacao(id, options) {
@@ -381,11 +381,11 @@
 			link.setAttribute('aria-current', ativo ? 'true' : 'false');
 		});
 
-		if (solNovaLink) {
+		solNovaLinks.forEach(function (link) {
 			var novaAtiva = 'nova' === alvo;
-			solNovaLink.classList.toggle('is-active', novaAtiva);
-			solNovaLink.setAttribute('aria-current', novaAtiva ? 'true' : 'false');
-		}
+			link.classList.toggle('is-active', novaAtiva);
+			link.setAttribute('aria-current', novaAtiva ? 'true' : 'false');
+		});
 
 		solPanes.forEach(function (pane) {
 			pane.hidden = pane.getAttribute('data-sol-pane') !== alvo;
@@ -428,10 +428,10 @@
 		});
 	});
 
-	if (solNovaLink) {
-		solNovaLink.addEventListener('click', function (event) {
+	solNovaLinks.forEach(function (link) {
+		link.addEventListener('click', function (event) {
 			var aberto = activateSolicitacao('nova', {
-				url: solNovaLink.getAttribute('href'),
+				url: link.getAttribute('href'),
 				scroll: true
 			});
 
@@ -440,7 +440,7 @@
 				event.preventDefault();
 			}
 		});
-	}
+	});
 
 	/* Voltar para as solicitacoes: so aparece no mobile, onde a lista fica
 	   oculta enquanto a conversa esta aberta. O href e real (?sol_lista=1),
@@ -589,10 +589,168 @@
 	});
 
 	/* ============================================================
+	 * Wizard da nova solicitacao (2 passos)
+	 *
+	 * Passo 1: assunto + duida. Passo 2: telefone/empresa (opcionais).
+	 * Sem JS os dois passos ficam visiveis e o formulario continua
+	 * funcionando como antes - o JS so assume o controle depois.
+	 * ============================================================ */
+	qsa('form[data-assoc-wizard]').forEach(function (form) {
+		var passos = qsa('[data-wizard-step]', form);
+		var barra = form.querySelector('[data-wizard-bar]');
+		var recap = form.querySelector('[data-wizard-recap]');
+		var btnAvancar = form.querySelector('[data-wizard-next]');
+		var btnVoltar = form.querySelector('[data-wizard-back]');
+
+		if (passos.length < 2 || !btnAvancar || !btnVoltar) {
+			return;
+		}
+
+		form.classList.add('is-wizard');
+
+		if (barra) {
+			barra.hidden = false;
+		}
+
+		function limparErro(chave) {
+			var el = form.querySelector('[data-wizard-error="' + chave + '"]');
+
+			if (el) {
+				el.hidden = true;
+			}
+		}
+
+		function mostrarErro(chave, texto) {
+			var el = form.querySelector('[data-wizard-error="' + chave + '"]');
+
+			if (!el) {
+				return;
+			}
+
+			el.textContent = texto;
+			el.hidden = false;
+		}
+
+		function validaPasso1(focar) {
+			var categoria = form.querySelector('[name="setceb_categoria"]:checked');
+			var mensagem = form.querySelector('[name="setceb_mensagem"]');
+			var texto = mensagem ? mensagem.value.trim() : '';
+			var ok = true;
+
+			if (categoria) {
+				limparErro('categoria');
+			} else {
+				mostrarErro('categoria', 'Escolha uma categoria para continuar.');
+				ok = false;
+			}
+
+			if (texto) {
+				limparErro('mensagem');
+			} else {
+				mostrarErro('mensagem', 'Escreva sua dúvida para continuar.');
+				ok = false;
+
+				if (focar && mensagem) {
+					mensagem.focus();
+				}
+			}
+
+			return ok;
+		}
+
+		function montaRecap() {
+			if (!recap) {
+				return;
+			}
+
+			var categoria = form.querySelector('[name="setceb_categoria"]:checked');
+			var mensagem = form.querySelector('[name="setceb_mensagem"]');
+			var rotulo = '';
+			var texto = mensagem ? mensagem.value.trim() : '';
+
+			if (categoria && categoria.closest('.assoc-cat')) {
+				var corpo = categoria.closest('.assoc-cat').querySelector('.assoc-cat__body');
+				rotulo = corpo ? corpo.textContent.trim() : '';
+			}
+
+			/* Montado com nos, nunca innerHTML: o texto vem do usuario. */
+			recap.textContent = '';
+
+			var titulo = document.createElement('strong');
+			titulo.textContent = rotulo || 'Sem categoria';
+			recap.appendChild(titulo);
+
+			recap.appendChild(
+				document.createTextNode(
+					texto.length > 160 ? texto.slice(0, 160) + '…' : texto
+				)
+			);
+
+			recap.hidden = false;
+		}
+
+		function vaiPara(passo) {
+			passos.forEach(function (step) {
+				step.hidden = String(step.getAttribute('data-wizard-step')) !== String(passo);
+			});
+
+			qsa('[data-wizard-dot]', form).forEach(function (ponto) {
+				var n = Number(ponto.getAttribute('data-wizard-dot'));
+
+				ponto.classList.toggle('is-current', n === passo);
+				ponto.classList.toggle('is-done', n < passo);
+			});
+
+			if (passo === 2) {
+				montaRecap();
+			}
+		}
+
+		btnAvancar.addEventListener('click', function () {
+			if (!validaPasso1(true)) {
+				return;
+			}
+
+			vaiPara(2);
+		});
+
+		btnVoltar.addEventListener('click', function () {
+			vaiPara(1);
+		});
+
+		/* Rede de seguranca: nunca enviar com o passo 1 invalido. */
+		form.addEventListener('submit', function (event) {
+			if (validaPasso1(false)) {
+				return;
+			}
+
+			event.preventDefault();
+
+			/* Exibe o passo 1 antes de focar: focar em elemento oculto
+			   nao funciona e o teclado do mobile nao abriria. */
+			vaiPara(1);
+
+			var mensagem = form.querySelector('[name="setceb_mensagem"]');
+
+			if (mensagem) {
+				mensagem.focus();
+			}
+		});
+
+		vaiPara(1);
+	});
+
+	/* ============================================================
 	 * Formularios: estado de envio (loading)
 	 * ============================================================ */
 	qsa('form[data-assoc-form]').forEach(function (form) {
-		form.addEventListener('submit', function () {
+		form.addEventListener('submit', function (event) {
+			/* Outro listener pode ter impedido o envio (validacao do
+			   wizard): nesse caso nao trava o botao em "Enviando...". */
+			if (event.defaultPrevented) {
+				return;
+			}
+
 			var button = form.querySelector('[type="submit"]');
 			var label = form.querySelector('.assoc-btn__label');
 

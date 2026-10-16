@@ -448,6 +448,24 @@ function setceb_sol_botao_voltar( $perfil_url ) {
 }
 
 /**
+ * Botao compacto "Nova" dentro do cabecalho da conversa.
+ *
+ * Sem ele o associado preso em uma conversa nao tem como iniciar outra
+ * no mobile, porque a coluna de solicitacoes fica oculta no modo detalhe.
+ *
+ * @param string $perfil_url URL da pagina de perfil do associado.
+ * @return string
+ */
+function setceb_sol_botao_nova( $perfil_url ) {
+	$url = add_query_arg( 'sol_nova', 1, $perfil_url ) . '#juridico';
+
+	return sprintf(
+		'<a class="assoc-sol__nova-mini" href="%1$s" data-sol-nova><span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span><span class="assoc-sol__nova-mini-label">Nova</span></a>',
+		esc_url( $url )
+	);
+}
+
+/**
  * Lista as solicitacoes de um associado (ou todas, para a equipe juridica).
  *
  * @param array $args {

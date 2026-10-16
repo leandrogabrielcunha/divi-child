@@ -707,7 +707,7 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 												</div>
 											</header>
 
-											<form class="assoc-form assoc-form--nova" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-assoc-form>
+<form class="assoc-form assoc-form--nova" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-assoc-form data-assoc-wizard>
 												<input type="hidden" name="action" value="setceb_juridico">
 												<?php wp_nonce_field( 'setceb_form_juridico' ); ?>
 
@@ -717,33 +717,68 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 
 												<input type="hidden" name="setceb_nome" value="<?php echo esc_attr( $user_name ); ?>">
 												<input type="hidden" name="setceb_email" value="<?php echo esc_attr( $user_email ); ?>">
-												<p class="assoc-form__field">
-													<label for="assoc-jur-categoria">Categoria <span aria-hidden="true">*</span></label>
-													<select id="assoc-jur-categoria" name="setceb_categoria" required>
-														<option value="">Selecione uma categoria</option>
-														<?php foreach ( $sol_categorias as $sol_cat_slug => $sol_cat_rotulo ) : ?>
-															<option value="<?php echo esc_attr( $sol_cat_slug ); ?>"><?php echo esc_html( $sol_cat_rotulo ); ?></option>
-														<?php endforeach; ?>
-													</select>
-												</p>
-												<p class="assoc-form__field">
-													<label for="assoc-jur-fone">Telefone</label>
-													<input type="tel" id="assoc-jur-fone" name="setceb_telefone" autocomplete="tel">
-												</p>
-												<p class="assoc-form__field">
-													<label for="assoc-jur-empresa">Empresa</label>
-													<input type="text" id="assoc-jur-empresa" name="setceb_empresa" autocomplete="organization">
-												</p>
 
-												<p class="assoc-form__field">
-													<label for="assoc-jur-msg">Sua dúvida <span aria-hidden="true">*</span></label>
-													<textarea id="assoc-jur-msg" name="setceb_mensagem" rows="5" required placeholder="Descreva sua dúvida para o assessor jurídico..."></textarea>
-												</p>
+												<div class="assoc-wizard">
 
-												<button type="submit" class="assoc-btn">
-													<span class="assoc-btn__label">Registrar solicitação</span>
-												</button>
-												<p class="assoc-form__note">Campos com <span aria-hidden="true">*</span> são obrigatórios.</p>
+													<ol class="assoc-wizard__bar" data-wizard-bar hidden>
+														<li class="assoc-wizard__bar-item" data-wizard-dot="1">
+															<span class="assoc-wizard__num" aria-hidden="true">1</span>
+															<span class="assoc-wizard__bar-label">Sua dúvida</span>
+														</li>
+														<li class="assoc-wizard__bar-item" data-wizard-dot="2">
+															<span class="assoc-wizard__num" aria-hidden="true">2</span>
+															<span class="assoc-wizard__bar-label">Seus dados</span>
+														</li>
+													</ol>
+
+													<?php /* Passo 1. Sem JS os dois passos aparecem (formulario unico). */ ?>
+													<section class="assoc-wizard__step" data-wizard-step="1">
+														<h4 class="assoc-wizard__title">Qual é o assunto?</h4>
+
+														<div class="assoc-cat-grid" role="radiogroup" aria-label="Categoria da solicitação">
+															<?php foreach ( $sol_categorias as $sol_cat_slug => $sol_cat_rotulo ) : ?>
+																<label class="assoc-cat">
+																	<input class="assoc-cat__input" type="radio" name="setceb_categoria" value="<?php echo esc_attr( $sol_cat_slug ); ?>">
+																	<span class="assoc-cat__body"><?php echo esc_html( $sol_cat_rotulo ); ?></span>
+																</label>
+															<?php endforeach; ?>
+														</div>
+														<p class="assoc-wizard__error" data-wizard-error="categoria" hidden>Escolha uma categoria para continuar.</p>
+
+														<p class="assoc-form__field">
+															<label for="assoc-jur-msg">Descreva sua dúvida <span aria-hidden="true">*</span></label>
+															<textarea id="assoc-jur-msg" name="setceb_mensagem" rows="6" aria-required="true" placeholder="Explique o que aconteceu. Se possivel, informe datas e os documentos envolvidos."></textarea>
+														</p>
+														<p class="assoc-wizard__error" data-wizard-error="mensagem" hidden>Escreva sua dúvida para continuar.</p>
+
+														<button type="button" class="assoc-btn assoc-btn--full" data-wizard-next>Continuar</button>
+													</section>
+
+													<?php /* Passo 2 */ ?>
+													<section class="assoc-wizard__step" data-wizard-step="2">
+														<h4 class="assoc-wizard__title">Seus dados <span class="assoc-wizard__opt">opcional</span></h4>
+
+														<div class="assoc-wizard__recap" data-wizard-recap hidden></div>
+
+														<p class="assoc-form__field">
+															<label for="assoc-jur-fone">Telefone</label>
+															<input type="tel" id="assoc-jur-fone" name="setceb_telefone" autocomplete="tel" inputmode="tel">
+														</p>
+														<p class="assoc-form__field">
+															<label for="assoc-jur-empresa">Empresa</label>
+															<input type="text" id="assoc-jur-empresa" name="setceb_empresa" autocomplete="organization">
+														</p>
+
+														<div class="assoc-wizard__actions">
+															<button type="button" class="assoc-btn assoc-btn--ghost" data-wizard-back>Voltar</button>
+															<button type="submit" class="assoc-btn">
+																	<span class="assoc-btn__label">Registrar solicitação</span>
+																</button>
+														</div>
+														<p class="assoc-form__note">Campos com <span aria-hidden="true">*</span> são obrigatórios.</p>
+													</section>
+
+												</div>
 											</form>
 										</article>
 
@@ -752,6 +787,7 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 											<article class="assoc-sol__pane" id="sol-pane-<?php echo (int) $sol['id']; ?>" data-sol-pane="<?php echo (int) $sol['id']; ?>" aria-labelledby="sol-tab-<?php echo (int) $sol['id']; ?>"<?php echo $sol_esta_ativa ? '' : ' hidden'; ?>>
 													<header class="assoc-sol__pane-head">
 														<?php echo setceb_sol_botao_voltar( $perfil_url ); ?>
+														<?php echo setceb_sol_botao_nova( $perfil_url ); ?>
 														<div class="assoc-sol__pane-heading">
 															<h3 class="assoc-sol__pane-title"><?php echo esc_html( $sol['titulo'] ); ?></h3>
 															<p class="assoc-sol__pane-meta">
