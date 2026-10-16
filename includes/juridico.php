@@ -147,6 +147,78 @@ function setceb_sol_sync_advogado_caps() {
 add_action( 'init', 'setceb_sol_sync_advogado_caps', 6 );
 
 /**
+ * Capacidades do modulo para o perfil administrador.
+ *
+ * O que o advogado precisa, mais a remocao: quem administra o modulo
+ * tambem apaga solicitacao. Criar continua bloqueado pela propria
+ * declaracao do post type ("create_posts" => "do_not_allow").
+ *
+ * Reaproveita setceb_sol_caps_advogado() em vez de repetir a lista: as
+ * duas se divergirem, o administrador e o advogado passam a enxergar
+ * coisas diferentes - e o sintoma disso e "no menu aparece, na tela nao".
+ *
+ * @return array<string,bool>
+ */
+function setceb_sol_caps_administrador() {
+	$cap = SETCEB_SOL_CAP;
+
+	return array_merge(
+		setceb_sol_caps_advogado(),
+		array(
+			'delete_' . $cap . 's'        => true,
+			'delete_others_' . $cap . 's' => true,
+		)
+	);
+}
+
+/**
+ * Da ao administrador as capacidades do modulo juridico.
+ *
+ * Bug de producao: o administrador recebia "Sorry, you are not allowed
+ * to access this page" ao abrir edit.php?post_type=setceb_solicitacao,
+ * e o item de topo nao aparecia no menu.
+ *
+ * A causa: o post type declara capability_type "setceb_sol", o que cria
+ * capacidades PRIMITIVAS proprias (edit_setceb_sols, read_setceb_sols).
+ * O WordPress so preenche o perfil administrador com capacidades que ele
+ * proprio conhece; uma capacidade customizada precisa ser concedida na
+ * mao. O perfil "advogado" recebia em setceb_sol_caps_advogado() - o
+ * administrador nao recebia de lugar nenhum.
+ *
+ * Sem "edit_setceb_sols", o core nega a listagem e remove o item do menu.
+ * Nao e o tema escondendo nada: e o core recusando a conta.
+ *
+ * Idempotente, como a sincronizacao do advogado: roda a cada requisicao
+ * e so acrescenta o que falta. Nao depende de numero de versao em option,
+ * porque uma instalacao que ja tivesse o valor antigo passaria a rodar
+ * com a lista negada para sempre.
+ */
+function setceb_sol_sync_administrador_caps() {
+	$role = get_role( 'administrator' );
+
+	if ( ! $role ) {
+		return;
+	}
+
+	foreach ( setceb_sol_caps_administrador() as $cap => $granted ) {
+		if ( ! $role->has_cap( $cap ) ) {
+			$role->add_cap( $cap );
+		}
+	}
+
+	// As meta capabilities continuam fora: com map_meta_cap ativo o core
+	// traduz edit_post/read_post/delete_post sozinho, e conceder
+	// diretamente faz o WordPress emitir "_doing_it_wrong" em toda
+	// verificacao sem post especifico.
+	foreach ( setceb_sol_caps_proibidas() as $cap ) {
+		if ( $role->has_cap( $cap ) ) {
+			$role->remove_cap( $cap );
+		}
+	}
+}
+add_action( 'init', 'setceb_sol_sync_administrador_caps', 7 );
+
+/**
  * Verifica se o usuario pertence a equipe juridica.
  *
  * @param WP_User|int|null $user Usuario (padrao: atual).
