@@ -878,7 +878,7 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 											target="_blank" rel="noopener noreferrer">
 											<span class="assoc-quick__icon"><span class="dashicons <?php echo esc_attr( isset( $boleto_icons[ $boleto['icon'] ] ) ? $boleto_icons[ $boleto['icon'] ] : 'dashicons-media-document' ); ?>" aria-hidden="true"></span></span>
 											<span class="assoc-quick__title"><?php echo esc_html( $boleto['label'] ); ?></span>
-											<span class="assoc-quick__desc">Emitir boleto</span>
+											<span class="assoc-quick__desc"><?php echo esc_html( isset( $boleto['detalhe'] ) ? $boleto['detalhe'] : 'Emitir boleto' ); ?></span>
 										</a>
 									<?php endforeach; ?>
 								</div>

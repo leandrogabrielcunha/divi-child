@@ -270,25 +270,39 @@ function setceb_news_login_prompt() {
  *
  * @return array
  */
+/**
+ * Boletos disponiveis na Area do Associado.
+ *
+ * `label` e o titulo do card e `detalhe` e a linha de apoio. Os dois
+ * textos eram um so, e o unico era "Emissao de Boleto de CONTRIBUICAO
+ * ASSISTENCIAL" - dentro de um card de 3 colunas quebravam em tres
+ * linhas e deixavam os tres cards com alturas diferentes. O titulo
+ * curto cabe; a explicacao continua no detalhe, e nao se perde nada.
+ *
+ * @return array[]
+ */
 function setceb_boletos() {
 	return array(
 		array(
-			'id'    => 'mensalidade',
-			'label' => 'Emissão de boleto da mensalidade',
-			'url'   => 'https://setcebba.sindis.com.br/sindis/pub/process/BoletoContribuicao?ACAO=contribuicao&tipo=Social',
-			'icon'  => 'calendar',
+			'id'      => 'mensalidade',
+			'label'   => 'Mensalidade',
+			'detalhe' => 'Contribuição mensal do associado',
+			'url'     => 'https://setcebba.sindis.com.br/sindis/pub/process/BoletoContribuicao?ACAO=contribuicao&tipo=Social',
+			'icon'    => 'calendar',
 		),
 		array(
-			'id'    => 'assistencial',
-			'label' => 'Emissão de Boleto de CONTRIBUIÇÃO ASSISTENCIAL',
-			'url'   => 'https://setcebba.sindis.com.br/sindis/pub/process/BoletoContribuicao?ACAO=contribuicao&tipo=Confederativa',
-			'icon'  => 'heart',
+			'id'      => 'assistencial',
+			'label'   => 'Assistencial',
+			'detalhe' => 'Contribuição assistencial',
+			'url'     => 'https://setcebba.sindis.com.br/sindis/pub/process/BoletoContribuicao?ACAO=contribuicao&tipo=Confederativa',
+			'icon'    => 'heart',
 		),
 		array(
-			'id'    => 'sindical',
-			'label' => 'Emissão de Boleto de CONTRIBUIÇÃO SINDICAL',
-			'url'   => 'https://setcebba.sindis.com.br/sindis/pub/process/BoletoContribuicao',
-			'icon'  => 'users',
+			'id'      => 'sindical',
+			'label'   => 'Sindical',
+			'detalhe' => 'Contribuição sindical',
+			'url'     => 'https://setcebba.sindis.com.br/sindis/pub/process/BoletoContribuicao',
+			'icon'    => 'users',
 		),
 	);
 }
