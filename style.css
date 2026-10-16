@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.46.6
+Version: 1.46.7
 Template: Divi
 */
 
@@ -2233,6 +2233,10 @@ via fonte Dashicons.
 
 	.assoc-nav__toggle-label {
 		flex: 1;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.assoc-nav__toggle .dashicons {
@@ -2291,6 +2295,21 @@ via fonte Dashicons.
 		gap: 14px;
 	}
 
+	/* Chat em 100% da largura disponivel: nenhuma coluna com px fixo,
+	   nenhum min-width que estoure a tela. */
+	.assoc-sol,
+	.assoc-sol__side,
+	.assoc-sol__panes,
+	.assoc-sol__pane,
+	.assoc-sol__pane-head,
+	.assoc-thread,
+	.assoc-form--nova,
+	.assoc-form--resposta {
+		width: 100%;
+		min-width: 0;
+		max-width: 100%;
+	}
+
 	.assoc-sol__side,
 	.assoc-sol__pane {
 		border-radius: 14px;
@@ -2319,21 +2338,27 @@ via fonte Dashicons.
 		padding: 10px 12px;
 	}
 
-	.assoc-sol__voltar {
+	/* Alvos de toque de 44px: com 30px os botoes ficavam dificeis de
+	   acertar no celular (recomendacao Apple HIG / Material). */
+	.assoc-sol__voltar,
+	.assoc-sol__nova-mini {
 		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		padding: 0 14px 0 11px;
+		font-size: 13px;
+		border-radius: 999px;
+	}
+
+	.assoc-sol__voltar {
 		grid-area: voltar;
 		justify-self: start;
 		margin: 0;
-		padding: 6px 11px 6px 9px;
-		font-size: 12.5px;
 	}
 
 	.assoc-sol__nova-mini {
-		display: inline-flex;
 		grid-area: nova;
 		justify-self: end;
-		padding: 6px 11px 6px 9px;
-		font-size: 12.5px;
 	}
 
 	.assoc-sol__pane-heading {
@@ -2342,10 +2367,15 @@ via fonte Dashicons.
 		align-items: baseline;
 		gap: 8px;
 		min-width: 0;
+		padding-right: 2px;
 	}
 
+	/* min-width:0 e obrigatorio: item flex naso encolhe abaixo do
+	   conteudo (min-width:auto), o que faria o ellipsis nao funcionar e
+	   o titulo estourar a linha, empurrando o status para fora da tela. */
 	.assoc-sol__pane-title {
 		flex: 0 1 auto;
+		min-width: 0;
 		margin: 0;
 		font-size: 15px;
 		white-space: nowrap;
@@ -2354,7 +2384,7 @@ via fonte Dashicons.
 	}
 
 	.assoc-sol__pane-meta {
-		flex: 0 100000 auto;
+		flex: 1 1 auto;
 		min-width: 0;
 		white-space: nowrap;
 		overflow: hidden;
@@ -2381,6 +2411,13 @@ via fonte Dashicons.
 
 	.assoc-thread__msg {
 		max-width: 94%;
+	}
+
+	/* Nome longo nao pode estourar a bolha. */
+	.assoc-thread__who,
+	.assoc-thread__who strong {
+		min-width: 0;
+		overflow-wrap: anywhere;
 	}
 
 	/* position: sticky exige que nenhum ancestral corte o overflow. */
@@ -2414,6 +2451,14 @@ via fonte Dashicons.
 }
 
 @media (max-width: 700px) {
+	/* O portal ocupa 100% da tela no celular: nada de max-width nem
+	   gutter lateral, para o chat respirar. */
+	.assoc-container {
+		width: 100%;
+		max-width: 100%;
+		padding: 12px 8px 40px;
+	}
+
 	.assoc-quick {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 10px;
@@ -2477,8 +2522,24 @@ via fonte Dashicons.
 		width: 100%;
 	}
 
+	/* Cartoes das conversas maiores: antes ficavam espremidos e sem
+       area de toque confortavel. */
 	.assoc-sol__link {
 		grid-template-columns: 38px minmax(0, 1fr);
+		min-height: 68px;
+		padding: 13px 12px;
+	}
+
+	.assoc-sol__link-title {
+		font-size: 14.5px;
+	}
+
+	.assoc-sol__link-meta {
+		font-size: 12.5px;
+	}
+
+	.assoc-sol__side {
+		padding: 12px;
 	}
 
 	.assoc-sol__link .assoc-badge {
