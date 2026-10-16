@@ -341,17 +341,12 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 										</button>
 										<?php $quick_primeiro = false; ?>
 									<?php endforeach; ?>
+											<a class="assoc-quick__card assoc-quick__card--seg" href="<?php echo esc_url( $senha_url ); ?>">
+												<span class="assoc-quick__icon"><span class="dashicons dashicons-lock" aria-hidden="true"></span></span>
+												<span class="assoc-quick__title">Segurança da conta</span>
+												<span class="assoc-quick__desc">Alterar a sua senha</span>
+											</a>
 								</div>
-
-								<div class="assoc-security">
-									<span class="assoc-security__icon"><span class="dashicons dashicons-lock" aria-hidden="true"></span></span>
-									<div class="assoc-security__text">
-										<h3 class="assoc-security__title">Segurança da conta</h3>
-										<p>Recomendamos alterar a senha periodicamente. Enviaremos um link de redefinição para o e-mail cadastrado na sua conta.</p>
-									</div>
-									<a class="assoc-btn assoc-security__btn" href="<?php echo esc_url( $senha_url ); ?>">Alterar senha</a>
-								</div>
-							</section>
 
 							<!-- RECENTES -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'recentes', $active_panel, 'class' ) ) ); ?>" id="panel-recentes" role="tabpanel" aria-labelledby="tab-recentes" tabindex="0">
