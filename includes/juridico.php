@@ -480,7 +480,7 @@ function setceb_sol_data( $data ) {
  * @return string
  */
 function setceb_sol_botao_voltar( $perfil_url ) {
-	$url = add_query_arg( 'sol_lista', 1, $perfil_url ) . '#juridico';
+	$url = add_query_arg( 'sol_lista', 1, $perfil_url ) . '#panel-juridico';
 
 	return sprintf(
 		'<a class="assoc-sol__voltar" href="%1$s" data-sol-voltar><span class="dashicons dashicons-arrow-left-alt2" aria-hidden="true"></span><span class="assoc-sol__voltar-label">Solicitações</span></a>',
@@ -498,7 +498,7 @@ function setceb_sol_botao_voltar( $perfil_url ) {
  * @return string
  */
 function setceb_sol_botao_nova( $perfil_url ) {
-	$url = add_query_arg( 'sol_nova', 1, $perfil_url ) . '#juridico';
+	$url = add_query_arg( 'sol_nova', 1, $perfil_url ) . '#panel-juridico';
 
 	return sprintf(
 		'<a class="assoc-sol__nova-mini" href="%1$s" data-sol-nova><span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span><span class="assoc-sol__nova-mini-label">Nova</span></a>',
@@ -1808,14 +1808,14 @@ function setceb_sol_email_corpo_painel( $frase, $url = null ) {
  * Link que abre a solicitacao ja na Area do Associado.
  *
  * Mesmo formato do link que o proprio portal usa na lista
- * (?sol_id=N#juridico), para o aviso cair direto na conversa em vez de
+ * (?sol_id=N#panel-juridico), para o aviso cair direto na conversa em vez de
  * exigir que o associado ache o atendimento entre os outros.
  *
  * @param int $post_id ID da solicitacao.
  * @return string
  */
 function setceb_sol_url_conversa( $post_id ) {
-	return add_query_arg( 'sol_id', (int) $post_id, setceb_associado_perfil_url() ) . '#juridico';
+	return add_query_arg( 'sol_id', (int) $post_id, setceb_associado_perfil_url() ) . '#panel-juridico';
 }
 
 

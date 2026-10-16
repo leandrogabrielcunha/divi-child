@@ -649,7 +649,7 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 
 										<a class="assoc-sol__nova-btn<?php echo $sol_nova_ativa ? ' is-active' : ''; ?>"
 											id="sol-nova-btn"
-											href="<?php echo esc_url( add_query_arg( 'sol_nova', 1, $perfil_url ) . '#juridico' ); ?>"
+											href="<?php echo esc_url( add_query_arg( 'sol_nova', 1, $perfil_url ) . '#panel-juridico' ); ?>"
 											data-sol-nova
 											aria-current="<?php echo $sol_nova_ativa ? 'true' : 'false'; ?>">
 											<span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span>
@@ -669,7 +669,7 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 													<li>
 														<a class="assoc-sol__link<?php echo $sol_esta_ativa ? ' is-active' : ''; ?>"
 															id="sol-tab-<?php echo (int) $sol['id']; ?>"
-															href="<?php echo esc_url( add_query_arg( 'sol_id', (int) $sol['id'], $perfil_url ) . '#juridico' ); ?>"
+															href="<?php echo esc_url( add_query_arg( 'sol_id', (int) $sol['id'], $perfil_url ) . '#panel-juridico' ); ?>"
 															data-sol-link="<?php echo (int) $sol['id']; ?>"
 															aria-current="<?php echo $sol_esta_ativa ? 'true' : 'false'; ?>">
 															<span class="assoc-sol__link-icon" style="--setceb-sol-cor:<?php echo esc_attr( $sol['status_cor'] ); ?>">

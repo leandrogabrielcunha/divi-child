@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.47.14
+Version: 1.47.15
 Template: Divi
 */
 
@@ -1850,9 +1850,23 @@ via fonte Dashicons.
 	display: block;
 }
 
+/* Abre com folga do header fixo quando a URL traz #panel-juridico. */
+.assoc-panel {
+	scroll-margin-top: 96px;
+}
+
 .assoc-panel:focus-visible {
-	outline: 2px solid var(--setceb-blue-light);
-	outline-offset: 2px;
+	/* Sem anel. O painel e uma regiao grande de rolagem, com
+	   tabindex="0" para o teclado conseguir rola-la. O navegador foca o
+	   alvo do hash ao abrir uma URL como ?sol_id=104497#panel-juridico,
+	   e o anel de 2px aparecia em volta do box inteiro da conversa -
+	   parecia borda de selecao e nao indicacao de foco.
+
+	   Tirar o anel do REGIAO nao tira acessibilidade: todo elemento
+	   interativo dentro dela (link, botao, input) tem o seu proprio
+	   anel, e eles continuam aparecendo. O que some e o retangulo em volta
+	   de meia pagina. */
+	outline: none;
 }
 
 /* ---------- Paginacao (painel de planilhas) ---------- */
