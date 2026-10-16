@@ -385,6 +385,28 @@ function setceb_sol_block_editor( $use_block_editor, $post_type ) {
 add_filter( 'use_block_editor_for_post_type', 'setceb_sol_block_editor', 10, 2 );
 
 /**
+ * Slug do dashboard juridico.
+ *
+ * Fica em uma constante para o menu, os links internos e a paginacao
+ * falarem do mesmo nome. O slug do top-level do WordPress e sempre
+ * relativo, entao a URL final e admin.php?page=setceb-sol-dashboard.
+ *
+ * @return string
+ */
+function setceb_sol_dashboard_slug() {
+	return apply_filters( 'setceb_sol_dashboard_slug', 'setceb-sol-dashboard' );
+}
+
+/**
+ * URL completa do dashboard juridico.
+ *
+ * @return string
+ */
+function setceb_sol_dashboard_url( $args = array() ) {
+	return add_query_arg( $args, admin_url( 'admin.php?page=' . setceb_sol_dashboard_slug() ) );
+}
+
+/**
  * URL da listagem de solicitacoes no painel.
  *
  * @return string
@@ -2799,12 +2821,29 @@ function setceb_sol_remover_advogado( $user_id ) {
 function setceb_sol_menu() {
 	$listagem = 'edit.php?post_type=' . SETCEB_SOL_CPT;
 
+	/* O dashboard e top-level: e assim que
+	   admin.php?page=setceb-sol-dashboard responde. Como submenu de
+	   post type ele vivia em
+	   edit.php?post_type=...&page=setceb-sol-dashboard, e o acesso
+	   direto pela URL de top-level dava pagina em branco - que era
+	   como o|time chegava nele. */
+	add_menu_page(
+		'Dashboard Juridico',
+		'Dashboard Juridico',
+		'manage_options',
+		setceb_sol_dashboard_slug(),
+		'setceb_sol_pagina_dashboard',
+		'dashicons-dashboard',
+		37
+	);
+
+	/* Atalho dentro de Solicitacoes, apontando para o mesmo slug. */
 	add_submenu_page(
 		$listagem,
 		'Dashboard Juridico',
 		'Dashboard',
 		'manage_options',
-		'setceb-sol-dashboard',
+		setceb_sol_dashboard_slug(),
 		'setceb_sol_pagina_dashboard'
 	);
 
@@ -2885,6 +2924,116 @@ function setceb_sol_garantir_menu() {
 	add_submenu_page( $slug, $obj->labels->all_items, $obj->labels->all_items, $obj->cap->edit_posts, $slug );
 }
 add_action( 'admin_menu', 'setceb_sol_garantir_menu', 100 );
+
+/* ------------------------------------------------------------
+ * 12b. Filtro por periodo na listagem
+ * ------------------------------------------------------------ */
+
+/**
+ * Le o periodo pedido na URL, ja validado.
+ *
+ * @return array{de:string,ate:string} Datas no formato Y-m-d.
+ */
+function setceb_sol_periodo_url() {
+	$bruto_de  = isset( $_GET['sol_de'] ) ? sanitize_text_field( wp_unslash( $_GET['sol_de'] ) ) : '';
+	$bruto_ate = isset( $_GET['sol_ate'] ) ? sanitize_text_field( wp_unslash( $_GET['sol_ate'] ) ) : '';
+
+	$valida = function ( $valor ) {
+		if ( ! is_string( $valor ) || ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $valor ) ) {
+			return '';
+		}
+
+		$partes = explode( '-', $valor );
+
+		return checkdate( (int) $partes[1], (int) $partes[2], (int) $partes[0] ) ? $valor : '';
+	};
+
+	return array(
+		'de'  => $valida( $bruto_de ),
+		'ate' => $valida( $bruto_ate ),
+	);
+}
+
+/**
+ * Campos de periodo acima da listagem de solicitacoes.
+ *
+ * Fica no restrict_manage_posts, o ponto que o proprio WordPress usa
+ * para os filtros de data e autor de qualquer listagem: o filtro entra
+ * na URL junto dos outros e sobrevive a ordenacao e a paginacao sem
+ * nenhum JavaScript.
+ *
+ * @param string $post_type Post type da tela.
+ */
+function setceb_sol_filtro_periodo( $post_type ) {
+	if ( SETCEB_SOL_CPT !== $post_type ) {
+		return;
+	}
+
+	$periodo = setceb_sol_periodo_url();
+	?>
+	<label class="screen-reader-text" for="sol_de">Solicitacoes a partir de</label>
+	<input type="date" id="sol_de" name="sol_de" class="setceb-sol-periodo"
+		value="<?php echo esc_attr( $periodo['de'] ); ?>" title="A partir de">
+
+	<label class="screen-reader-text" for="sol_ate">Solicitacoes ate</label>
+	<input type="date" id="sol_ate" name="sol_ate" class="setceb-sol-periodo"
+		value="<?php echo esc_attr( $periodo['ate'] ); ?>" title="Ate">
+
+	<?php if ( '' !== $periodo['de'] || '' !== $periodo['ate'] ) : ?>
+		<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=' . SETCEB_SOL_CPT ) ); ?>">Limpar periodo</a>
+	<?php endif; ?>
+	<?php
+}
+add_action( 'restrict_manage_posts', 'setceb_sol_filtro_periodo' );
+
+/**
+ * Aplica o periodo pedido a consulta da listagem.
+ *
+ * @param WP_Query $query Query principal.
+ */
+function setceb_sol_aplicar_periodo( $consulta ) {
+	if ( ! is_admin() || ! $consulta->is_main_query() ) {
+		return;
+	}
+
+	if ( SETCEB_SOL_CPT !== $consulta->get( 'post_type' ) ) {
+		return;
+	}
+
+	$periodo = setceb_sol_periodo_url();
+
+	if ( '' === $periodo['de'] && '' === $periodo['ate'] ) {
+		return;
+	}
+
+	$limite = array( 'inclusive' => true );
+
+	if ( '' !== $periodo['de'] ) {
+		$limite['after'] = $periodo['de'] . ' 00:00:00';
+	}
+
+	if ( '' !== $periodo['ate'] ) {
+		/* O dia final entra inteiro: sem o 23:59:59, uma solicitacao
+		   aberta as 10h de 16/10 sumiria de um filtro que vai ate
+		   16/10. */
+		$limite['before'] = $periodo['ate'] . ' 23:59:59';
+	}
+
+	$limite['column'] = 'post_date';
+
+	/* Mescla com o que ja existir, como os filtros de status e
+	   advogado fazem: substituir apagaria o filtro do outro.
+
+	   O array_filter nao e cosmetics: WP_Query::get() devolve '' quando
+	   o argumento nao foi setado, e (array) '' vira array( '' ) - uma
+	   clausula de data vazia dentro da consulta, que o WP_Query nao
+	   sabe o que fazer. */
+	$date_query = array_filter( (array) $consulta->get( 'date_query' ), 'is_array' );
+	$date_query[] = $limite;
+
+	$consulta->set( 'date_query', $date_query );
+}
+add_action( 'pre_get_posts', 'setceb_sol_aplicar_periodo' );
 
 /* ------------------------------------------------------------
  * 13. Dashboard
@@ -3013,12 +3162,18 @@ function setceb_sol_pagina_dashboard() {
 		$sol_filtro_status = '';
 	}
 
+	/* O dashboard e resumo, nao listagem. As 25 mais recentes numa tela
+	   que ja tem cinco indicadores e uma distribuicao por status
+	   duplicavam a listagem completa sem acrescentar nada.
+
+	   A listagem completa, com filtro por data, fica na tela de
+	   Solicitacoes (edit.php?post_type=setceb_solicitacao). */
 	$sol_lista = setceb_sol_listagem_admin(
 		array(
 			'status'     => $sol_filtro_status,
 			'busca'      => $sol_filtro_busca,
 			'pagina'     => $sol_filtro_pagina,
-			'por_pagina' => 25,
+			'por_pagina' => 15,
 		)
 	);
 	?>
@@ -3142,7 +3297,7 @@ function setceb_sol_pagina_dashboard() {
 				<button type="submit" class="button">Filtrar</button>
 
 				<?php if ( '' !== $sol_filtro_status || '' !== $sol_filtro_busca ) : ?>
-					<a class="button-link" href="<?php echo esc_url( admin_url( 'edit.php?post_type=' . SETCEB_SOL_CPT . '&page=setceb-sol-dashboard' ) ); ?>">Limpar</a>
+					<a class="button-link" href="<?php echo esc_url( setceb_sol_dashboard_url() ); ?>">Limpar</a>
 				<?php endif; ?>
 			</form>
 
@@ -3166,7 +3321,6 @@ function setceb_sol_pagina_dashboard() {
 				<table class="widefat striped setceb-sol-lista" data-nonce="<?php echo esc_attr( wp_create_nonce( 'setceb_sol_conversa' ) ); ?>">
 					<thead>
 						<tr>
-							<th class="setceb-sol-col-ver">Conversa</th>
 							<th>Protocolo</th>
 							<th>Solicitante</th>
 							<th>Status</th>
@@ -3177,11 +3331,6 @@ function setceb_sol_pagina_dashboard() {
 					<tbody>
 						<?php foreach ( $sol_lista['itens'] as $sol ) : ?>
 							<tr class="setceb-sol-lista__linha" data-sol-id="<?php echo (int) $sol['id']; ?>">
-								<td class="setceb-sol-col-ver">
-									<button type="button" class="button button-small setceb-sol-ver" data-sol-ver="<?php echo (int) $sol['id']; ?>" aria-expanded="false" aria-controls="setceb-sol-conversa-<?php echo (int) $sol['id']; ?>">
-										Ver conversa
-									</button>
-								</td>
 								<td>
 									<a href="<?php echo esc_url( get_edit_post_link( $sol['id'] ) ); ?>">
 										<strong><?php echo esc_html( $sol['protocolo'] ); ?></strong>
@@ -3198,7 +3347,7 @@ function setceb_sol_pagina_dashboard() {
 								<td><?php echo esc_html( setceb_sol_data( $sol['data'] ) ); ?></td>
 							</tr>
 							<tr class="setceb-sol-lista__conversa" id="setceb-sol-conversa-<?php echo (int) $sol['id']; ?>" data-sol-painel="<?php echo (int) $sol['id']; ?>" hidden>
-								<td colspan="6">
+								<td colspan="5">
 									<div class="setceb-sol-conversa" data-sol-conversa="<?php echo (int) $sol['id']; ?>">
 										<p class="setceb-sol-vazio">Carregando conversa…</p>
 									</div>
@@ -3228,7 +3377,7 @@ function setceb_sol_pagina_dashboard() {
 													'status' => $sol_filtro_status,
 													's'      => $sol_filtro_busca,
 												),
-												admin_url( 'edit.php?post_type=' . SETCEB_SOL_CPT . '&page=setceb-sol-dashboard' )
+												setceb_sol_dashboard_url()
 											)
 										)
 									),

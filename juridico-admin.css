@@ -854,3 +854,20 @@
 		max-height: 60vh;
 	}
 }
+
+/* ---------- Filtro de periodo na listagem ----------
+   Os dois <input type="date"> ficam em .restrict_manage_posts, entre
+   os filtros que o WordPress ja desenha. Sem largura fixa eles
+   quebram a linha dos filtros em telas estreitas do admin. */
+.setceb-sol-periodo {
+	width: 150px;
+	margin: 0 8px 0 0;
+	vertical-align: middle;
+}
+
+@media screen and ( max-width: 782px ) {
+	.setceb-sol-periodo {
+		width: 100%;
+		margin: 0 0 6px;
+	}
+}
