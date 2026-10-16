@@ -745,83 +745,12 @@
 }
 
 /* ============================================================
- * Listagem completa de solicitacoes + conversa expandida
- * ============================================================ */
-
-.setceb-sol-filtros {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: flex-end;
-	gap: 10px;
-	margin: 0 0 12px;
-	padding: 12px 14px;
-	background: #fff;
-	border: 1px solid #dcdcde;
-	border-radius: 6px;
-}
-
-.setceb-sol-filtros__campo {
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
-	font-size: 12px;
-	font-weight: 600;
-	color: #50575e;
-}
-
-.setceb-sol-filtros__campo select {
-	min-width: 190px;
-	min-height: 36px;
-}
-
-.setceb-sol-filtros__campo input[type="search"] {
-	min-width: 280px;
-	min-height: 36px;
-}
-
-.setceb-sol-contagem {
-	margin: 0 0 8px;
-	color: #50575e;
-}
-
-
-.setceb-sol-paginacao {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 6px;
-	margin-top: 14px;
-}
-
-.setceb-sol-paginacao .page-numbers {
-	display: inline-block;
-	min-width: 32px;
-	padding: 6px 10px;
-	text-align: center;
-	text-decoration: none;
-	border: 1px solid #c3c4c7;
-	border-radius: 4px;
-	background: #fff;
-}
-
-.setceb-sol-paginacao .page-numbers.current {
-	color: #fff;
-	background: #2271b1;
-	border-color: #2271b1;
-	font-weight: 700;
-}
-
-@media screen and (max-width: 782px) {
-	.setceb-sol-filtros {
-		flex-direction: column;
-		align-items: stretch;
-	}
-
-	.setceb-sol-filtros__campo select,
-	.setceb-sol-filtros__campo input[type="search"] {
-		min-width: 0;
-		width: 100%;
-	}
-}
+ * Itens recentes na dashboard
+ * ============================================================
+   A dashboard nao tem mais filtro nem paginacao: e um resumo das
+   mais recentes. Quem filtra ou varre o historico entra em
+   Solicitacoes. As classes .setceb-sol-filtros, .setceb-sol-contagem e
+   .setceb-sol-paginacao sairam junto com o que as usava. */
 
 /* ---------- Filtro de periodo na listagem ----------
    Os dois <input type="date"> ficam em .restrict_manage_posts, entre

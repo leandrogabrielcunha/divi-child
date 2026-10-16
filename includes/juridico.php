@@ -3211,29 +3211,21 @@ function setceb_sol_pagina_dashboard() {
 	$status       = setceb_sol_status();
 	$total_status = max( 1, (int) $dados['total'] );
 
-	/* Filtros da listagem completa (nonce dispensado: apenas leitura). */
-	$sol_filtro_status = isset( $_GET['status'] ) ? sanitize_key( wp_unslash( $_GET['status'] ) ) : '';
-	$sol_filtro_busca  = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
-	$sol_filtro_pagina = isset( $_GET['paged'] ) ? max( 1, absint( $_GET['paged'] ) ) : 1;
-
-	if ( '' !== $sol_filtro_status && ! isset( $status[ $sol_filtro_status ] ) ) {
-		$sol_filtro_status = '';
-	}
-
-	/* O dashboard e resumo, nao listagem. As 25 mais recentes numa tela
-	   que ja tem cinco indicadores e uma distribuicao por status
-	   duplicavam a listagem completa sem acrescentar nada.
-
-	   A listagem completa, com filtro por data, fica na tela de
-	   Solicitacoes (edit.php?post_type=setceb_solicitacao). */
-	$sol_lista = setceb_sol_listagem_admin(
-		array(
-			'status'     => $sol_filtro_status,
-			'busca'      => $sol_filtro_busca,
-			'pagina'     => $sol_filtro_pagina,
-			'por_pagina' => 15,
-		)
-	);
+	/*
+	 * O dashboard mostra as mais recentes, e so.
+	 *
+	 * Sem filtro e sem paginacao de proposito: um resumo que aceita
+	 * "status = respondida" e "busca = 123" deixa de ser resumo e vira
+	 * uma segunda listagem - e era exatamente isso que a tela fazia.
+	 * Quem quer filtrar ou varrer o historico entra em Solicitacoes
+	 * (edit.php?post_type=setceb_solicitacao), que tem filtro por data,
+	 * por status e por advogado.
+	 *
+	 * O bloco cuida tambem de dizer o total: um cartao ja mostra
+	 * "Solicitacoes registradas", e o total da lista ao lado do titulo
+	 * repetia o mesmo numero a tres linhas de distancia.
+	 */
+	$sol_lista = setceb_sol_listagem_admin( array( 'por_pagina' => 15 ) );
 	?>
 	<div class="wrap setceb-sol-wrap">
 		<h1 class="wp-heading-inline">Solicitações Jurídicas</h1>
@@ -3329,52 +3321,10 @@ function setceb_sol_pagina_dashboard() {
 		</div>
 
 <div class="setceb-sol-box setceb-sol-box--lista">
-			<h2>Todas as solicitações</h2>
-
-			<form class="setceb-sol-filtros" method="get">
-				<input type="hidden" name="post_type" value="<?php echo esc_attr( SETCEB_SOL_CPT ); ?>">
-				<input type="hidden" name="page" value="<?php echo esc_attr( setceb_sol_dashboard_slug() ); ?>">
-
-				<label class="setceb-sol-filtros__campo">
-					<span>Status</span>
-					<select name="status">
-						<option value="">Todos os status</option>
-						<?php foreach ( $status as $slug_status => $info_status ) : ?>
-							<option value="<?php echo esc_attr( $slug_status ); ?>" <?php selected( $sol_filtro_status, $slug_status ); ?>>
-								<?php echo esc_html( $info_status['rotulo'] ); ?>
-							</option>
-						<?php endforeach; ?>
-					</select>
-				</label>
-
-				<label class="setceb-sol-filtros__campo setceb-sol-filtros__campo--busca">
-					<span>Buscar</span>
-					<input type="search" name="s" value="<?php echo esc_attr( $sol_filtro_busca ); ?>" placeholder="Protocolo, título, nome ou e-mail">
-				</label>
-
-				<button type="submit" class="button">Filtrar</button>
-
-				<?php if ( '' !== $sol_filtro_status || '' !== $sol_filtro_busca ) : ?>
-					<a class="button-link" href="<?php echo esc_url( setceb_sol_dashboard_url() ); ?>">Limpar</a>
-				<?php endif; ?>
-			</form>
-
-			<p class="setceb-sol-contagem">
-				<?php
-				printf(
-					'%d solicitação%s encontrada%s',
-					(int) $sol_lista['total'],
-					1 === (int) $sol_lista['total'] ? '' : 's',
-					(int) $sol_lista['total'] > (int) $sol_lista['por_pagina'] ? 's' : ''
-				);
-				?>
-				<?php if ( $sol_lista['paginas'] > 1 ) : ?>
-					&middot; pagina <?php echo (int) $sol_lista['pagina']; ?> de <?php echo (int) $sol_lista['paginas']; ?>
-				<?php endif; ?>
-			</p>
+			<h2>Itens recentes</h2>
 
 			<?php if ( empty( $sol_lista['itens'] ) ) : ?>
-				<p class="description">Nenhuma solicitação encontrada com esses filtros.</p>
+				<p class="description">Nenhuma solicitação registrada.</p>
 			<?php else : ?>
 				<table class="widefat striped setceb-sol-lista">
 					<thead>
@@ -3408,43 +3358,15 @@ function setceb_sol_pagina_dashboard() {
 					</tbody>
 				</table>
 
-				<?php if ( $sol_lista['paginas'] > 1 ) : ?>
-					<div class="setceb-sol-paginacao">
-						<?php
-						echo wp_kses_post(
-							paginate_links(
-								array(
-									/* Mantem os filtros ao trocar de pagina.
-									   add_query_arg escapa '%#%' para
-									   '%25%23%25'; usa-se o padrao
-									   numerico do proprio WordPress. */
-									'base'      => str_replace(
-										'999999999',
-										'%#%',
-										esc_url(
-											add_query_arg(
-												array(
-													'paged'  => 999999999,
-													'status' => $sol_filtro_status,
-													's'      => $sol_filtro_busca,
-												),
-												setceb_sol_dashboard_url()
-											)
-										)
-									),
-									'format'    => '',
-									'current'   => (int) $sol_lista['pagina'],
-									'total'     => (int) $sol_lista['paginas'],
-									'type'      => 'plain',
-									'prev_text' => '&laquo; Anteriores',
-									'next_text' => 'Próximas &raquo;',
-								)
-							)
-						);
-						?>
-					</div>
+				<?php if ( (int) $sol_lista['total'] > count( $sol_lista['itens'] ) ) : ?>
+					<p class="description">
+						<a href="<?php echo esc_url( setceb_sol_admin_url() ); ?>">
+							Ver todas as solicitações
+						</a>
+					</p>
 				<?php endif; ?>
 			<?php endif; ?>
+		</div>
 		</div>
 	</div>
 	<?php
