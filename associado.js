@@ -424,13 +424,24 @@
 			trocarUrl( options.url );
 		}
 
-		/* Em telas empilhadas (lista acima da conversa) leva a conversa
-		   para a area visivel. */
-		if (options.scroll && window.matchMedia && window.matchMedia('(max-width: 1200px)').matches) {
+		/* Leva a conversa para a area visivel quando ela nao cabe na tela.
+
+		   A condicao e medida, nao por breakpoint: o grid do juridico nao
+		   fixa mais colunas, entao o empilhamento (lista acima da conversa)
+		   acontece no desktop tambem. Quando a conversa ja esta a vista -
+	   caso do modo detalhe do mobile, que ocupa a tela inteira - nao ha
+		   o que rolar e um salto ali seria apenas ruido. */
+		if ( options.scroll ) {
 			var paneAlvo = root.querySelector('[data-sol-pane="' + alvo + '"]');
 
-			if (paneAlvo && typeof paneAlvo.scrollIntoView === 'function') {
-				paneAlvo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			if ( paneAlvo && typeof paneAlvo.getBoundingClientRect === 'function' ) {
+				var caixa = paneAlvo.getBoundingClientRect();
+				var margem = 80;
+				var precisaRolar = caixa.top > margem || caixa.bottom > window.innerHeight + margem;
+
+				if ( precisaRolar && typeof paneAlvo.scrollIntoView === 'function' ) {
+					paneAlvo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+				}
 			}
 		}
 
