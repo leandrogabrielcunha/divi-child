@@ -115,11 +115,16 @@ $modulos = array(
 	),
 	'convencoes'       => array(
 		'rotulo' => 'Convenções coletivas',
+		/* Rotulo do mobile: a 320px o titulo divide a linha com o filtro
+		   de ano e tinha 111px para 144px de texto. Mesmo padrao do
+		   botao Voltar: dois niveis, um para cada largura. */
+		'curto'  => 'Convenções',
 		'icone'  => 'dashicons-media-document',
 		'desc'   => 'Documentos oficiais das convenções coletivas da categoria.',
 	),
 	'outros-materiais' => array(
 		'rotulo' => 'Outros materiais',
+		'curto'  => 'Materiais',
 		'icone'  => 'dashicons-portfolio',
 		'desc'   => 'Materiais complementares e documentos diversos.',
 	),
@@ -236,7 +241,15 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 		<div class="assoc-mod__main">
 			<span class="assoc-mod__icon"><span class="dashicons <?php echo esc_attr( $modulo['icone'] ); ?>" aria-hidden="true"></span></span>
 			<div class="assoc-mod__body">
-				<h2 class="assoc-mod__title"><?php echo esc_html( $modulo['rotulo'] ); ?></h2>
+				<?php /* O modificador marca que existe rotulo curto: sem ele o
+				   CSS esconde o rotulo longo de todo mundo e os modulos sem
+				   curto ficam sem titulo nenhum. */ ?>
+				<h2 class="assoc-mod__title<?php echo ! empty( $modulo['curto'] ) ? ' assoc-mod__title--curto' : ''; ?>">
+					<span class="assoc-mod__title-full"><?php echo esc_html( $modulo['rotulo'] ); ?></span>
+					<?php if ( ! empty( $modulo['curto'] ) ) : ?>
+						<span class="assoc-mod__title-short"><?php echo esc_html( $modulo['curto'] ); ?></span>
+					<?php endif; ?>
+				</h2>
 				<p class="assoc-mod__desc"><?php echo esc_html( $modulo['desc'] ); ?></p>
 			</div>
 			<?php if ( $year_filter ) : ?>
@@ -505,7 +518,7 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 
 							<!-- CONVENCOES COLETIVAS -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'convencoes', $active_panel, 'class' ) ) ); ?>" id="panel-convencoes" role="tabpanel" aria-labelledby="tab-convencoes" tabindex="0">
-								<?php setceb_modulo_cabecalho( 'convencoes', $modulos ); ?>
+								<?php setceb_modulo_cabecalho( 'convencoes', $modulos, true ); ?>
 
 								<?php if ( ! empty( $convencoes ) ) : ?>
 									<ul class="assoc-list">
@@ -515,7 +528,7 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 												continue;
 											}
 											?>
-											<li class="assoc-list__item">
+											<li class="assoc-list__item"<?php echo ! empty( $item['ano'] ) ? ' data-ano="' . esc_attr( $item['ano'] ) . '"' : ''; ?>>
 												<span class="assoc-list__icon"><span class="dashicons dashicons-media-document" aria-hidden="true"></span></span>
 												<div class="assoc-list__info">
 													<h3 class="assoc-list__title"><?php echo esc_html( $item['titulo'] ); ?></h3>
@@ -530,6 +543,10 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 											</li>
 										<?php endforeach; ?>
 									</ul>
+									<div class="assoc-empty" data-convencoes-empty hidden>
+										<span class="dashicons dashicons-media-document assoc-empty__icon" aria-hidden="true"></span>
+										<p data-convencoes-empty-text>Nenhuma convenção coletiva para o ano selecionado.</p>
+									</div>
 								<?php else : ?>
 									<div class="assoc-empty">
 										<span class="dashicons dashicons-media-document assoc-empty__icon" aria-hidden="true"></span>
@@ -540,7 +557,7 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 
 							<!-- OUTROS MATERIAIS -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'outros-materiais', $active_panel, 'class' ) ) ); ?>" id="panel-outros-materiais" role="tabpanel" aria-labelledby="tab-outros-materiais" tabindex="0">
-								<?php setceb_modulo_cabecalho( 'outros-materiais', $modulos ); ?>
+								<?php setceb_modulo_cabecalho( 'outros-materiais', $modulos, true ); ?>
 
 								<?php if ( ! empty( $outros_materiais ) ) : ?>
 									<ul class="assoc-list">
@@ -560,7 +577,7 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 												$om_meta[] = $item['ano'];
 											}
 											?>
-											<li class="assoc-list__item">
+											<li class="assoc-list__item"<?php echo ! empty( $item['ano'] ) ? ' data-ano="' . esc_attr( $item['ano'] ) . '"' : ''; ?>>
 												<span class="assoc-list__icon"><span class="dashicons dashicons-portfolio" aria-hidden="true"></span></span>
 												<div class="assoc-list__info">
 													<h3 class="assoc-list__title"><?php echo esc_html( $item['titulo'] ); ?></h3>
@@ -575,6 +592,10 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 											</li>
 										<?php endforeach; ?>
 									</ul>
+									<div class="assoc-empty" data-outros-materiais-empty hidden>
+										<span class="dashicons dashicons-portfolio assoc-empty__icon" aria-hidden="true"></span>
+										<p data-outros-materiais-empty-text>Nenhum material para o ano selecionado.</p>
+									</div>
 								<?php else : ?>
 									<div class="assoc-empty">
 										<span class="dashicons dashicons-portfolio assoc-empty__icon" aria-hidden="true"></span>
@@ -585,7 +606,7 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 
 							<!-- SIMULADORES -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'simuladores', $active_panel, 'class' ) ) ); ?>" id="panel-simuladores" role="tabpanel" aria-labelledby="tab-simuladores" tabindex="0">
-								<?php setceb_modulo_cabecalho( 'simuladores', $modulos ); ?>
+								<?php setceb_modulo_cabecalho( 'simuladores', $modulos, true ); ?>
 
 								<?php if ( ! empty( $simuladores ) ) : ?>
 									<ul class="assoc-list">
@@ -605,7 +626,7 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 												$sim_meta[] = $item['ano'];
 											}
 											?>
-											<li class="assoc-list__item">
+											<li class="assoc-list__item"<?php echo ! empty( $item['ano'] ) ? ' data-ano="' . esc_attr( $item['ano'] ) . '"' : ''; ?>>
 												<span class="assoc-list__icon"><span class="dashicons dashicons-performance" aria-hidden="true"></span></span>
 												<div class="assoc-list__info">
 													<h3 class="assoc-list__title"><?php echo esc_html( $item['titulo'] ); ?></h3>
@@ -620,6 +641,10 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 											</li>
 										<?php endforeach; ?>
 									</ul>
+									<div class="assoc-empty" data-simuladores-empty hidden>
+										<span class="dashicons dashicons-performance assoc-empty__icon" aria-hidden="true"></span>
+										<p data-simuladores-empty-text>Nenhum simulador para o ano selecionado.</p>
+									</div>
 								<?php else : ?>
 									<div class="assoc-empty">
 										<span class="dashicons dashicons-performance assoc-empty__icon" aria-hidden="true"></span>

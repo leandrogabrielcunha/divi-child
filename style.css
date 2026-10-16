@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.47.18
+Version: 1.47.19
 Template: Divi
 */
 
@@ -1568,6 +1568,13 @@ via fonte Dashicons.
 	display: none;
 }
 
+/* Mesmo dois-niveis no titulo do modulo. "Convencoes coletivas" e
+   "Outros materiais" nao cabem ao lado do filtro de ano a 320px: o
+   espaco real do titulo e 111px e o texto pedia 144px e 116px. */
+.assoc-mod__title-short {
+	display: none;
+}
+
 .assoc-mod__main {
 	display: flex;
 	align-items: center;
@@ -2348,6 +2355,16 @@ via fonte Dashicons.
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+
+	/* Só o modulo que tem rotulo curto troca. Esconder o rotulo longo
+	   sem condicao deixaria "Planilhas" e "Simuladores" sem titulo. */
+	.assoc-mod__title--curto .assoc-mod__title-full {
+		display: none;
+	}
+
+	.assoc-mod__title--curto .assoc-mod__title-short {
+		display: inline;
 	}
 
 	/* Descricao e texto de vitrine: no card do acesso rapido ela ja

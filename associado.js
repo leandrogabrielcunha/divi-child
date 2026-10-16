@@ -188,6 +188,14 @@
 		refreshEmptyPanel('#panel-planilhas', '[data-planilhas-empty]', '[data-planilhas-empty-text]', 'Nenhuma planilha disponível', true);
 		refreshEmptyPanel('#panel-relatorios', '[data-relatorios-empty]', '[data-empty-text]', 'Nenhum relatório disponível', false);
 
+		/* Convencoes, outros materiais e simuladores tambem tem ano: o
+		   filtro de ano selecionado aqui esconde os itens, e sem um
+		   estado vazio o usuario veria uma lista em branco sem nenhum
+		   aviso de que aquilo era o filtro. */
+		refreshEmptyPanel('#panel-convencoes', '[data-convencoes-empty]', '[data-convencoes-empty-text]', 'Nenhuma convenção coletiva', false);
+		refreshEmptyPanel('#panel-outros-materiais', '[data-outros-materiais-empty]', '[data-outros-materiais-empty-text]', 'Nenhum material', false);
+		refreshEmptyPanel('#panel-simuladores', '[data-simuladores-empty]', '[data-simuladores-empty-text]', 'Nenhum simulador', false);
+
 		/* Paginacao recomputada do zero aqui, para que qualquer
 		   filtro/ano/categoria mantenha a paginacao correto. */
 		paginatePlanilhas();
