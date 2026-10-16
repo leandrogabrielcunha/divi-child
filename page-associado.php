@@ -684,16 +684,24 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 															</span>
 															<span class="assoc-sol__link-main">
 																<span class="assoc-sol__link-title"><?php echo esc_html( $sol['titulo'] ); ?></span>
-																<span class="assoc-sol__link-meta">
-																	Protocolo <?php echo esc_html( $sol['protocolo'] ); ?>
-																	<?php if ( '' !== setceb_sol_tempo_relativo( $sol['atualizada'] ) ) : ?>
-																		&middot; atualizada <?php echo esc_html( setceb_sol_tempo_relativo( $sol['atualizada'] ) ); ?>
-																	<?php endif; ?>
+																<span class="assoc-sol__link-foot">
+																	<span class="assoc-sol__link-meta">
+																		Protocolo <?php echo esc_html( $sol['protocolo'] ); ?>
+																		<?php if ( '' !== setceb_sol_tempo_relativo( $sol['atualizada'] ) ) : ?>
+																			<span class="assoc-sol__link-tempo">&middot; atualizada <?php echo esc_html( setceb_sol_tempo_relativo( $sol['atualizada'] ) ); ?></span>
+																		<?php endif; ?>
+																	</span>
+																	<?php /* O badge fica NA LINHA DO PROTOCOLO, e nao como terceira
+																		   coluna nem em linha propria: como coluna ele rouba a
+																		   largura do titulo (medido: 135px, titulo em duas
+																		   linhas) e o cartao nao encolhe. Aqui ele divide
+																		   altura com o protocolo e some da conta. */ ?>
+																	<span class="assoc-badge" style="--setceb-sol-cor:<?php echo esc_attr( $sol['status_cor'] ); ?>">
+																		<span class="dashicons <?php echo esc_attr( $sol['status_icone'] ); ?>" aria-hidden="true"></span>
+																		<span class="assoc-badge__full"><?php echo esc_html( $sol['status_rotulo'] ); ?></span>
+																		<span class="assoc-badge__curto"><?php echo esc_html( $sol['status_rotulo_curto'] ); ?></span>
+																	</span>
 																</span>
-															</span>
-															<span class="assoc-badge" style="--setceb-sol-cor:<?php echo esc_attr( $sol['status_cor'] ); ?>">
-																<span class="dashicons <?php echo esc_attr( $sol['status_icone'] ); ?>" aria-hidden="true"></span>
-																<?php echo esc_html( $sol['status_rotulo'] ); ?>
 															</span>
 														</a>
 													</li>

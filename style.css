@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.47.7
+Version: 1.47.8
 Template: Divi
 */
 
@@ -3517,7 +3517,7 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 
 .assoc-sol__link {
 	display: grid;
-	grid-template-columns: 36px minmax(0, 1fr) auto;
+	grid-template-columns: 36px minmax(0, 1fr);
 	align-items: start;
 	gap: 10px;
 	padding: 12px;
@@ -3558,6 +3558,23 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 	height: 18px;
 }
 
+/* Protocolo a esquerda, badge a direita, na mesma linha. */
+.assoc-sol__link-foot {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-width: 0;
+}
+
+.assoc-sol__link-foot .assoc-sol__link-meta {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.assoc-sol__link-foot .assoc-badge {
+	margin-top: 0;
+}
+
 .assoc-sol__link-main {
 	display: flex;
 	flex-direction: column;
@@ -3580,6 +3597,12 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 }
 
 /* ---------- Selo de status ---------- */
+/* O rotulo curto entra so no mobile; ver o bloco de 700px. Fora dele o
+   completo, que e o que faz sentido em tela larga. */
+.assoc-badge__curto {
+	display: none;
+}
+
 .assoc-badge {
 	display: inline-flex;
 	align-items: center;
@@ -4143,12 +4166,22 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
  * max-height de 520px (scroll aninhado), padding de 20px e a barra
  * de resposta sem o espacaco da area segura do iPhone.
  * ============================================================ */
-	/* Cartoes das conversas maiores: antes ficavam espremidos e sem
-       area de toque confortavel. */
+	/* Cartoes das conversas: mais baixa e mais info por tela.
+
+	   Medido antes, em 360px: 104px de altura,porque o badge ia para uma
+	   LINHA PROPRIA (grid-column: 2 + margin-top) com o rotulo inteiro
+	   "Aguardando associado" ocupando 194px. O titulo e o protocolo
+	   ocupavam 39px e o badge outros 27px.
+
+	   Aqui o badge vira a terceira coluna, alinhado ao centro e com o
+	   rotulo curto, entao ele nao cria mais nenhuma linha. O cartao
+	   passa a ter a altura do texto: titulo + meta. */
 	.assoc-sol__link {
-		grid-template-columns: 38px minmax(0, 1fr);
-		min-height: 68px;
-		padding: 13px 12px;
+		grid-template-columns: 30px minmax(0, 1fr);
+		align-items: center;
+		gap: 8px;
+		min-height: 56px;
+		padding: 10px;
 	}
 
 	.assoc-sol__link-title {
@@ -4157,16 +4190,49 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 
 	.assoc-sol__link-meta {
 		font-size: 12.5px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	/* "atualizada ha 2 dias" cabe mal ao lado do badge:_media de 360px
+	   o protocolo e o status disputam a mesma linha, e o tempo vira a
+	   terceira linha do cartao. O protocolo e o status ficam; o tempo
+	   relativo e informacao de comodidade e volta a aparecer quando a
+	   conversa esta aberta (o cabecalho da conversa mostra a data). */
+	.assoc-sol__link-tempo {
+		display: none;
+	}
+
+	.assoc-sol__link .assoc-badge {
+		flex-shrink: 0;
+		margin-top: 0;
+		padding: 3px 8px;
+		font-size: 10.5px;
+		gap: 4px;
+	}
+
+	.assoc-sol__link .assoc-badge .dashicons {
+		font-size: 12px;
+		width: 12px;
+		height: 12px;
+	}
+
+	.assoc-sol__link-icon {
+		width: 30px;
+		height: 30px;
+	}
+
+	.assoc-badge__full {
+		display: none;
+	}
+
+	.assoc-badge__curto {
+		display: inline;
 	}
 
 	.assoc-sol__side {
 		padding: 12px;
-	}
-
-	.assoc-sol__link .assoc-badge {
-		grid-column: 2;
-		justify-self: start;
-		margin-top: 6px;
 	}
 
 	.assoc-form--nova,
