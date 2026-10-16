@@ -1414,6 +1414,32 @@ function setceb_sol_columns( $cols ) {
 add_filter( 'manage_' . SETCEB_SOL_CPT . '_posts_columns', 'setceb_sol_columns' );
 
 /**
+ * Na listagem do admin, a coluna "Solicitacao" exibe o protocolo (#ID)
+ * em vez do titulo interno, que e apenas um resumo da mensagem.
+ *
+ * O titulo real segue intacto no banco e no atendimento; aqui so se
+ * troca o que e' exibido na listagem.
+ */
+function setceb_sol_titulo_listagem( $title, $post_id ) {
+	global $pagenow;
+
+	if ( ! is_admin() || 'edit.php' !== $pagenow ) {
+		return $title;
+	}
+
+	if ( (string) ( $_GET['post_type'] ?? '' ) !== SETCEB_SOL_CPT ) {
+		return $title;
+	}
+
+	if ( (int) $post_id <= 0 || get_post_type( $post_id ) !== SETCEB_SOL_CPT ) {
+		return $title;
+	}
+
+	return '#' . (int) $post_id;
+}
+add_filter( 'the_title', 'setceb_sol_titulo_listagem', 10, 2 );
+
+/**
  * Conteudo das colunas customizadas.
  *
  * @param string $coluna  Coluna atual.
