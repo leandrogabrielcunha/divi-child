@@ -1781,6 +1781,30 @@ function setceb_sol_email_assunto( $texto ) {
 }
 
 /**
+ * Corpo do e-mail de aviso para a equipe juridica.
+ *
+ * O aviso nao carrega a solicitacao: nem identificacao do associado,
+ * nem o texto da duvida, nem link de edicao. Ele diz o que houve e
+ * aponta para o painel, onde o|time ja tem tudo em um lugar so. O
+ * pedido foi explicito: "apenas falar que ele recebeu uma nova
+ * solicitacao e apontar para o painel".
+ *
+ * @param string $frase O que aconteceu, em uma frase.
+ * @return array Linhas do corpo.
+ */
+function setceb_sol_email_corpo_painel( $frase ) {
+	return array(
+		$frase,
+		'',
+		'Acompanhe pelo painel:',
+		setceb_sol_admin_url(),
+		'',
+		'-- ',
+		wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ),
+	);
+}
+
+/**
  * Linhas de identification da solicitacao, comuns aos e-mails.
  *
  * @param array $solicitacao Solicitacao.
@@ -1819,8 +1843,9 @@ function setceb_sol_linhas( $linhas ) {
 /**
  * Notifica a equipe juridica sobre uma nova solicitacao.
  *
- * Sem advogado cadastrado, o aviso vai para o endereco administrativo
- * para que nenhuma solicitacao fique sem retorno.
+ * O corpo e propositalmente curto: uma frase e o link do painel. Sem
+ * advogado cadastrado o aviso vai para o endereco administrativo, para
+ * que nenhuma solicitacao fique sem retorno.
  *
  * @param int $post_id ID da solicitacao.
  */
@@ -1853,22 +1878,10 @@ function setceb_sol_email_nova_solicitacao( $post_id ) {
 		);
 	}
 
-	$linhas = array_merge(
-		array( 'Uma nova solicitacao juridica foi registrada na Area do Associado.', '' ),
-		setceb_sol_linhas( setceb_sol_email_identificacao( $solicitacao ) ),
-		array(
-			'',
-			'Assunto:',
-			$solicitacao['mensagem'],
-			'',
-			'Atendimento: ' . get_edit_post_link( $post_id, 'raw' ),
-		)
-	);
-
 	setceb_sol_email(
 		$emails,
 		setceb_sol_email_assunto( 'Nova solicitacao juridica ' . $solicitacao['protocolo'] ),
-		setceb_sol_linhas( $linhas )
+		setceb_sol_email_corpo_painel( 'Voce recebeu uma nova solicitacao juridica.' )
 	);
 }
 
@@ -1947,10 +1960,17 @@ function setceb_sol_email_associado_status( $post_id, $status ) {
 }
 
 /**
- * Notifica o responsavel sobre uma nova mensagem do associado.
+ * Notifica o responsavel sobre uma nova interacao do associado.
  *
- * @param int    $post_id ID da solicitacao.
- * @param string $mensagem Texto da mensagem.
+ * "Interacao" e a mensagem que o associado escreve no atendimento: e a
+ * unica acao que ele tem sobre uma solicitacao ja aberta. O corpo
+ * segue a mesma regra do aviso de solicitacao nova - uma frase e o
+ * link do painel, sem o texto da mensagem nem os dados do associado.
+ *
+ * @param int    $post_id  ID da solicitacao.
+ * @param string $mensagem Texto da mensagem (mantido no parametro para
+ *                        o registro no historico e para compatibilidade
+ *                        de quem chama).
  */
 function setceb_sol_email_mensagem_associado( $post_id, $mensagem ) {
 	$solicitacao = setceb_sol_obter( $post_id );
@@ -1973,23 +1993,12 @@ function setceb_sol_email_mensagem_associado( $post_id, $mensagem ) {
 		$emails[] = setceb_form_recipient( 'juridico' );
 	}
 
-	$linhas = array_merge(
-		array( 'O associado enviou uma nova mensagem na solicitacao.', '' ),
-		setceb_sol_linhas( setceb_sol_email_identificacao( $solicitacao ) ),
-		array(
-			'',
-			'Mensagem:',
-			$mensagem,
-			'',
-			'Atendimento: ' . get_edit_post_link( $post_id, 'raw' ),
-		)
-	);
-
 	setceb_sol_email(
 		$emails,
-		setceb_sol_email_assunto( 'Nova mensagem na solicitacao ' . $solicitacao['protocolo'] ),
-		setceb_sol_linhas( $linhas ),
-		is_email( $solicitacao['email'] ) ? $solicitacao['email'] : ''
+		setceb_sol_email_assunto( 'Nova interacao na solicitacao ' . $solicitacao['protocolo'] ),
+		setceb_sol_email_corpo_painel(
+			'O associado fez uma nova interacao na solicitacao ' . $solicitacao['protocolo'] . '.'
+		)
 	);
 }
 

@@ -755,11 +755,6 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 																</select>
 															</p>
 
-															<p class="assoc-form__field assoc-form__field--largo">
-																<label for="assoc-jur-msg">Descreva sua dúvida <span aria-hidden="true">*</span></label>
-																<textarea id="assoc-jur-msg" name="setceb_mensagem" rows="4" required placeholder="Explique o que aconteceu. Se possível, informe datas e os documentos envolvidos."></textarea>
-															</p>
-
 															<?php /* Telefone e empresa lado a lado quando ha largura.
 															   No celular viram uma coluna, como antes. */ ?>
 															<p class="assoc-form__field">
@@ -770,14 +765,18 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 																<label for="assoc-jur-empresa">Empresa</label>
 																<input type="text" id="assoc-jur-empresa" name="setceb_empresa" autocomplete="organization">
 															</p>
+
+<p class="assoc-form__field assoc-form__field--largo">
+																<label for="assoc-jur-msg">Descreva sua dúvida <span aria-hidden="true">*</span></label>
+																<textarea id="assoc-jur-msg" name="setceb_mensagem" rows="4" required placeholder="Explique o que aconteceu. Se possível, informe datas e os documentos envolvidos."></textarea>
+															</p>
 														</div>
 
 														<div class="assoc-form__actions">
 															<button type="submit" class="assoc-btn assoc-btn--full">
 																<span class="assoc-btn__label">Registrar solicitação</span>
 															</button>
-															<p class="assoc-form__note">Campos com <span aria-hidden="true">*</span> são obrigatórios.</p>
-														</div>
+																													</div>
 												</form>
 										</article>
 
