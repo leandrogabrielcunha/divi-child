@@ -1118,8 +1118,7 @@ function setceb_sol_meta_box_atendimento( $post ) {
 		</div>
 
 		<div class="setceb-sol-acoes">
-			<input type="submit" name="save" class="button button-primary button-hero" value="Salvar e enviar">
-			<a class="button" href="<?php echo esc_url( setceb_sol_admin_url() ); ?>">Voltar para a lista</a>
+			<input type="submit" name="save" class="button button-primary button-hero" value="ENVIAR MENSAGEM">
 		</div>
 	</div>
 	<?php

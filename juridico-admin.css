@@ -338,10 +338,11 @@
 .setceb-sol-acoes {
 	display: flex;
 	align-items: center;
+	justify-content: flex-end;
 	gap: 12px;
 	flex-wrap: wrap;
 	margin: 0;
-	padding-top: 22px;
+	padding-top: 16px;
 	border-top: 1px solid #eef2f6;
 }
 
