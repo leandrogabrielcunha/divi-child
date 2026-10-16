@@ -212,6 +212,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
  * @param array  $modulos Mapa de modulos da area do associado.
  */
 function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
+	global $anos, $ano_atual;
 	if ( ! isset( $modulos[ $key ] ) ) {
 		return;
 	}
@@ -231,7 +232,6 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 			</div>
 			<?php if ( $year_filter ) : ?>
 			<div class="assoc-mod__year">
-				<span class="assoc-toolbar__label">Ano de referência</span>
 				<div class="assoc-year">
 					<button type="button" class="assoc-year__btn" aria-haspopup="listbox" aria-expanded="false" aria-label="Selecionar ano de referência">
 						<span class="dashicons dashicons-calendar-alt" aria-hidden="true"></span>
