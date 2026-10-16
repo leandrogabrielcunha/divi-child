@@ -185,8 +185,6 @@ function setceb_header_markup() {
 			</div>
 		</div>
 
-		<div class="setceb-header__main-spacer" data-setceb-main-spacer aria-hidden="true"></div>
-
 		<nav class="setceb-header__nav" id="setceb-header-menu" aria-label="Menu principal">
 			<?php setceb_header_menu(); ?>
 			<div class="setceb-header__mobile-actions">

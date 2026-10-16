@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.44.0
+Version: 1.45.0
 Template: Divi
 */
 
@@ -643,38 +643,6 @@ O header nativo do Divi e ocultado abaixo.
 	background: #fff;
 }
 
-/* Espaço reservado quando a barra principal fica fixa no scroll */
-.setceb-header__main-spacer {
-	height: 0;
-}
-
-/* Estado fixo no scroll (apenas desktop, onde o menu e inline):
-   barra principal presa ao topo + menu oculto */
-@media (min-width: 1024px) {
-	.setceb-header.is-sticky .setceb-header__main {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		z-index: 1001;
-		box-shadow: 0 6px 18px rgba(18, 35, 56, 0.14);
-	}
-
-	.setceb-header.is-sticky .setceb-header__nav {
-		display: none;
-	}
-
-	/* Compensa a barra do admin do WordPress */
-	.admin-bar .setceb-header.is-sticky .setceb-header__main {
-		top: 32px;
-	}
-
-	@media (max-width: 782px) {
-		.admin-bar .setceb-header.is-sticky .setceb-header__main {
-			top: 46px;
-		}
-	}
-}
 
 .setceb-header__main-inner {
 	display: grid;
@@ -1479,91 +1447,6 @@ via fonte Dashicons.
 	min-width: 0;
 }
 
-/* ---------- Cartao de perfil ---------- */
-.assoc-profile {
-	background: #fff;
-	border: 1px solid var(--setceb-border);
-	border-radius: 18px;
-	overflow: hidden;
-	box-shadow: 0 8px 22px rgba(18, 61, 115, 0.07);
-}
-
-.assoc-profile__cover {
-	position: relative;
-	height: 84px;
-	background:
-		radial-gradient(circle at 84% 26%, rgba(31, 183, 201, 0.55) 0, rgba(31, 183, 201, 0) 42%),
-		linear-gradient(135deg, var(--setceb-blue) 0%, #17457f 100%);
-}
-
-.assoc-profile__cover::after {
-	content: "";
-	position: absolute;
-	right: 18px;
-	bottom: -14px;
-	width: 74px;
-	height: 74px;
-	border: 1px solid rgba(255, 255, 255, 0.22);
-	border-radius: 22px;
-	transform: rotate(18deg);
-}
-
-.assoc-profile__body {
-	padding: 0 18px 18px;
-	text-align: center;
-}
-
-.assoc-profile__avatar {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 72px;
-	height: 72px;
-	margin: -36px auto 10px;
-	font-size: 25px;
-	font-weight: 800;
-	letter-spacing: 1px;
-	color: #fff;
-	background: linear-gradient(150deg, var(--setceb-accent), var(--setceb-accent-deep));
-	border: 4px solid #fff;
-	border-radius: 22px;
-	box-shadow: 0 8px 18px rgba(9, 30, 66, 0.18);
-}
-
-.assoc-profile__name {
-	margin: 0 0 2px;
-	font-size: 16.5px;
-	line-height: 1.3;
-	color: var(--setceb-blue);
-}
-
-.assoc-profile__login {
-	margin: 0 0 10px;
-	font-size: 12.5px;
-	color: var(--setceb-muted);
-	overflow-wrap: anywhere;
-}
-
-.assoc-profile__status {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	padding: 4px 10px;
-	font-size: 11px;
-	font-weight: 700;
-	letter-spacing: 0.4px;
-	text-transform: uppercase;
-	color: var(--setceb-success);
-	background: var(--setceb-success-tint);
-	border-radius: 999px;
-}
-
-.assoc-profile__status .dashicons {
-	font-size: 14px;
-	width: 14px;
-	height: 14px;
-}
-
 /* ---------- Navegacao dos modulos ---------- */
 .assoc-nav__details {
 	border: 0;
@@ -2320,50 +2203,7 @@ via fonte Dashicons.
 		gap: 14px;
 	}
 
-	/* Perfil e atendimento compactos em uma coluna */
-	.assoc-profile {
-		display: flex;
-		align-items: center;
-		gap: 14px;
-		padding: 14px 16px;
-	}
-
-	.assoc-profile__cover {
-		display: none;
-	}
-
-	.assoc-profile__body {
-		display: flex;
-		align-items: center;
-		gap: 14px;
-		padding: 0;
-		text-align: left;
-		min-width: 0;
-	}
-
-	.assoc-profile__avatar {
-		flex-shrink: 0;
-		width: 52px;
-		height: 52px;
-		margin: 0;
-		font-size: 19px;
-		border-width: 3px;
-		border-radius: 16px;
-	}
-
-	.assoc-profile__info {
-		min-width: 0;
-	}
-
-	.assoc-profile__name {
-		font-size: 15.5px;
-	}
-
-	.assoc-profile__login {
-		margin-bottom: 6px;
-	}
-
-	/* Menu de modulos recolhivel */
+		/* Menu de modulos recolhivel */
 	.assoc-nav__toggle {
 		display: flex;
 		align-items: center;
@@ -2438,10 +2278,6 @@ via fonte Dashicons.
 	.assoc-sol {
 		grid-template-columns: minmax(0, 1fr);
 		gap: 16px;
-	}
-
-	.assoc-sol__vazio {
-		grid-column: auto;
 	}
 
 	.assoc-sol__list {
@@ -3510,11 +3346,7 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 	white-space: nowrap;
 }
 
-/* ---------- Nova solicitacao (disclosure) ---------- */
-.assoc-sol__nova {
-	border: 0;
-}
-
+/* ---------- Nova solicitacao (botao que abre o form na coluna da conversa) ---------- */
 .assoc-sol__nova-btn {
 	display: flex;
 	align-items: center;
@@ -3529,20 +3361,15 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 	text-transform: uppercase;
 	color: #fff;
 	background: var(--setceb-accent);
-	border: 0;
 	border-radius: 12px;
-	cursor: pointer;
-	list-style: none;
+	text-decoration: none;
 	transition: background 0.18s ease;
 }
 
-.assoc-sol__nova-btn::-webkit-details-marker {
-	display: none;
-}
-
 .assoc-sol__nova-btn:hover,
-.assoc-sol__nova[open] .assoc-sol__nova-btn {
+.assoc-sol__nova-btn.is-active {
 	background: var(--setceb-accent-dark);
+	color: #fff;
 }
 
 .assoc-sol__nova-btn .dashicons {
@@ -3551,13 +3378,10 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 	height: 17px;
 }
 
-.assoc-sol__nova-body {
-	margin-top: 14px;
-	padding-top: 14px;
-	border-top: 1px dashed var(--setceb-border);
+/* Formulario da nova solicitacao na coluna da conversa */
+.assoc-form--nova {
+	padding: 20px;
 }
-
-/* Formulario na coluna estreita: campos empilhados. */
 
 /* ---------- Lista de solicitacoes ---------- */
 .assoc-sol__list {
@@ -3837,12 +3661,6 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 	width: 16px;
 	height: 16px;
 	color: var(--setceb-muted);
-}
-
-/* Estado vazio do modulo (sem solicitacoes) */
-.assoc-sol__vazio {
-	grid-column: 2 / -1;
-	margin-top: 0;
 }
 
 /* ---------- Foco visivel ---------- */

@@ -360,6 +360,7 @@
 	 * ============================================================ */
 	var solLinks = qsa('[data-sol-link]');
 	var solPanes = qsa('[data-sol-pane]');
+	var solNovaLink = root.querySelector('[data-sol-nova]');
 
 	function activateSolicitacao(id, options) {
 		options = options || {};
@@ -378,6 +379,12 @@
 			link.classList.toggle('is-active', ativo);
 			link.setAttribute('aria-current', ativo ? 'true' : 'false');
 		});
+
+		if (solNovaLink) {
+			var novaAtiva = 'nova' === alvo;
+			solNovaLink.classList.toggle('is-active', novaAtiva);
+			solNovaLink.setAttribute('aria-current', novaAtiva ? 'true' : 'false');
+		}
 
 		solPanes.forEach(function (pane) {
 			pane.hidden = pane.getAttribute('data-sol-pane') !== alvo;
@@ -413,6 +420,20 @@
 			}
 		});
 	});
+
+	if (solNovaLink) {
+		solNovaLink.addEventListener('click', function (event) {
+			var aberto = activateSolicitacao('nova', {
+				url: solNovaLink.getAttribute('href'),
+				scroll: true
+			});
+
+			/* Sem JS o proprio link (?sol_nova=1#juridico) abre o formulario. */
+			if (aberto && window.history && window.history.replaceState) {
+				event.preventDefault();
+			}
+		});
+	}
 
 	/* ============================================================
 	 * Seletor de ano (listbox acessivel)

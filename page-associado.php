@@ -76,13 +76,14 @@ if ( ! $notice && function_exists( 'setceb_sol_notice' ) ) {
 
 $minhas_solicitacoes = function_exists( 'setceb_sol_listar' ) ? setceb_sol_listar( array( 'usuario_id' => get_current_user_id() ) ) : array();
 $sol_aberta          = isset( $_GET['sol_id'] ) ? absint( $_GET['sol_id'] ) : 0;
+$sol_nova_aberta     = isset( $_GET['sol_nova'] ) && absint( $_GET['sol_nova'] ) > 0;
 
 /* Painel visivel: aviso de formulario > solicitacao da URL > acesso rapido. */
 $active_panel = 'visao-geral';
 
 if ( $notice ) {
 	$active_panel = $notice['forma'];
-} elseif ( $sol_aberta ) {
+} elseif ( $sol_aberta || $sol_nova_aberta ) {
 	$active_panel = 'juridico';
 }
 
@@ -167,28 +168,8 @@ $boleto_icons = array(
 $user_name  = trim( $user->first_name . ' ' . $user->last_name );
 $user_name  = '' !== trim( $user_name ) ? $user_name : $user->display_name;
 $user_email = $user->user_email;
-$user_login = $user->user_login;
 $perfil_url = setceb_associado_perfil_url();
 $senha_url  = wp_lostpassword_url( $perfil_url );
-
-/* Iniciais do associado (avatar sem foto cadastrada): primeira letra do
-   primeiro nome + primeira letra do ultimo nome. */
-$nome_partes = array_values( array_filter( (array) preg_split( '/\s+/', trim( $user_name ) ) ) );
-$iniciais    = '';
-
-if ( ! empty( $nome_partes ) ) {
-	$iniciais = mb_substr( $nome_partes[0], 0, 1 );
-
-	if ( count( $nome_partes ) > 1 ) {
-		$iniciais .= mb_substr( $nome_partes[ count( $nome_partes ) - 1 ], 0, 1 );
-	}
-}
-
-if ( '' === $iniciais ) {
-	$iniciais = mb_substr( $user_login, 0, 2 );
-}
-
-$iniciais = mb_strtoupper( $iniciais );
 
 /* Solicitacao aberta no painel do juridico (primeira da lista como padrao). */
 $sol_ids   = array_map(
@@ -199,6 +180,10 @@ $sol_ids   = array_map(
 );
 $sol_ativa = in_array( (int) $sol_aberta, $sol_ids, true ) ? (int) $sol_aberta : ( ! empty( $sol_ids ) ? (int) $sol_ids[0] : 0 );
 $sol_total = count( $minhas_solicitacoes );
+
+/* Painel "Nova solicitacao" visivel: pedido pela URL ou estado inicial de
+   quem ainda nao possui solicitacoes. */
+$sol_nova_ativa = $sol_nova_aberta || empty( $minhas_solicitacoes );
 
 /**
  * Painel ativo por padrao (classe/aria dos botoes e secoes).
@@ -275,21 +260,6 @@ function setceb_modulo_cabecalho( $key, $modulos ) {
 
 					<aside class="assoc-sidebar">
 
-						<!-- Perfil do associado -->
-						<div class="assoc-profile">
-							<div class="assoc-profile__cover" aria-hidden="true"></div>
-							<div class="assoc-profile__body">
-								<span class="assoc-profile__avatar" aria-hidden="true"><?php echo esc_html( $iniciais ); ?></span>
-								<div class="assoc-profile__info">
-									<h2 class="assoc-profile__name"><?php echo esc_html( $user_name ); ?></h2>
-									<p class="assoc-profile__login">@<?php echo esc_html( $user_login ); ?></p>
-									<span class="assoc-profile__status">
-										<span class="dashicons dashicons-yes-alt" aria-hidden="true"></span>
-										<span class="assoc-profile__role"><?php echo current_user_can( 'manage_options' ) ? 'Administrador' : 'Associado'; ?></span>
-									</span>
-								</div>
-							</div>
-						</div>
 
 						<!-- Navegacao dos modulos -->
 						<nav class="assoc-nav" aria-label="Módulos da Área do Associado">
@@ -687,55 +657,19 @@ function setceb_modulo_cabecalho( $key, $modulos ) {
 											<span class="assoc-sol__count"><?php echo esc_html( $sol_total . ' ' . ( 1 === $sol_total ? 'protocolo' : 'protocolos' ) ); ?></span>
 										</div>
 
-										<details class="assoc-sol__nova"<?php echo empty( $minhas_solicitacoes ) ? ' open' : ''; ?>>
-											<summary class="assoc-sol__nova-btn">
-												<span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span>
-												<span class="assoc-sol__nova-label">Nova solicitação</span>
-											</summary>
-
-											<div class="assoc-sol__nova-body">
-												<form class="assoc-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-assoc-form>
-													<input type="hidden" name="action" value="setceb_juridico">
-													<?php wp_nonce_field( 'setceb_form_juridico' ); ?>
-
-													<p class="assoc-hp" aria-hidden="true">
-														<label>Site<input type="text" name="setceb_website" tabindex="-1" autocomplete="off"></label>
-													</p>
-
-													<p class="assoc-form__field">
-														<label for="assoc-jur-nome">Nome completo <span aria-hidden="true">*</span></label>
-														<input type="text" id="assoc-jur-nome" name="setceb_nome" value="<?php echo esc_attr( $user_name ); ?>" required autocomplete="name">
-													</p>
-													<p class="assoc-form__field">
-														<label for="assoc-jur-email">E-mail <span aria-hidden="true">*</span></label>
-														<input type="email" id="assoc-jur-email" name="setceb_email" value="<?php echo esc_attr( $user_email ); ?>" required autocomplete="email">
-													</p>
-													<p class="assoc-form__field">
-														<label for="assoc-jur-fone">Telefone</label>
-														<input type="tel" id="assoc-jur-fone" name="setceb_telefone" autocomplete="tel">
-													</p>
-													<p class="assoc-form__field">
-														<label for="assoc-jur-empresa">Empresa</label>
-														<input type="text" id="assoc-jur-empresa" name="setceb_empresa" autocomplete="organization">
-													</p>
-
-													<p class="assoc-form__field">
-														<label for="assoc-jur-msg">Sua dúvida <span aria-hidden="true">*</span></label>
-														<textarea id="assoc-jur-msg" name="setceb_mensagem" rows="5" required placeholder="Descreva sua dúvida para o assessor jurídico..."></textarea>
-													</p>
-
-													<button type="submit" class="assoc-btn">
-														<span class="assoc-btn__label">Registrar solicitação</span>
-													</button>
-													<p class="assoc-form__note">Campos com <span aria-hidden="true">*</span> são obrigatórios.</p>
-												</form>
-											</div>
-										</details>
+										<a class="assoc-sol__nova-btn<?php echo $sol_nova_ativa ? ' is-active' : ''; ?>"
+											id="sol-nova-btn"
+											href="<?php echo esc_url( add_query_arg( 'sol_nova', 1, $perfil_url ) . '#juridico' ); ?>"
+											data-sol-nova
+											aria-current="<?php echo $sol_nova_ativa ? 'true' : 'false'; ?>">
+											<span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span>
+											<span class="assoc-sol__nova-label">Nova solicitação</span>
+										</a>
 
 										<?php if ( ! empty( $minhas_solicitacoes ) ) : ?>
 											<ul class="assoc-sol__list">
 												<?php foreach ( $minhas_solicitacoes as $sol ) : ?>
-													<?php $sol_esta_ativa = ( (int) $sol['id'] === $sol_ativa ); ?>
+													<?php $sol_esta_ativa = ( (int) $sol['id'] === $sol_ativa ) && ! $sol_nova_ativa; ?>
 													<li>
 														<a class="assoc-sol__link<?php echo $sol_esta_ativa ? ' is-active' : ''; ?>"
 															id="sol-tab-<?php echo (int) $sol['id']; ?>"
@@ -765,19 +699,57 @@ function setceb_modulo_cabecalho( $key, $modulos ) {
 										<?php endif; ?>
 									</aside>
 
-									<?php if ( empty( $minhas_solicitacoes ) ) : ?>
+									<div class="assoc-sol__panes">
 
-										<div class="assoc-empty assoc-sol__vazio">
-											<span class="dashicons dashicons-book assoc-empty__icon" aria-hidden="true"></span>
-											<p>Você ainda não possui solicitações. Use o botão <strong>Nova solicitação</strong> para enviar sua primeira dúvida.</p>
-										</div>
+										<!-- Nova solicitacao: o formulario abre na coluna da conversa -->
+										<article class="assoc-sol__pane assoc-sol__pane--nova" id="sol-pane-nova" data-sol-pane="nova" aria-labelledby="sol-nova-btn"<?php echo $sol_nova_ativa ? '' : ' hidden'; ?>>
+											<header class="assoc-sol__pane-head">
+												<div class="assoc-sol__pane-heading">
+													<h3 class="assoc-sol__pane-title">Nova solicitação</h3>
+													<p class="assoc-sol__pane-meta">Descreva sua dúvida para a Assessoria Jurídica do SETCEB. A resposta chega aqui nesta conversa.</p>
+												</div>
+											</header>
 
-									<?php else : ?>
+											<form class="assoc-form assoc-form--nova" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-assoc-form>
+												<input type="hidden" name="action" value="setceb_juridico">
+												<?php wp_nonce_field( 'setceb_form_juridico' ); ?>
 
-										<div class="assoc-sol__panes">
-											<?php foreach ( $minhas_solicitacoes as $sol ) : ?>
-												<?php $sol_esta_ativa = ( (int) $sol['id'] === $sol_ativa ); ?>
-												<article class="assoc-sol__pane" id="sol-pane-<?php echo (int) $sol['id']; ?>" data-sol-pane="<?php echo (int) $sol['id']; ?>" aria-labelledby="sol-tab-<?php echo (int) $sol['id']; ?>"<?php echo $sol_esta_ativa ? '' : ' hidden'; ?>>
+												<p class="assoc-hp" aria-hidden="true">
+													<label>Site<input type="text" name="setceb_website" tabindex="-1" autocomplete="off"></label>
+												</p>
+
+												<p class="assoc-form__field">
+													<label for="assoc-jur-nome">Nome completo <span aria-hidden="true">*</span></label>
+													<input type="text" id="assoc-jur-nome" name="setceb_nome" value="<?php echo esc_attr( $user_name ); ?>" required autocomplete="name">
+												</p>
+												<p class="assoc-form__field">
+													<label for="assoc-jur-email">E-mail <span aria-hidden="true">*</span></label>
+													<input type="email" id="assoc-jur-email" name="setceb_email" value="<?php echo esc_attr( $user_email ); ?>" required autocomplete="email">
+												</p>
+												<p class="assoc-form__field">
+													<label for="assoc-jur-fone">Telefone</label>
+													<input type="tel" id="assoc-jur-fone" name="setceb_telefone" autocomplete="tel">
+												</p>
+												<p class="assoc-form__field">
+													<label for="assoc-jur-empresa">Empresa</label>
+													<input type="text" id="assoc-jur-empresa" name="setceb_empresa" autocomplete="organization">
+												</p>
+
+												<p class="assoc-form__field">
+													<label for="assoc-jur-msg">Sua dúvida <span aria-hidden="true">*</span></label>
+													<textarea id="assoc-jur-msg" name="setceb_mensagem" rows="5" required placeholder="Descreva sua dúvida para o assessor jurídico..."></textarea>
+												</p>
+
+												<button type="submit" class="assoc-btn">
+													<span class="assoc-btn__label">Registrar solicitação</span>
+												</button>
+												<p class="assoc-form__note">Campos com <span aria-hidden="true">*</span> são obrigatórios.</p>
+											</form>
+										</article>
+
+										<?php foreach ( $minhas_solicitacoes as $sol ) : ?>
+											<?php $sol_esta_ativa = ( (int) $sol['id'] === $sol_ativa ) && ! $sol_nova_ativa; ?>
+											<article class="assoc-sol__pane" id="sol-pane-<?php echo (int) $sol['id']; ?>" data-sol-pane="<?php echo (int) $sol['id']; ?>" aria-labelledby="sol-tab-<?php echo (int) $sol['id']; ?>"<?php echo $sol_esta_ativa ? '' : ' hidden'; ?>>
 													<header class="assoc-sol__pane-head">
 														<div class="assoc-sol__pane-heading">
 															<h3 class="assoc-sol__pane-title"><?php echo esc_html( $sol['titulo'] ); ?></h3>
@@ -864,8 +836,6 @@ function setceb_modulo_cabecalho( $key, $modulos ) {
 												</article>
 											<?php endforeach; ?>
 										</div>
-
-									<?php endif; ?>
 
 								</div>
 							</section>

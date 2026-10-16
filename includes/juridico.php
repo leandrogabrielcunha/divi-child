@@ -1806,7 +1806,15 @@ function setceb_sol_redirecionar( $status, $extra = array() ) {
 		$referer = setceb_associado_perfil_url();
 	}
 
-	$referer = remove_query_arg( array( 'assoc_status', 'assoc_form', 'sol_status', 'sol_id' ), $referer );
+	$args_remover = array( 'assoc_status', 'assoc_form', 'sol_status', 'sol_id' );
+
+	/* Quando o envio e bem-sucedido e abre uma solicitacao especifica, o
+	   estado "nova solicitacao" nao deve continuar ativo. */
+	if ( isset( $extra['sol_id'] ) && $extra['sol_id'] ) {
+		$args_remover[] = 'sol_nova';
+	}
+
+	$referer = remove_query_arg( $args_remover, $referer );
 
 	// Sem duplicar a ancora caso o referer ja a traga.
 	$referer = strtok( $referer, '#' );
