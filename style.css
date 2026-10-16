@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.46.8
+Version: 1.46.9
 Template: Divi
 */
 
@@ -1683,22 +1683,6 @@ via fonte Dashicons.
 }
 
 /* ---------- Acesso rapido (visao geral) ---------- */
-.assoc-home {
-	margin: 0 0 16px;
-}
-
-.assoc-home__title {
-	margin: 0 0 4px;
-	font-size: 23px;
-	color: var(--setceb-blue);
-}
-
-.assoc-home__sub {
-	margin: 0;
-	font-size: 14px;
-	color: var(--setceb-muted);
-}
-
 .assoc-quick {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
@@ -2324,18 +2308,28 @@ via fonte Dashicons.
 		display: none;
 	}
 
+	.assoc-sol:not(.is-list) > .assoc-sol__panes .assoc-sol__placeholder {
+		display: none;
+	}
+
 	/* Cabecalho compacto: antes ocupava ~150px com 4 blocos empilhados.
 	   Agora sao 2 linhas - navegacao em cima, titulo + status embaixo. */
+	/* Barra de navegacao da conversa: so "Voltar" e "Nova". Titulo,
+	   protocolo, data e status ficam na lista - no mobile ela some da
+	   tela enquanto a conversa esta aberta, entao aqui so precisa o
+	   caminho de volta e o atalho para nova solicitacao. */
 	.assoc-sol__pane-head {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) auto;
-		grid-template-areas:
-			"voltar nova"
-			"heading badge";
+		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		column-gap: 10px;
-		row-gap: 8px;
+		justify-content: space-between;
+		gap: 8px;
 		padding: 10px 12px;
+	}
+
+	.assoc-sol__pane-heading,
+	.assoc-sol__pane-head > .assoc-badge {
+		display: none;
 	}
 
 	/* Alvos de toque de 44px: com 30px os botoes ficavam dificeis de
@@ -2345,56 +2339,18 @@ via fonte Dashicons.
 		display: inline-flex;
 		align-items: center;
 		min-height: 44px;
-		padding: 0 14px 0 11px;
-		font-size: 13px;
+		margin: 0;
+		padding: 0 16px 0 12px;
+		font-size: 13.5px;
 		border-radius: 999px;
 	}
 
 	.assoc-sol__voltar {
-		grid-area: voltar;
 		justify-self: start;
-		margin: 0;
 	}
 
 	.assoc-sol__nova-mini {
-		grid-area: nova;
 		justify-self: end;
-	}
-
-	.assoc-sol__pane-heading {
-		grid-area: heading;
-		display: flex;
-		align-items: baseline;
-		gap: 8px;
-		min-width: 0;
-		padding-right: 2px;
-	}
-
-	/* min-width:0 e obrigatorio: item flex naso encolhe abaixo do
-	   conteudo (min-width:auto), o que faria o ellipsis nao funcionar e
-	   o titulo estourar a linha, empurrando o status para fora da tela. */
-	.assoc-sol__pane-title {
-		flex: 0 1 auto;
-		min-width: 0;
-		margin: 0;
-		font-size: 15px;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	.assoc-sol__pane-meta {
-		flex: 1 1 auto;
-		min-width: 0;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	.assoc-sol__pane-head > .assoc-badge {
-		grid-area: badge;
-		align-self: center;
-		margin-top: 0;
 	}
 
 	.assoc-sol__list {
@@ -2505,10 +2461,6 @@ via fonte Dashicons.
 		font-size: 19px;
 	}
 
-	.assoc-home__title {
-		font-size: 20px;
-	}
-
 	.assoc-quick__card {
 		min-height: 132px;
 		padding: 16px;
@@ -2562,20 +2514,16 @@ via fonte Dashicons.
 		padding: 16px 14px;
 	}
 
-	/* O cabecalho compacto ja foi definido no bloco de 1200px; aqui so
-	   aperta ainda mais o espaco vertical. */
 	.assoc-sol__pane-head {
-		column-gap: 8px;
-		row-gap: 6px;
-		padding: 9px 12px;
+		gap: 8px;
+		padding: 9px 10px;
 	}
 
-	.assoc-sol__pane-title {
-		font-size: 14.5px;
-	}
-
-	.assoc-sol__pane-meta {
-		font-size: 11.5px;
+	.assoc-sol__voltar,
+	.assoc-sol__nova-mini {
+		min-height: 46px;
+		padding: 0 14px 0 11px;
+		font-size: 14px;
 	}
 }
 
@@ -3602,6 +3550,76 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 	padding: 20px;
 }
 
+/* ---------- Estados: lista vazia e coluna da conversa ---------- */
+.assoc-sol__sem-conversas {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 28px 16px;
+	text-align: center;
+	color: var(--setceb-muted);
+	background: #F8FAFC;
+	border: 1px dashed var(--setceb-border);
+	border-radius: 13px;
+}
+
+.assoc-sol__sem-conversas .dashicons {
+	font-size: 28px;
+	width: 28px;
+	height: 28px;
+	color: #B9C6D4;
+}
+
+.assoc-sol__sem-conversas p {
+	margin: 0;
+	font-size: 13.5px;
+	line-height: 1.5;
+}
+
+.assoc-sol__sem-conversas-dica {
+	font-size: 12.5px !important;
+	color: var(--setceb-muted);
+}
+
+.assoc-sol__placeholder {
+	display: grid;
+	justify-items: center;
+	gap: 6px;
+	align-content: center;
+	min-height: 260px;
+	padding: 40px 24px;
+	text-align: center;
+	color: var(--setceb-muted);
+	background: #F8FAFC;
+	border: 1px dashed var(--setceb-border);
+	border-radius: 16px;
+}
+
+.assoc-sol__placeholder .dashicons {
+	font-size: 32px;
+	width: 32px;
+	height: 32px;
+	color: #B9C6D4;
+}
+
+.assoc-sol__placeholder p {
+	margin: 0;
+	font-size: 13.5px;
+	line-height: 1.5;
+}
+
+.assoc-sol__placeholder strong {
+	color: var(--setceb-ink);
+}
+
+/* No desktop a coluna da conversa so some quando ha alguma aberta. */
+@media (min-width: 1201px) {
+	.assoc-sol:has(.assoc-sol__pane:not([hidden])) .assoc-sol__placeholder {
+		display: none;
+	}
+}
+
 /* ---------- Lista de solicitacoes ---------- */
 .assoc-sol__list {
 	display: flex;
@@ -3723,8 +3741,11 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 	display: none;
 }
 
+/* No desktop o cabecalho da conversa e desnecessario: a coluna da lista
+   ja mostra titulo, protocolo e status de cada solicitacao. Ele volta a
+   existir no mobile como barra de navegacao (ver bloco de 1200px). */
 .assoc-sol__pane-head {
-	display: flex;
+	display: none;
 	align-items: flex-start;
 	justify-content: space-between;
 	gap: 14px;

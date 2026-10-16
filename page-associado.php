@@ -92,10 +92,6 @@ $minhas_solicitacoes = function_exists( 'setceb_sol_listar' ) ? setceb_sol_lista
 $sol_aberta          = isset( $_GET['sol_id'] ) ? absint( $_GET['sol_id'] ) : 0;
 $sol_nova_aberta     = isset( $_GET['sol_nova'] ) && absint( $_GET['sol_nova'] ) > 0;
 
-/* "Voltar para solicitacoes": no mobile a lista ocupa a tela inteira e
-   a conversa abre por cima dela. Server-side para funcionar sem JS. */
-$sol_lista_aberta    = isset( $_GET['sol_lista'] ) && absint( $_GET['sol_lista'] ) > 0;
-
 /* Painel visivel: aviso de formulario > solicitacao da URL > acesso rapido. */
 $active_panel = 'visao-geral';
 
@@ -196,13 +192,22 @@ $sol_ids   = array_map(
 	},
 	$minhas_solicitacoes
 );
-$sol_ativa = in_array( (int) $sol_aberta, $sol_ids, true ) ? (int) $sol_aberta : ( ! empty( $sol_ids ) ? (int) $sol_ids[0] : 0 );
+/* Entrada padrao do Juridico: a LISTA de solicitacoes. Nenhuma conversa
+   e aberta sozinha - ela so abre quando o_assococentou nela (sol_id) ou
+   pediu uma nova (sol_nova). Antes caia na primeira solicitacao da lista
+   sem o usuario ter escolhido nada. */
+$sol_lista_aberta = ! ( $sol_aberta > 0 || $sol_nova_aberta );
+
+$sol_ativa = ( $sol_lista_aberta || ! in_array( (int) $sol_aberta, $sol_ids, true ) )
+	? 0
+	: (int) $sol_aberta;
+
 $sol_total = count( $minhas_solicitacoes );
 
-/* Painel "Nova solicitacao" visivel: pedido pela URL ou estado inicial de
-   quem ainda nao possui solicitacoes. A visao de lista (sol_lista) e
-   apenas um estado de layout do mobile e nao altera qual painel abre. */
-$sol_nova_ativa = $sol_nova_aberta || empty( $minhas_solicitacoes );
+/* Formulario de nova solicitacao: so quando explicitamente pedido. Sem
+   solicitacoes o usuario tambem cai na lista - que tem o botao "Nova" e
+   o estado vazio explicando o que fazer. */
+$sol_nova_ativa = ( ! $sol_lista_aberta ) && $sol_nova_aberta;
 
 /**
  * Painel ativo por padrao (classe/aria dos botoes e secoes).
@@ -331,11 +336,6 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 
 							<!-- VISAO GERAL -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'visao-geral', $active_panel, 'class' ) ) ); ?>" id="panel-visao-geral" role="tabpanel" aria-labelledby="tab-visao-geral" tabindex="0">
-								<div class="assoc-home">
-									<h2 class="assoc-home__title">Acesso rápido</h2>
-									<p class="assoc-home__sub">O que você precisa está a um clique.</p>
-								</div>
-
 								<div class="assoc-quick">
 									<?php $quick_primeiro = true; ?>
 									<?php foreach ( $quick_cards as $quick_key => $quick ) : ?>
@@ -662,7 +662,13 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 											<span class="assoc-sol__nova-label">Nova solicitação</span>
 										</a>
 
-										<?php if ( ! empty( $minhas_solicitacoes ) ) : ?>
+										<?php if ( empty( $minhas_solicitacoes ) ) : ?>
+											<div class="assoc-sol__sem-conversas">
+												<span class="dashicons dashicons-format-chat" aria-hidden="true"></span>
+												<p>Voce ainda nao tem nenhuma solicitacao juridica.</p>
+												<p class="assoc-sol__sem-conversas-dica">Use o botao <strong>Nova solicitacao</strong> acima para abrir um atendimento com a Assessoria Juridica.</p>
+											</div>
+										<?php else : ?>
 											<ul class="assoc-sol__list">
 												<?php foreach ( $minhas_solicitacoes as $sol ) : ?>
 													<?php $sol_esta_ativa = ( (int) $sol['id'] === $sol_ativa ) && ! $sol_nova_ativa; ?>
@@ -696,6 +702,12 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 									</aside>
 
 									<div class="assoc-sol__panes" aria-live="polite">
+
+										<div class="assoc-sol__placeholder">
+											<span class="dashicons dashicons-format-chat" aria-hidden="true"></span>
+											<p><strong>Nenhuma solicitacao aberta.</strong></p>
+											<p>Escolha uma solicitacao na lista ao lado para ver a conversa completa.</p>
+										</div>
 
 										<!-- Nova solicitacao: o formulario abre na coluna da conversa -->
 										<article class="assoc-sol__pane assoc-sol__pane--nova" id="sol-pane-nova" data-sol-pane="nova" aria-labelledby="sol-nova-btn"<?php echo $sol_nova_ativa ? '' : ' hidden'; ?>>
