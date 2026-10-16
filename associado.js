@@ -43,10 +43,16 @@
 
 		Object.keys(panels).forEach(function (name) {
 			panels[name].classList.toggle('is-active', name === key);
+			panels[name].style.display = name === key ? 'block' : 'none';
 		});
 
-		if (options.scroll && panelsBox && typeof panelsBox.scrollIntoView === 'function') {
-			panelsBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		if (options.scroll) {
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+			if (panels[key] && typeof panels[key].scrollIntoView === 'function') {
+				window.setTimeout(function () {
+					panels[key].scrollIntoView({ behavior: 'smooth', block: 'start' });
+				}, 30);
+			}
 		}
 
 		if (!options.silent && window.history && window.history.replaceState) {
