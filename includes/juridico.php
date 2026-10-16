@@ -523,6 +523,203 @@ function setceb_sol_listar( $args = array() ) {
 }
 
 /**
+ * Listagem completa das solicitacoes para o painel do advogado.
+ *
+ * Diferente de setceb_sol_listar(), que carrega o objeto completo de
+ * TODAS as solicitacoes, aqui a consulta e paginada: so os objetos da
+ * pagina atual sao montados. Isso permite listar o historico inteiro
+ * sem estourar memoria.
+ *
+ * @param array $args {
+ *     @type string $status     Filtro de status (vazio = todos).
+ *     @type string $busca      Texto livre (titulo, nome, e-mail) ou protocolo.
+ *     @type int    $pagina     Pagina atual (1-based).
+ *     @type int    $por_pagina Itens por pagina.
+ * }
+ * @return array {
+ *     @type array[] $itens   Objetos de setceb_sol_obter() da pagina.
+ *     @type int     $total   Total de solicitacoes que atendem ao filtro.
+ *     @type int     $paginas Quantidade total de paginas.
+ *     @type int     $pagina  Pagina atual.
+ * }
+ */
+function setceb_sol_listagem_admin( $args = array() ) {
+	$args = wp_parse_args(
+		$args,
+		array(
+			'status'     => '',
+			'busca'      => '',
+			'pagina'     => 1,
+			'por_pagina' => 25,
+		)
+	);
+
+	$status     = sanitize_key( $args['status'] );
+	$busca      = sanitize_text_field( $args['busca'] );
+	$pagina     = max( 1, (int) $args['pagina'] );
+	$por_pagina = max( 1, (int) $args['por_pagina'] );
+	$protocolo  = ltrim( $busca, '#' );
+
+	$consulta = array(
+		'post_type'      => SETCEB_SOL_CPT,
+		'post_status'    => 'publish',
+		'posts_per_page' => $por_pagina,
+		'orderby'        => 'date',
+		'order'          => 'DESC',
+	);
+
+	/* Protocolo (#123) e o proprio ID do post. */
+	if ( '' !== $protocolo && ctype_digit( $protocolo ) ) {
+		$consulta['p'] = (int) $protocolo;
+		$consulta['paged'] = 1;
+		$pagina = 1;
+	} else {
+		$consulta['paged'] = $pagina;
+	}
+
+	$meta_query = array();
+
+	if ( '' !== $status && isset( setceb_sol_status()[ $status ] ) ) {
+		$meta_query[] = array(
+			'key'   => '_setceb_sol_status',
+			'value' => $status,
+		);
+	}
+
+	if ( '' !== $busca && ! ctype_digit( $protocolo ) ) {
+		$consulta['s'] = $busca;
+
+		$por_texto = array(
+			'relation' => 'OR',
+			array(
+				'key'     => '_setceb_sol_nome',
+				'value'   => $busca,
+				'compare' => 'LIKE',
+			),
+			array(
+				'key'     => '_setceb_sol_email',
+				'value'   => $busca,
+				'compare' => 'LIKE',
+			),
+		);
+
+		$meta_query[] = $por_texto;
+	}
+
+	if ( $meta_query ) {
+		$consulta['meta_query'] = $meta_query;
+	}
+
+	$query = new WP_Query( $consulta );
+
+	$itens = array();
+
+	foreach ( $query->posts as $post ) {
+		$solicitacao = setceb_sol_obter( $post->ID );
+
+		if ( $solicitacao ) {
+			$itens[] = $solicitacao;
+		}
+	}
+
+	return array(
+		'itens'   => $itens,
+		'total'   => (int) $query->found_posts,
+		'paginas' => (int) $query->max_num_pages,
+		'pagina'  => $pagina,
+	);
+}
+
+/**
+ * Renderiza a conversa (historico) de uma solicitacao.
+ *
+ * Usado pela listagem do painel para exibir o conteudo sem sair da tela.
+ * Nao e um formulario: o advogado acompanha, nao responde por aqui.
+ *
+ * @param int $post_id ID da solicitacao.
+ * @return string HTML da conversa.
+ */
+function setceb_sol_render_conversa( $post_id ) {
+	$historico = setceb_sol_historico( $post_id, false );
+
+	if ( empty( $historico ) ) {
+		return '<p class="setceb-sol-vazio">Nenhuma interacao registrada.</p>';
+	}
+
+	$html = '<ol class="setceb-sol-timeline setceb-sol-timeline--leitura">';
+
+	foreach ( array_reverse( $historico ) as $registro ) {
+		$html .= sprintf(
+			'<li class="setceb-sol-timeline__item setceb-sol-timeline__item--%1$s">
+				<span class="setceb-sol-timeline__marca" aria-hidden="true"><span class="dashicons %2$s"></span></span>
+				<div class="setceb-sol-timeline__conteudo">
+					<p class="setceb-sol-timeline__meta">
+						<strong>%3$s</strong>
+						<span class="setceb-sol-timeline__rotulo">%4$s</span>
+						%5$s
+					</p>
+					%6$s
+				</div>
+			</li>',
+			esc_attr( $registro['tipo'] ),
+			esc_attr( $registro['icone'] ),
+			esc_html( $registro['autor'] ),
+			esc_html( $registro['rotulo'] ),
+			'' !== $registro['data_txt']
+				? '<time class="setceb-sol-timeline__quando">' . esc_html( $registro['data_txt'] ) . '</time>'
+				: '',
+			'' !== $registro['texto']
+				? '<div class="setceb-sol-timeline__texto">' . nl2br( esc_html( $registro['texto'] ) ) . '</div>'
+				: ''
+		);
+	}
+
+	return $html . '</ol>';
+}
+
+/**
+ * Devolve a conversa de uma solicitacao via AJAX.
+ *
+ * Leitura apenas: nao ha campo de resposta. Exige permissao de edicao
+ * sobre a solicitacao, o mesmo que abre a tela de edicao.
+ */
+function setceb_sol_ajax_conversa() {
+	$post_id = isset( $_POST['sol_id'] ) ? absint( $_POST['sol_id'] ) : 0;
+
+	if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
+		wp_send_json_error(
+			array( 'mensagem' => 'Sem permissao para ver esta solicitacao.' ),
+			403
+		);
+	}
+
+	check_ajax_referer( 'setceb_sol_conversa', 'nonce' );
+
+	$post = get_post( $post_id );
+
+	if ( ! $post || SETCEB_SOL_CPT !== $post->post_type ) {
+		wp_send_json_error( array( 'mensagem' => 'Solicitacao nao encontrada.' ), 404 );
+	}
+
+	$solicitacao = setceb_sol_obter( $post_id );
+	$contato     = array();
+
+	foreach ( array( 'nome', 'email', 'telefone', 'empresa' ) as $campo ) {
+		$contato[ $campo ] = $solicitacao[ $campo ];
+	}
+
+	wp_send_json_success(
+		array(
+			'html'      => setceb_sol_render_conversa( $post_id ),
+			'protocolo' => $solicitacao['protocolo'],
+			'titulo'    => $solicitacao['titulo'],
+			'contato'   => $contato,
+		)
+	);
+}
+add_action( 'wp_ajax_setceb_sol_conversa', 'setceb_sol_ajax_conversa' );
+
+/**
  * Relatorio com uma unica consulta, consumido pela listagem do admin e
  * pelo Dashboard. Devolve as linhas cruas (ID, data, status, advogado).
  *
@@ -2735,7 +2932,6 @@ function setceb_sol_indicadores() {
 		'recentes'     => $recentes,
 		'mes'          => $mes,
 		'solicitantes' => count( $solicitantes ),
-		'recentes_lis' => setceb_sol_listar( array( 'limite' => 8 ) ),
 	);
 }
 
@@ -2750,6 +2946,24 @@ function setceb_sol_pagina_dashboard() {
 	$dados        = setceb_sol_indicadores();
 	$status       = setceb_sol_status();
 	$total_status = max( 1, (int) $dados['total'] );
+
+	/* Filtros da listagem completa (nonce dispensado: apenas leitura). */
+	$sol_filtro_status = isset( $_GET['status'] ) ? sanitize_key( wp_unslash( $_GET['status'] ) ) : '';
+	$sol_filtro_busca  = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
+	$sol_filtro_pagina = isset( $_GET['paged'] ) ? max( 1, absint( $_GET['paged'] ) ) : 1;
+
+	if ( '' !== $sol_filtro_status && ! isset( $status[ $sol_filtro_status ] ) ) {
+		$sol_filtro_status = '';
+	}
+
+	$sol_lista = setceb_sol_listagem_admin(
+		array(
+			'status'     => $sol_filtro_status,
+			'busca'      => $sol_filtro_busca,
+			'pagina'     => $sol_filtro_pagina,
+			'por_pagina' => 25,
+		)
+	);
 	?>
 	<div class="wrap setceb-sol-wrap">
 		<h1 class="wp-heading-inline">Solicitacoes Juridicas</h1>
@@ -2844,14 +3058,58 @@ function setceb_sol_pagina_dashboard() {
 			</div>
 		</div>
 
-		<div class="setceb-sol-box">
-			<h2>Solicitacoes recentes</h2>
-			<?php if ( empty( $dados['recentes_lis'] ) ) : ?>
-				<p class="description">Nenhuma solicitacao registrada ate o momento.</p>
+<div class="setceb-sol-box setceb-sol-box--lista">
+			<h2>Todas as solicitacoes</h2>
+
+			<form class="setceb-sol-filtros" method="get">
+				<input type="hidden" name="post_type" value="<?php echo esc_attr( SETCEB_SOL_CPT ); ?>">
+				<input type="hidden" name="page" value="setceb-sol-dashboard">
+
+				<label class="setceb-sol-filtros__campo">
+					<span>Status</span>
+					<select name="status">
+						<option value="">Todos os status</option>
+						<?php foreach ( $status as $slug_status => $info_status ) : ?>
+							<option value="<?php echo esc_attr( $slug_status ); ?>" <?php selected( $sol_filtro_status, $slug_status ); ?>>
+								<?php echo esc_html( $info_status['rotulo'] ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+				</label>
+
+				<label class="setceb-sol-filtros__campo setceb-sol-filtros__campo--busca">
+					<span>Buscar</span>
+					<input type="search" name="s" value="<?php echo esc_attr( $sol_filtro_busca ); ?>" placeholder="Protocolo, titulo, nome ou e-mail">
+				</label>
+
+				<button type="submit" class="button">Filtrar</button>
+
+				<?php if ( '' !== $sol_filtro_status || '' !== $sol_filtro_busca ) : ?>
+					<a class="button-link" href="<?php echo esc_url( admin_url( 'edit.php?post_type=' . SETCEB_SOL_CPT . '&page=setceb-sol-dashboard' ) ); ?>">Limpar</a>
+				<?php endif; ?>
+			</form>
+
+			<p class="setceb-sol-contagem">
+				<?php
+				printf(
+					'%d solicitacao%s encontrada%s',
+					(int) $sol_lista['total'],
+					1 === (int) $sol_lista['total'] ? '' : 's',
+					(int) $sol_lista['total'] > (int) $sol_lista['por_pagina'] ? 's' : ''
+				);
+				?>
+				<?php if ( $sol_lista['paginas'] > 1 ) : ?>
+					&middot; pagina <?php echo (int) $sol_lista['pagina']; ?> de <?php echo (int) $sol_lista['paginas']; ?>
+				<?php endif; ?>
+			</p>
+
+			<?php if ( empty( $sol_lista['itens'] ) ) : ?>
+				<p class="description">Nenhuma solicitacao encontrada com esses filtros.</p>
 			<?php else : ?>
-				<table class="widefat striped">
+				<table class="widefat striped setceb-sol-lista" data-nonce="<?php echo esc_attr( wp_create_nonce( 'setceb_sol_conversa' ) ); ?>">
 					<thead>
 						<tr>
+							<th class="setceb-sol-col-ver">Conversa</th>
 							<th>Protocolo</th>
 							<th>Solicitante</th>
 							<th>Status</th>
@@ -2860,8 +3118,13 @@ function setceb_sol_pagina_dashboard() {
 						</tr>
 					</thead>
 					<tbody>
-						<?php foreach ( $dados['recentes_lis'] as $sol ) : ?>
-							<tr>
+						<?php foreach ( $sol_lista['itens'] as $sol ) : ?>
+							<tr class="setceb-sol-lista__linha" data-sol-id="<?php echo (int) $sol['id']; ?>">
+								<td class="setceb-sol-col-ver">
+									<button type="button" class="button button-small setceb-sol-ver" data-sol-ver="<?php echo (int) $sol['id']; ?>" aria-expanded="false" aria-controls="setceb-sol-conversa-<?php echo (int) $sol['id']; ?>">
+										Ver conversa
+									</button>
+								</td>
 								<td>
 									<a href="<?php echo esc_url( get_edit_post_link( $sol['id'] ) ); ?>">
 										<strong><?php echo esc_html( $sol['protocolo'] ); ?></strong>
@@ -2877,9 +3140,53 @@ function setceb_sol_pagina_dashboard() {
 								<td><?php echo esc_html( '' !== $sol['advogado'] ? $sol['advogado'] : '—' ); ?></td>
 								<td><?php echo esc_html( setceb_sol_data( $sol['data'] ) ); ?></td>
 							</tr>
+							<tr class="setceb-sol-lista__conversa" id="setceb-sol-conversa-<?php echo (int) $sol['id']; ?>" data-sol-painel="<?php echo (int) $sol['id']; ?>" hidden>
+								<td colspan="6">
+									<div class="setceb-sol-conversa" data-sol-conversa="<?php echo (int) $sol['id']; ?>">
+										<p class="setceb-sol-vazio">Carregando conversa…</p>
+									</div>
+								</td>
+							</tr>
 						<?php endforeach; ?>
 					</tbody>
 				</table>
+
+				<?php if ( $sol_lista['paginas'] > 1 ) : ?>
+					<div class="setceb-sol-paginacao">
+						<?php
+						echo wp_kses_post(
+							paginate_links(
+								array(
+									/* Mantem os filtros ao trocar de pagina.
+									   add_query_arg escapa '%#%' para
+									   '%25%23%25'; usa-se o padrao
+									   numerico do proprio WordPress. */
+									'base'      => str_replace(
+										'999999999',
+										'%#%',
+										esc_url(
+											add_query_arg(
+												array(
+													'paged'  => 999999999,
+													'status' => $sol_filtro_status,
+													's'      => $sol_filtro_busca,
+												),
+												admin_url( 'edit.php?post_type=' . SETCEB_SOL_CPT . '&page=setceb-sol-dashboard' )
+											)
+										)
+									),
+									'format'    => '',
+									'current'   => (int) $sol_lista['pagina'],
+									'total'     => (int) $sol_lista['paginas'],
+									'type'      => 'plain',
+									'prev_text' => '&laquo; Anteriores',
+									'next_text' => 'Proximas &raquo;',
+								)
+							)
+						);
+						?>
+					</div>
+				<?php endif; ?>
 			<?php endif; ?>
 		</div>
 	</div>
@@ -3105,11 +3412,32 @@ function setceb_sol_admin_assets( $hook ) {
 		return;
 	}
 
+	$versao = wp_get_theme()->get( 'Version' );
+
 	wp_enqueue_style(
 		'setceb-sol-admin',
 		get_stylesheet_directory_uri() . '/juridico-admin.css',
 		array(),
-		wp_get_theme()->get( 'Version' )
+		$versao
 	);
+
+	/* O "Ver conversa" so existe na listagem do dashboard. */
+	if ( $pagina === 'setceb-sol-dashboard' ) {
+		wp_enqueue_script(
+			'setceb-sol-admin',
+			get_stylesheet_directory_uri() . '/juridico-admin.js',
+			array(),
+			$versao,
+			true
+		);
+
+		wp_localize_script(
+			'setceb-sol-admin',
+			'setcebSolAdmin',
+			array(
+				'nonce' => wp_create_nonce( 'setceb_sol_conversa' ),
+			)
+		);
+	}
 }
 add_action( 'admin_enqueue_scripts', 'setceb_sol_admin_assets' );
