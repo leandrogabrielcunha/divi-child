@@ -422,6 +422,7 @@
 			}
 		}
 
+		console.info('assoc: activatePanel after toggle ->', key, 'display=', (panels[key] || {}).style ? panels[key].style.display : null, 'is-active=', !!(panels[key] && panels[key].classList.contains('is-active')));
 		return true;
 	}
 
