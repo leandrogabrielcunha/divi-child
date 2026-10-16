@@ -237,7 +237,8 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 	<header class="assoc-mod">
 		<button type="button" class="assoc-mod__back" data-open-panel="visao-geral">
 			<span class="dashicons dashicons-arrow-left-alt2" aria-hidden="true"></span>
-			Voltar ao acesso rápido
+			<span class="assoc-mod__back-full">Voltar ao acesso rápido</span>
+			<span class="assoc-mod__back-short">Voltar</span>
 		</button>
 		<div class="assoc-mod__main">
 			<span class="assoc-mod__icon"><span class="dashicons <?php echo esc_attr( $modulo['icone'] ); ?>" aria-hidden="true"></span></span>

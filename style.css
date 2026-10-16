@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.47.1
+Version: 1.47.2
 Template: Divi
 */
 
@@ -1632,6 +1632,11 @@ via fonte Dashicons.
 	height: 15px;
 }
 
+/* O rotulo curto so entra no mobile; ver bloco de 700px. */
+.assoc-mod__back-short {
+	display: none;
+}
+
 .assoc-mod__main {
 	display: flex;
 	align-items: center;
@@ -2429,27 +2434,71 @@ via fonte Dashicons.
 		grid-template-columns: 1fr;
 	}
 
+	/* Cabecalho do modulo em UMA linha no mobile.
+	   Antes: coluna (voltar + icone/titulo/descricao) = 148px + 20px de
+	   margem, ou 24% da tela antes de aparecer qualquer solicitacao. */
 	.assoc-mod {
-		padding: 16px;
+		flex-direction: row;
+		align-items: center;
+		gap: 10px;
+		margin-bottom: 12px;
+		padding: 7px 10px;
+		border-radius: 14px;
+	}
+
+	.assoc-mod__back {
+		min-height: 40px;
+		padding: 0 11px;
+		flex-shrink: 0;
+	}
+
+	.assoc-mod__back-full {
+		display: none;
+	}
+
+	.assoc-mod__back-short {
+		display: inline;
+	}
+
+	.assoc-mod__main {
+		flex: 1 1 auto;
+		gap: 10px;
+		min-width: 0;
+	}
+
+	.assoc-mod__icon {
+		width: 32px;
+		height: 32px;
+		border-radius: 9px;
+	}
+
+	.assoc-mod__title {
+		margin: 0;
+		font-size: 16px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	/* Descricao e texto de vitrine: no card do acesso rapido ela ja
+	   aparece. No mobile ela empurra a lista para fora da tela. */
+	.assoc-mod__desc {
+		display: none;
+	}
+
+	.assoc-mod__year {
+		flex-shrink: 0;
+		margin-left: auto;
 	}
 
 	.assoc-mod__main {
 		gap: 12px;
 	}
 
-	.assoc-mod__icon {
-		width: 44px;
-		height: 44px;
-	}
-
 	.assoc-mod__icon .dashicons {
-		font-size: 22px;
-		width: 22px;
-		height: 22px;
-	}
-
-	.assoc-mod__title {
-		font-size: 19px;
+		font-size: 17px;
+		width: 17px;
+		height: 17px;
 	}
 
 	.assoc-quick__card {
