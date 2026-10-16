@@ -71,14 +71,7 @@ $simuladores  = setceb_simuladores();
 $recentes     = setceb_conteudos_recentes( 8 );
 $boletos      = setceb_boletos();
 $assuntos     = setceb_contato_assuntos();
-$sol_categorias = array(
-    'trabalhista'  => 'Trabalhista',
-    'tributario'   => 'Tributário',
-    'contratual'   => 'Contratual',
-    'previdencia'  => 'INSS / Previdência',
-    'civil'        => 'Cível',
-    'outro'        => 'Outro',
-);
+$sol_categorias = setceb_sol_categorias();
 
 $notice       = setceb_associado_form_notice();
 
@@ -744,17 +737,21 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 
 													<?php /* Passo 1. Sem JS os dois passos aparecem (formulario unico). */ ?>
 													<section class="assoc-wizard__step" data-wizard-step="1">
-														<h4 class="assoc-wizard__title">Qual é o assunto?</h4>
-
-														<div class="assoc-cat-grid" role="radiogroup" aria-label="Categoria da solicitação">
-															<?php foreach ( $sol_categorias as $sol_cat_slug => $sol_cat_rotulo ) : ?>
-																<label class="assoc-cat">
-																	<input class="assoc-cat__input" type="radio" name="setceb_categoria" value="<?php echo esc_attr( $sol_cat_slug ); ?>">
-																	<span class="assoc-cat__body"><?php echo esc_html( $sol_cat_rotulo ); ?></span>
-																</label>
-															<?php endforeach; ?>
-														</div>
-														<p class="assoc-wizard__error" data-wizard-error="categoria" hidden>Escolha uma categoria para continuar.</p>
+														<?php /* Select, e nao um grupo de radios: seis bolhas de
+														   categoria ocupavam meia tela do celular, com alvo pequeno. A
+														   lista vem de setceb_sol_categorias() - a mesma funcao que o
+														   servidor usa para validar, porque um array solto no template
+														   seria a mesma lista em dois lugares. */ ?>
+														<p class="assoc-form__field">
+															<label for="assoc-jur-categoria">Qual é o assunto? <span aria-hidden="true">*</span></label>
+															<select id="assoc-jur-categoria" name="setceb_categoria" data-wizard-categoria>
+																<option value="">Selecione um assunto</option>
+																<?php foreach ( $sol_categorias as $sol_cat_slug => $sol_cat_rotulo ) : ?>
+																	<option value="<?php echo esc_attr( $sol_cat_slug ); ?>"><?php echo esc_html( $sol_cat_rotulo ); ?></option>
+																<?php endforeach; ?>
+															</select>
+														</p>
+														<p class="assoc-wizard__error" data-wizard-error="categoria" hidden>Escolha um assunto para continuar.</p>
 
 														<p class="assoc-form__field">
 															<label for="assoc-jur-msg">Descreva sua dúvida <span aria-hidden="true">*</span></label>
@@ -773,7 +770,7 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 
 														<p class="assoc-form__field">
 															<label for="assoc-jur-fone">Telefone</label>
-															<input type="tel" id="assoc-jur-fone" name="setceb_telefone" autocomplete="tel" inputmode="tel">
+															<input type="tel" id="assoc-jur-fone" name="setceb_telefone" autocomplete="tel" inputmode="tel" data-mask-phone maxlength="18" placeholder="(00) 00000-0000">
 														</p>
 														<p class="assoc-form__field">
 															<label for="assoc-jur-empresa">Empresa</label>

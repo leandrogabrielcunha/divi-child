@@ -108,6 +108,7 @@ add_action( 'the_post', 'setceb_contato_maybe_enqueue' );
  * Enfileira de fato os assets do formulario.
  */
 function setceb_contato_enqueue() {
+	wp_enqueue_script( 'setceb-mascaras' );
 	wp_enqueue_script( 'setceb-contato' );
 	wp_enqueue_style( 'dashicons' );
 }

@@ -76,45 +76,10 @@
 		}
 	}
 
-	/* ============================================================
-	 * Mascaras (telefone e CEP)
-	 * ============================================================ */
-	function maskPhone(el) {
-		el.addEventListener('input', function () {
-			var v = el.value.replace(/\D/g, '');
-			if (v.length > 11) {
-				v = v.slice(0, 11);
-			}
-			if (v.length > 0) {
-				if (v.length <= 2) {
-					v = '(' + v;
-				} else if (v.length <= 6) {
-					v = '(' + v.slice(0, 2) + ') ' + v.slice(2);
-				} else if (v.length <= 10) {
-					v = '(' + v.slice(0, 2) + ') ' + v.slice(2, 6) + '-' + v.slice(6);
-				} else {
-					v = '(' + v.slice(0, 2) + ') ' + v.slice(2, 7) + '-' + v.slice(7);
-				}
-			}
-			el.value = v;
-		});
-	}
-
-	function maskCep(el) {
-		el.addEventListener('input', function () {
-			var v = el.value.replace(/\D/g, '');
-			if (v.length > 8) {
-				v = v.slice(0, 8);
-			}
-			if (v.length > 5) {
-				v = v.slice(0, 5) + '-' + v.slice(5);
-			}
-			el.value = v;
-		});
-	}
-
-	root.querySelectorAll('[data-mask-phone]').forEach(maskPhone);
-	root.querySelectorAll('[data-mask-cep]').forEach(maskCep);
+	/* As mascaras de telefone e CEP sairam daqui para mascaras.js,
+	   que e carregado junto com este script. Era uma copia dentro deste
+	   arquivo: o portal do associado nao conseguia usar, porque cada
+	   pagina enfileira o seu proprio script. */
 
 	/* ============================================================
 	 * Auto-preenchimento do endereco a partir do CEP (ViaCEP)

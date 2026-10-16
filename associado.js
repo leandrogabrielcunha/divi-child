@@ -669,17 +669,33 @@
 			el.hidden = false;
 		}
 
+		/* O erro de "assunto" some assim que o usuario escolhe, sem
+		   esperar ele clicar em Continuar de novo. */
+		var selCategoria = form.querySelector('[data-wizard-categoria]');
+		if (selCategoria) {
+			selCategoria.addEventListener('change', function () {
+				if (selCategoria.value) {
+					limparErro('categoria');
+				}
+			});
+		}
+
 		function validaPasso1(focar) {
-			var categoria = form.querySelector('[name="setceb_categoria"]:checked');
+			var categoria = form.querySelector('[name="setceb_categoria"]');
 			var mensagem = form.querySelector('[name="setceb_mensagem"]');
 			var texto = mensagem ? mensagem.value.trim() : '';
+			var temCategoria = !!(categoria && categoria.value);
 			var ok = true;
 
-			if (categoria) {
+			if (temCategoria) {
 				limparErro('categoria');
 			} else {
-				mostrarErro('categoria', 'Escolha uma categoria para continuar.');
+				mostrarErro('categoria', 'Escolha um assunto para continuar.');
 				ok = false;
+
+				if (focar && categoria) {
+					categoria.focus();
+				}
 			}
 
 			if (texto) {
@@ -701,14 +717,15 @@
 				return;
 			}
 
-			var categoria = form.querySelector('[name="setceb_categoria"]:checked');
+			var categoria = form.querySelector('[name="setceb_categoria"]');
 			var mensagem = form.querySelector('[name="setceb_mensagem"]');
 			var rotulo = '';
 			var texto = mensagem ? mensagem.value.trim() : '';
 
-			if (categoria && categoria.closest('.assoc-cat')) {
-				var corpo = categoria.closest('.assoc-cat').querySelector('.assoc-cat__body');
-				rotulo = corpo ? corpo.textContent.trim() : '';
+			/* Select: o rotulo vem do option marcado, nunca do value,
+			   que e um slug. */
+			if (categoria && categoria.selectedIndex > 0 && categoria.options) {
+				rotulo = categoria.options[categoria.selectedIndex].textContent.trim();
 			}
 
 			/* Montado com nos, nunca innerHTML: o texto vem do usuario. */
@@ -718,11 +735,12 @@
 			titulo.textContent = rotulo || 'Sem categoria';
 			recap.appendChild(titulo);
 
-			recap.appendChild(
-				document.createTextNode(
-					texto.length > 160 ? texto.slice(0, 160) + '…' : texto
-				)
-			);
+			/* Nó de bloco, não text node solto: um text node cai na
+			   mesma linha do <strong> e o resumo vira
+			   "TributárioFui cobrado...". */
+			var corpo = document.createElement('span');
+			corpo.textContent = texto.length > 160 ? texto.slice(0, 160) + '…' : texto;
+			recap.appendChild(corpo);
 
 			recap.hidden = false;
 		}

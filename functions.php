@@ -95,6 +95,31 @@ function setceb_login_header_title() {
 add_filter( 'login_headertext', 'setceb_login_header_title' );
 
 /*================================================
+#SETCEB - Mascaras de formulario (componente)
+mascaras.js e carregado por quem precisa, com
+wp_enqueue_script( 'setceb-mascaras' ). Hoje:
+- includes/contato.php  (telefone e CEP do formulario)
+- includes/associado.php (telefone da solicitacao)
+
+Registrado uma vez aqui para nao repetir o
+register nos dois modulos. Age em
+[data-mask-phone] e [data-mask-cep], sem
+seletor de raiz, entao serve a qualquer pagina.
+================================================*/
+function setceb_mascaras_register() {
+	$theme = wp_get_theme();
+
+	wp_register_script(
+		'setceb-mascaras',
+		get_stylesheet_directory_uri() . '/mascaras.js',
+		array(),
+		$theme->get( 'Version' ),
+		true
+	);
+}
+add_action( 'wp_enqueue_scripts', 'setceb_mascaras_register' );
+
+/*================================================
 #SETCEB - Regras de negocio do Associado
 Role "associado", noticias restritas e area do
 associado (perfil). Ver includes/associado.php

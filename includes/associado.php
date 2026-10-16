@@ -312,6 +312,8 @@ function setceb_associado_enqueue_assets() {
 
 	wp_enqueue_style( 'dashicons' );
 
+	wp_enqueue_script( 'setceb-mascaras' );
+
 	wp_enqueue_script(
 		'setceb-associado',
 		get_stylesheet_directory_uri() . '/associado.js',

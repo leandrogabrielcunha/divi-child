@@ -240,6 +240,41 @@ function setceb_sol_status() {
 }
 
 /**
+ * Categorias de assunto da solicitacao juridica.
+ *
+ * Fonte unica: o select do formulario e a validacao do servidor leem
+ * daqui. A lista nao pode existir em dois lugares - quando existia, o
+ * servidor aceitava qualquer valor no POST e a categoria gravada
+ * podia ser um slug que o formulario nunca offeria.
+ *
+ * @return array<string,string> slug => rotulo exibido.
+ */
+function setceb_sol_categorias() {
+	$categorias = array(
+		'trabalhista' => 'Trabalhista',
+		'tributario'  => 'Tributário',
+		'contratual'  => 'Contratual',
+		'previdencia' => 'INSS / Previdência',
+		'civil'       => 'Cível',
+		'outro'       => 'Outro',
+	);
+
+	return apply_filters( 'setceb_sol_categorias', $categorias );
+}
+
+/**
+ * Uma categoria enviada no POST e valida?
+ *
+ * @param string $slug Valor recebido.
+ * @return bool
+ */
+function setceb_sol_categoria_valida( $slug ) {
+	$slug = (string) $slug;
+
+	return '' !== $slug && array_key_exists( $slug, setceb_sol_categorias() );
+}
+
+/**
  * Status padrao de uma solicitacao recem-criada.
  *
  * @return string
@@ -2113,8 +2148,15 @@ function setceb_sol_process_nova() {
 	$email    = isset( $_POST['setceb_email'] ) ? sanitize_email( wp_unslash( $_POST['setceb_email'] ) ) : '';
 	$telefone = isset( $_POST['setceb_telefone'] ) ? sanitize_text_field( wp_unslash( $_POST['setceb_telefone'] ) ) : '';
 	$empresa  = isset( $_POST['setceb_empresa'] ) ? sanitize_text_field( wp_unslash( $_POST['setceb_empresa'] ) ) : '';
-$categoria = isset( $_POST['setceb_categoria'] ) ? sanitize_key( wp_unslash( $_POST['setceb_categoria'] ) ) : '';
+	$categoria = isset( $_POST['setceb_categoria'] ) ? sanitize_key( wp_unslash( $_POST['setceb_categoria'] ) ) : '';
 	$mensagem = isset( $_POST['setceb_mensagem'] ) ? sanitize_textarea_field( wp_unslash( $_POST['setceb_mensagem'] ) ) : '';
+
+	/* A categoria so passa se existir na lista. Antes bastava nao ser
+	   vazia: um POST manual gravava um slug que o formulario nunca
+	   offeria, e o painel mostrava um rotulo vazio. */
+	if ( ! setceb_sol_categoria_valida( $categoria ) ) {
+		$categoria = '';
+	}
 
 	if ( '' === $nome || '' === $mensagem || '' === $categoria || ! is_email( $email ) ) {
 		setceb_sol_redirecionar( 'campos' );
