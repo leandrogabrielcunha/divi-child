@@ -316,13 +316,20 @@ function setceb_sol_status_info( $slug ) {
 function setceb_sol_register_cpt() {
 	$rotulo = 'Solicitacoes Juridicas';
 
+	/* O menu de nivel superior do modulo se chama "Juridico" e a
+	   listagem e o primeiro submenu dele. Sao dois rotulos distintos de
+	   proposito: com os dois iguais, "Juridico > Solicitacoes Juridicas"
+	   e o proprio item de topo pareciam dois menus. */
+	$rotulo_menu = 'Juridico';
+	$rotulo_lista = 'Solicitacoes';
+
 	register_post_type(
 		SETCEB_SOL_CPT,
 		array(
 			'labels'          => array(
 				'name'                  => $rotulo,
 				'singular_name'         => 'Solicitacao Juridica',
-				'menu_name'             => $rotulo,
+				'menu_name'             => $rotulo_menu,
 				'name_admin_bar'        => 'Solicitacao Juridica',
 				'add_new'               => 'Nova Solicitacao',
 				'add_new_item'          => 'Registrar Solicitacao',
@@ -332,7 +339,7 @@ function setceb_sol_register_cpt() {
 				'search_items'          => 'Buscar em ' . $rotulo,
 				'not_found'             => 'Nenhuma solicitacao registrada.',
 				'not_found_in_trash'    => 'Nenhuma solicitacao na lixeira.',
-				'all_items'             => 'Todas as Solicitacoes',
+				'all_items'             => $rotulo_lista,
 				'featured_image'        => '',
 				'items_list'            => 'Solicitacoes',
 				'item_published'        => 'Solicitacao registrada.',
@@ -387,9 +394,8 @@ add_filter( 'use_block_editor_for_post_type', 'setceb_sol_block_editor', 10, 2 )
 /**
  * Slug do dashboard juridico.
  *
- * Fica em uma constante para o menu, os links internos e a paginacao
- * falarem do mesmo nome. O slug do top-level do WordPress e sempre
- * relativo, entao a URL final e admin.php?page=setceb-sol-dashboard.
+ * Fica em uma funcao para o menu, os links internos e a paginacao
+ * falarem do mesmo nome.
  *
  * @return string
  */
@@ -400,10 +406,18 @@ function setceb_sol_dashboard_slug() {
 /**
  * URL completa do dashboard juridico.
  *
+ * O dashboard e submenu do post type, entao a URL e
+ * edit.php?post_type=...&page=... e nao admin.php?page=...: a segunda
+ * forma so existe para menu de nivel superior.
+ *
+ * @param array $args Query args a acrescentar.
  * @return string
  */
 function setceb_sol_dashboard_url( $args = array() ) {
-	return add_query_arg( $args, admin_url( 'admin.php?page=' . setceb_sol_dashboard_slug() ) );
+	return add_query_arg(
+		$args,
+		admin_url( 'edit.php?post_type=' . SETCEB_SOL_CPT . '&page=' . setceb_sol_dashboard_slug() )
+	);
 }
 
 /**
@@ -2818,26 +2832,7 @@ function setceb_sol_remover_advogado( $user_id ) {
  * Ambas exigem "manage_options": a equipe juridica ve apenas a
  * listagem e o atendimento das solicitacoes.
  */
-function setceb_sol_menu() {
-	$listagem = 'edit.php?post_type=' . SETCEB_SOL_CPT;
-
-	/* O dashboard e top-level: e assim que
-	   admin.php?page=setceb-sol-dashboard responde. Como submenu de
-	   post type ele vivia em
-	   edit.php?post_type=...&page=setceb-sol-dashboard, e o acesso
-	   direto pela URL de top-level dava pagina em branco - que era
-	   como o|time chegava nele. */
-	add_menu_page(
-		'Dashboard Juridico',
-		'Dashboard Juridico',
-		'manage_options',
-		setceb_sol_dashboard_slug(),
-		'setceb_sol_pagina_dashboard',
-		'dashicons-dashboard',
-		37
-	);
-
-	/* Atalho dentro de Solicitacoes, apontando para o mesmo slug. */
+function setceb_sol_submenus( $listagem ) {
 	add_submenu_page(
 		$listagem,
 		'Dashboard Juridico',
@@ -2855,6 +2850,22 @@ function setceb_sol_menu() {
 		'setceb-sol-advogados',
 		'setceb_sol_pagina_advogados'
 	);
+}
+
+function setceb_sol_menu() {
+	$listagem = 'edit.php?post_type=' . SETCEB_SOL_CPT;
+
+	/* Tudo abaixo do menu "Juridico", que e o top-level do post type.
+
+	   O dashboard JA foi registrado como top-level E como submenu com o
+	   mesmo slug. O WordPress resolve o submenu olhando
+	   $admin_page_hooks: como o slug ja era top-level, o submenu herdava o
+	   hookname "toplevel_page_setceb-sol-dashboard" e os dois itens
+	   levavam a mesma pagina. Pior: a duplicidade fazia o item de topo
+	   "Solicitacoes Juridicas" resolver tambem para o dashboard.
+
+	   Um slug por item de menu, e o dashboard so como submenu. */
+	setceb_sol_submenus( $listagem );
 }
 add_action( 'admin_menu', 'setceb_sol_menu', 20 );
 
@@ -2885,6 +2896,46 @@ function setceb_sol_bloquear_criacao() {
 add_action( 'admin_init', 'setceb_sol_bloquear_criacao', 5 );
 
 /**
+ * Manda a URL antiga do dashboard para a de submenu.
+ *
+ * O dashboard ja foi top-level, e a URL
+ * admin.php?page=setceb-sol-dashboard pode estar em link salvo, em
+ * favoravel ou em texto antigo. Como submenu ele responde em
+ * edit.php?post_type=...&page=..., e a forma de top-level agora
+ * devolveria "sem permissao" sem explicar o motivo.
+ *
+ * O redirect e estrito: so quando "page" e o dashboard E "post_type"
+ * nao veio na URL, que e a assinatura da forma de top-level.
+ */
+function setceb_sol_redirecionar_dashboard() {
+	global $pagenow;
+
+	if ( 'admin.php' !== $pagenow ) {
+		return;
+	}
+
+	$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+
+	if ( setceb_sol_dashboard_slug() !== $page ) {
+		return;
+	}
+
+	if ( ! empty( $_GET['post_type'] ) ) {
+		return;
+	}
+
+	/* Preserva filtros, busca e paginacao: quem chega por link salvo
+	   pode estar no meio de um filtro, e perder isso jogaria a pessoa
+	   numa tela diferente da que ela abriu. */
+	$resto = $_GET;
+	unset( $resto['page'], $resto['post_type'], $resto['_wpnonce'] );
+
+	wp_safe_redirect( setceb_sol_dashboard_url( array_map( 'sanitize_text_field', wp_unslash( $resto ) ) ) );
+	exit;
+}
+add_action( 'admin_init', 'setceb_sol_redirecionar_dashboard', 5 );
+
+/**
  * Garante que o menu de nivel superior do modulo exista.
  *
  * Assim como os demais CPTs da area do associado, outro plugin pode
@@ -2911,6 +2962,9 @@ function setceb_sol_garantir_menu() {
 		return;
 	}
 
+	/* O titulo do item de topo e "Juridico" (menu_name), nao
+	   "Solicitacoes Juridicas" (name). Sao dois rotulos diferentes de
+	   proposito: um nomeia o modulo, o outro nomeia a listagem. */
 	add_menu_page(
 		$obj->labels->name,
 		$obj->labels->menu_name,
@@ -2922,6 +2976,10 @@ function setceb_sol_garantir_menu() {
 	);
 
 	add_submenu_page( $slug, $obj->labels->all_items, $obj->labels->all_items, $obj->cap->edit_posts, $slug );
+
+	/* Sem isto, um plugin que derrubasse o menu perderia o Dashboard e
+	   os Advogados junto - e o modulo ficaria so com a listagem. */
+	setceb_sol_submenus( $slug );
 }
 add_action( 'admin_menu', 'setceb_sol_garantir_menu', 100 );
 
@@ -3275,7 +3333,7 @@ function setceb_sol_pagina_dashboard() {
 
 			<form class="setceb-sol-filtros" method="get">
 				<input type="hidden" name="post_type" value="<?php echo esc_attr( SETCEB_SOL_CPT ); ?>">
-				<input type="hidden" name="page" value="setceb-sol-dashboard">
+				<input type="hidden" name="page" value="<?php echo esc_attr( setceb_sol_dashboard_slug() ); ?>">
 
 				<label class="setceb-sol-filtros__campo">
 					<span>Status</span>
@@ -3628,7 +3686,7 @@ function setceb_sol_admin_assets( $hook ) {
 	);
 
 	/* O "Ver conversa" so existe na listagem do dashboard. */
-	if ( $pagina === 'setceb-sol-dashboard' ) {
+	if ( setceb_sol_dashboard_slug() === $pagina ) {
 		wp_enqueue_script(
 			'setceb-sol-admin',
 			get_stylesheet_directory_uri() . '/juridico-admin.js',
