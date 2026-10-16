@@ -1781,28 +1781,43 @@ function setceb_sol_email_assunto( $texto ) {
 }
 
 /**
- * Corpo do e-mail de aviso para a equipe juridica.
+ * Corpo curto de aviso, usado por TODOS os e-mails do juridico.
  *
- * O aviso nao carrega a solicitacao: nem identificacao do associado,
- * nem o texto da duvida, nem link de edicao. Ele diz o que houve e
- * aponta para o painel, onde o|time ja tem tudo em um lugar so. O
- * pedido foi explicito: "apenas falar que ele recebeu uma nova
- * solicitacao e apontar para o painel".
+ * Nenhum dos quatro avisos carrega a conversa: nem a duvida, nem a
+ * resposta, nem os dados de quem escreveu, nem o status. Todos sao uma
+ * frase e um link. Quem tem que ler, responde ou acompanha entra pelo
+ * link - e o link ja abre o lugar certo, entao o aviso e so o aviso.
  *
- * @param string $frase O que aconteceu, em uma frase.
+ * @param string      $frase O que aconteceu, em uma frase.
+ * @param string|null $url   Link a mostrar. Padrao: o painel do advogado.
  * @return array Linhas do corpo.
  */
-function setceb_sol_email_corpo_painel( $frase ) {
+function setceb_sol_email_corpo_painel( $frase, $url = null ) {
 	return array(
 		$frase,
 		'',
 		'Acompanhe pelo painel:',
-		setceb_sol_admin_url(),
+		null === $url ? setceb_sol_admin_url() : $url,
 		'',
 		'-- ',
 		wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ),
 	);
 }
+
+/**
+ * Link que abre a solicitacao ja na Area do Associado.
+ *
+ * Mesmo formato do link que o proprio portal usa na lista
+ * (?sol_id=N#juridico), para o aviso cair direto na conversa em vez de
+ * exigir que o associado ache o atendimento entre os outros.
+ *
+ * @param int $post_id ID da solicitacao.
+ * @return string
+ */
+function setceb_sol_url_conversa( $post_id ) {
+	return add_query_arg( 'sol_id', (int) $post_id, setceb_associado_perfil_url() ) . '#juridico';
+}
+
 
 /**
  * Linhas de identification da solicitacao, comuns aos e-mails.
@@ -1886,10 +1901,16 @@ function setceb_sol_email_nova_solicitacao( $post_id ) {
 }
 
 /**
- * Notifica o associado sobre a resposta do juridico.
+ * Avisa o associado que a solicitacao foi respondida.
  *
- * @param int    $post_id ID da solicitacao.
- * @param string $resposta Texto da resposta.
+ * O aviso nao carrega a resposta: ela fica na Area do Associado, onde
+ * ele pode ler, responder e ter o historico inteiro. O mesmo vale para
+ * o aviso de mudanca de status. O e-mail e o aviso, nao o atendimento.
+ *
+ * @param int    $post_id  ID da solicitacao.
+ * @param string $resposta Texto da resposta (nao vai no e-mail; o
+ *                        parametro segue por compatibilidade de quem
+ *                        chama e por causa do registro no historico).
  */
 function setceb_sol_email_associado( $post_id, $resposta ) {
 	$solicitacao = setceb_sol_obter( $post_id );
@@ -1898,33 +1919,26 @@ function setceb_sol_email_associado( $post_id, $resposta ) {
 		return;
 	}
 
-	$atendente = $solicitacao['advogado'] ? $solicitacao['advogado'] : 'Assessoria Juridica';
-
-	$linhas = array_merge(
-		array( 'Ola, ' . $solicitacao['nome'] . '!', '' ),
-		setceb_sol_linhas( setceb_sol_email_identificacao( $solicitacao ) ),
-		array(
-			'',
-			'Resposta de ' . $atendente . ':',
-			$resposta,
-			'',
-			'O andamento completo esta disponivel na Area do Associado, em Juridico.',
-			setceb_associado_perfil_url() . '#panel-juridico',
-		)
-	);
-
 	setceb_sol_email(
 		$solicitacao['email'],
-		setceb_sol_email_assunto( 'Resposta da sua solicitacao juridica ' . $solicitacao['protocolo'] ),
-		setceb_sol_linhas( $linhas )
+		setceb_sol_email_assunto( 'Resposta na sua solicitacao ' . $solicitacao['protocolo'] ),
+		setceb_sol_email_corpo_painel(
+			'A Assessoria Juridica respondeu a sua solicitacao ' . $solicitacao['protocolo'] . '.',
+			setceb_sol_url_conversa( $post_id )
+		)
 	);
 }
 
 /**
- * Notifica o associado sobre a mudanca de status.
+ * Avisa o associado que a solicitacao mudou de status.
+ *
+ * Como o resto: uma frase e o link da conversa. Nem o rotulo do
+ * status vai no e-mail - se o status fosse uma novelty isolada, o
+ * associado receberia um aviso que nao diz nada; o que importa e que a
+ * solicitacao se moveu, e ele ve onde ela esta.
  *
  * @param int    $post_id ID da solicitacao.
- * @param string $status  Novo status.
+ * @param string $status  Novo status (nao vai no e-mail).
  */
 function setceb_sol_email_associado_status( $post_id, $status ) {
 	$solicitacao = setceb_sol_obter( $post_id );
@@ -1933,29 +1947,13 @@ function setceb_sol_email_associado_status( $post_id, $status ) {
 		return;
 	}
 
-	$info    = setceb_sol_status_info( $status );
-	$explica = array(
-		'aguardando_associado' => 'O juridico precisa de mais alguma informacao sua. Voce pode responder direto pela Area do Associado.',
-		'encerrada'            => 'Esta solicitacao foi encerrada. Se ainda for necessario, abra uma nova solicitacao.',
-		'respondida'           => 'Sua solicitacao foi respondida. Consulte a resposta na Area do Associado.',
-	);
-
-	$linhas = array_merge(
-		array( 'Ola, ' . $solicitacao['nome'] . '!', '' ),
-		setceb_sol_linhas( setceb_sol_email_identificacao( $solicitacao ) ),
-		array(
-			'',
-			'Status atual: ' . $info['rotulo'],
-			isset( $explica[ $status ] ) ? $explica[ $status ] : '',
-			'',
-			'Consulta e responda em: ' . setceb_associado_perfil_url() . '#panel-juridico',
-		)
-	);
-
 	setceb_sol_email(
 		$solicitacao['email'],
-		setceb_sol_email_assunto( 'Atualizacao da solicitacao juridica ' . $solicitacao['protocolo'] ),
-		setceb_sol_linhas( $linhas )
+		setceb_sol_email_assunto( 'Atualizacao na sua solicitacao ' . $solicitacao['protocolo'] ),
+		setceb_sol_email_corpo_painel(
+			'A sua solicitacao ' . $solicitacao['protocolo'] . ' foi atualizada.',
+			setceb_sol_url_conversa( $post_id )
+		)
 	);
 }
 
