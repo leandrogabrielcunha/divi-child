@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.47.4
+Version: 1.47.5
 Template: Divi
 */
 
@@ -2270,132 +2270,6 @@ via fonte Dashicons.
 	}
 }
 
-@media (max-width: 1200px) {
-	/* Juridico no mobile: modo conversa.
-
-	   1) Sem scroll aninhado - a pagina rola uma vez so (antes eram tres:
-	      pagina + lista de 320px + conversa de 62vh).
-	   2) A conversa ocupa a tela inteira e a lista some, com botao de volta
-	      (regra do WhatsApp/Intercom). Estado controlado pela classe
-	      is-list, que vem do PHP (?sol_lista=1) e funciona sem JS.
-	   3) O campo de resposta fica grudado no rodape, sempre alcancavel. */
-	.assoc-sol {
-		grid-template-columns: minmax(0, 1fr);
-		gap: 14px;
-	}
-
-	/* O tema so aplica border-box em body.login. Sem isto, width:100%
-	   + padding estoura a largura do card (content-box). */
-	.assoc-sol,
-	.assoc-sol *,
-	.assoc-sol *::before,
-	.assoc-sol *::after {
-		box-sizing: border-box;
-	}
-
-	/* Chat em 100% da largura disponivel: nenhuma coluna com px fixo,
-	   nenhum min-width que estoure a tela. */
-	.assoc-sol,
-	.assoc-sol__side,
-	.assoc-sol__panes,
-	.assoc-sol__pane,
-	.assoc-sol__pane-head,
-	.assoc-thread,
-	.assoc-form--nova,
-	.assoc-form--resposta {
-		width: 100%;
-		min-width: 0;
-		max-width: 100%;
-	}
-
-	.assoc-sol__side,
-	.assoc-sol__pane {
-		border-radius: 14px;
-	}
-
-	/* A lista so aparece quando o modo lista esta ativo. */
-	.assoc-sol:not(.is-list) > .assoc-sol__side {
-		display: none;
-	}
-
-	.assoc-sol.is-list > .assoc-sol__panes {
-		display: none;
-	}
-
-	/* Cabecalho compacto: antes ocupava ~150px com 4 blocos empilhados.
-	   Agora sao 2 linhas - navegacao em cima, titulo + status embaixo. */
-	/* Barra de navegacao da conversa: so "Voltar" e "Nova". Titulo,
-	   protocolo, data e status ficam na lista - no mobile ela some da
-	   tela enquanto a conversa esta aberta, entao aqui so precisa o
-	   caminho de volta e o atalho para nova solicitacao. */
-	/* Barra minima do chat: apenas o caminho de volta para a lista.
-	   Titulo, protocolo, data e status pertencem a lista - no mobile ela
-	   some da tela enquanto a conversa esta aberta. */
-	.assoc-sol__pane-head {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		padding: 8px 10px;
-	}
-
-	/* Alvo de toque de 44px: com 30px era dificil acertar no celular. */
-	.assoc-sol__voltar {
-		display: inline-flex;
-		align-items: center;
-		min-height: 44px;
-		margin: 0;
-		padding: 0 16px 0 12px;
-		font-size: 13.5px;
-		border-radius: 999px;
-	}
-
-	.assoc-sol__list {
-		max-height: none;
-		overflow: visible;
-	}
-
-	/* A conversa flui na pagina: sem caixa rolavel. */
-	.assoc-thread {
-		max-height: none;
-		overflow: visible;
-		padding: 16px 14px;
-	}
-
-	.assoc-thread__msg {
-		max-width: 94%;
-	}
-
-	/* Nome longo nao pode estourar a bolha. */
-	.assoc-thread__who,
-	.assoc-thread__who strong {
-		min-width: 0;
-		overflow-wrap: anywhere;
-	}
-
-	/* position: sticky exige que nenhum ancestral corte o overflow. */
-	.assoc-sol__pane {
-		overflow: visible;
-	}
-
-	/* Barra de resposta fixa: sempre alcancavel, sem rolar ate o fim.
-	   A borda inferior e o raio ficam com o proprio painel. */
-	.assoc-form--resposta {
-		position: sticky;
-		bottom: 0;
-		z-index: 5;
-		padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
-		background: #fff;
-		border-top: 1px solid var(--setceb-border);
-		border-radius: 0 0 13px 13px;
-		box-shadow: 0 -6px 18px rgba(18, 61, 115, 0.09);
-	}
-
-	.assoc-form--resposta .assoc-btn {
-		width: 100%;
-		justify-content: center;
-	}
-}
-
 @media (max-width: 1024px) {
 	.assoc-sidebar {
 		display: none;
@@ -2557,32 +2431,6 @@ via fonte Dashicons.
 		width: 100%;
 	}
 
-	/* Cartoes das conversas maiores: antes ficavam espremidos e sem
-       area de toque confortavel. */
-	.assoc-sol__link {
-		grid-template-columns: 38px minmax(0, 1fr);
-		min-height: 68px;
-		padding: 13px 12px;
-	}
-
-	.assoc-sol__link-title {
-		font-size: 14.5px;
-	}
-
-	.assoc-sol__link-meta {
-		font-size: 12.5px;
-	}
-
-	.assoc-sol__side {
-		padding: 12px;
-	}
-
-	.assoc-sol__link .assoc-badge {
-		grid-column: 2;
-		justify-self: start;
-		margin-top: 6px;
-	}
-
 	/* iOS/Safari dá zoom automático ao focar campos com fonte < 16px,
 	   o que quebra o layout da conversa ao digitar a resposta. */
 	.assoc-form__field input,
@@ -2590,21 +2438,6 @@ via fonte Dashicons.
 	.assoc-form__field textarea {
 		font-size: 16px;
 		min-height: 52px;
-	}
-
-	.assoc-form--nova,
-	.assoc-form--resposta {
-		padding: 16px 14px;
-	}
-
-	.assoc-sol__pane-head {
-		padding: 8px;
-	}
-
-	.assoc-sol__voltar {
-		min-height: 46px;
-		padding: 0 14px 0 11px;
-		font-size: 14px;
 	}
 }
 
@@ -2615,10 +2448,6 @@ via fonte Dashicons.
 
 	.assoc-quick {
 		grid-template-columns: minmax(0, 1fr);
-	}
-
-	.assoc-sol__side {
-		padding: 14px;
 	}
 
 	.assoc-list__item {
@@ -3783,54 +3612,6 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 	display: none;
 }
 
-/* No desktop o cabecalho da conversa e desnecessario: a coluna da lista
-   ja mostra titulo, protocolo e status. O mobile trata a barra no bloco
-   de 1200px. Nao declarar display:none AQUI: esta regra vem depois do
-   media query no arquivo e media query nao ganha especificidade, o que
-   esconderia o botao de voltar justamente no mobile. */
-.assoc-sol__pane-head {
-	align-items: flex-start;
-	justify-content: space-between;
-	gap: 14px;
-	flex-wrap: wrap;
-	padding: 18px 20px;
-	border-bottom: 1px solid var(--setceb-border);
-}
-
-/* ---------- Voltar para as solicitacoes ----------
-   Só aparece no mobile; o hide fica no bloco min-width:1201px do fim. */
-.assoc-sol__voltar {
-	align-items: center;
-	gap: 6px;
-	align-self: flex-start;
-	margin: -4px 0 10px;
-	padding: 7px 12px 7px 10px;
-	font-family: inherit;
-	font-size: 13px;
-	font-weight: 700;
-	line-height: 1.2;
-	color: var(--setceb-accent-dark);
-	background: var(--setceb-accent-tint);
-	border-radius: 999px;
-	text-decoration: none;
-	-webkit-tap-highlight-color: transparent;
-	transition: background 0.15s ease;
-}
-
-.assoc-sol__voltar:hover,
-.assoc-sol__voltar:focus-visible {
-	background: #D9EDF1;
-	color: var(--setceb-accent-dark);
-	text-decoration: none;
-}
-
-.assoc-sol__voltar .dashicons {
-	flex-shrink: 0;
-	font-size: 16px;
-	width: 16px;
-	height: 16px;
-}
-
 /* ---------- Wizard da nova solicitacao ----------
    Passo 1: assunto + duida. Passo 2: dados de contato (opcionais).
    Sem JS os dois passos aparecem, como o formulario unico de antes. */
@@ -4173,4 +3954,240 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 .assoc-sol__link:focus-visible {
 	outline: 3px solid rgba(18, 61, 115, 0.55);
 	outline-offset: 2px;
+}
+
+/* ============================================================
+ * Juridico no mobile
+ *
+ * Estas regras ficam AQUI, depois das regras base da secao, e nao
+ * no bloco de 1200px do "Area do Associado v2". Media query nao
+ * aumenta especificidade: enquanto a secao base do juridico ficava
+ * depois daquele bloco, cada valor de mobile era sobrescrito pela
+ * regra base. Medido no iPhone 12: a conversa continuava com
+ * max-height de 520px (scroll aninhado), padding de 20px e a barra
+ * de resposta sem o espacaco da area segura do iPhone.
+ *
+ * A ordem e decrescente (1200 -> 700 -> 480) para que a faixa mais
+ * estreita seja a ultima a falar.
+ * ============================================================ */
+@media (max-width: 1200px) {
+	/* Juridico no mobile: modo conversa.
+
+	   1) Sem scroll aninhado - a pagina rola uma vez so (antes eram tres:
+	      pagina + lista de 320px + conversa de 62vh).
+	   2) A conversa ocupa a tela inteira e a lista some, com botao de volta
+	      (regra do WhatsApp/Intercom). Estado controlado pela classe
+	      is-list, que vem do PHP (?sol_lista=1) e funciona sem JS.
+	   3) O campo de resposta fica grudado no rodape, sempre alcancavel. */
+	.assoc-sol {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 14px;
+	}
+
+	/* O tema so aplica border-box em body.login. Sem isto, width:100%
+	   + padding estoura a largura do card (content-box). */
+	.assoc-sol,
+	.assoc-sol *,
+	.assoc-sol *::before,
+	.assoc-sol *::after {
+		box-sizing: border-box;
+	}
+
+	/* Chat em 100% da largura disponivel: nenhuma coluna com px fixo,
+	   nenhum min-width que estoure a tela. */
+	.assoc-sol,
+	.assoc-sol__side,
+	.assoc-sol__panes,
+	.assoc-sol__pane,
+	.assoc-sol__pane-head,
+	.assoc-thread,
+	.assoc-form--nova,
+	.assoc-form--resposta {
+		width: 100%;
+		min-width: 0;
+		max-width: 100%;
+	}
+
+	.assoc-sol__side,
+	.assoc-sol__pane {
+		border-radius: 14px;
+	}
+
+	/* A lista so aparece quando o modo lista esta ativo. */
+	.assoc-sol:not(.is-list) > .assoc-sol__side {
+		display: none;
+	}
+
+	.assoc-sol.is-list > .assoc-sol__panes {
+		display: none;
+	}
+
+	/* Cabecalho compacto: antes ocupava ~150px com 4 blocos empilhados.
+	   Agora sao 2 linhas - navegacao em cima, titulo + status embaixo. */
+	/* Barra de navegacao da conversa: so "Voltar" e "Nova". Titulo,
+	   protocolo, data e status ficam na lista - no mobile ela some da
+	   tela enquanto a conversa esta aberta, entao aqui so precisa o
+	   caminho de volta e o atalho para nova solicitacao. */
+	/* Barra minima do chat: apenas o caminho de volta para a lista.
+	   Titulo, protocolo, data e status pertencem a lista - no mobile ela
+	   some da tela enquanto a conversa esta aberta.
+
+	   O estilo inteiro da barra mora AQUI, e nao numa regra base. O
+	   cabecalho e escondido no desktop (bloco min-width:1201px do fim),
+	   entao nao existe versao desktop a preservar - e uma regra base
+	   escrita depois deste media query venceria a cascata e voltaria a
+	   impor 18px de padding e flex-wrap, Medido no iPhone 12: o cabecalho
+	   ficava com 89px para um botao so. */
+	.assoc-sol__pane-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		flex-wrap: nowrap;
+		padding: 8px 10px;
+		border-bottom: 1px solid var(--setceb-border);
+	}
+
+	/* Alvo de toque de 44px: com 30px era dificil acertar no celular. */
+	.assoc-sol__voltar {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		align-self: auto;
+		min-height: 44px;
+		margin: 0;
+		padding: 0 16px 0 12px;
+		font-family: inherit;
+		font-size: 13.5px;
+		font-weight: 700;
+		line-height: 1.2;
+		color: var(--setceb-accent-dark);
+		background: var(--setceb-accent-tint);
+		border-radius: 999px;
+		text-decoration: none;
+		-webkit-tap-highlight-color: transparent;
+		transition: background 0.15s ease;
+	}
+
+	.assoc-sol__voltar:hover,
+	.assoc-sol__voltar:focus-visible {
+		background: #D9EDF1;
+		color: var(--setceb-accent-dark);
+		text-decoration: none;
+	}
+
+	.assoc-sol__voltar .dashicons {
+		flex-shrink: 0;
+		font-size: 16px;
+		width: 16px;
+		height: 16px;
+	}
+
+	.assoc-sol__list {
+		max-height: none;
+		overflow: visible;
+	}
+
+	/* A conversa flui na pagina: sem caixa rolavel. */
+	.assoc-thread {
+		max-height: none;
+		overflow: visible;
+		padding: 16px 14px;
+	}
+
+	.assoc-thread__msg {
+		max-width: 94%;
+	}
+
+	/* Nome longo nao pode estourar a bolha. */
+	.assoc-thread__who,
+	.assoc-thread__who strong {
+		min-width: 0;
+		overflow-wrap: anywhere;
+	}
+
+	/* position: sticky exige que nenhum ancestral corte o overflow. */
+	.assoc-sol__pane {
+		overflow: visible;
+	}
+
+	/* Barra de resposta fixa: sempre alcancavel, sem rolar ate o fim.
+	   A borda inferior e o raio ficam com o proprio painel. */
+	.assoc-form--resposta {
+		position: sticky;
+		bottom: 0;
+		z-index: 5;
+		padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+		background: #fff;
+		border-top: 1px solid var(--setceb-border);
+		border-radius: 0 0 13px 13px;
+		box-shadow: 0 -6px 18px rgba(18, 61, 115, 0.09);
+	}
+
+	.assoc-form--resposta .assoc-btn {
+		width: 100%;
+		justify-content: center;
+	}
+}
+
+@media (max-width: 700px) {
+/* ============================================================
+ * Juridico no mobile
+ *
+ * Estas regras ficam AQUI, depois das regras base da secao, e nao
+ * no bloco de 1200px do "Area do Associado v2". Media query nao
+ * aumenta especificidade: enquanto a secao base do juridico ficava
+ * depois daquele bloco, cada valor de mobile era sobrescrito pela
+ * regra base. Medido no iPhone 12: a conversa continuava com
+ * max-height de 520px (scroll aninhado), padding de 20px e a barra
+ * de resposta sem o espacaco da area segura do iPhone.
+ * ============================================================ */
+	/* Cartoes das conversas maiores: antes ficavam espremidos e sem
+       area de toque confortavel. */
+	.assoc-sol__link {
+		grid-template-columns: 38px minmax(0, 1fr);
+		min-height: 68px;
+		padding: 13px 12px;
+	}
+
+	.assoc-sol__link-title {
+		font-size: 14.5px;
+	}
+
+	.assoc-sol__link-meta {
+		font-size: 12.5px;
+	}
+
+	.assoc-sol__side {
+		padding: 12px;
+	}
+
+	.assoc-sol__link .assoc-badge {
+		grid-column: 2;
+		justify-self: start;
+		margin-top: 6px;
+	}
+
+	.assoc-form--nova,
+	.assoc-form--resposta {
+		padding: 16px 14px;
+	}
+
+	.assoc-sol__pane-head {
+		padding: 8px;
+	}
+
+	.assoc-sol__voltar {
+		min-height: 46px;
+		padding: 0 14px 0 11px;
+		font-size: 14px;
+	}
+
+	
+}
+
+@media (max-width: 480px) {
+.assoc-sol__side {
+		padding: 14px;
+	}
 }
