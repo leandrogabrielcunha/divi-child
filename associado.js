@@ -1,5 +1,7 @@
 (function () {
 	'use strict';
+	console.log('assoc: script loaded');
+
 
 	var root = document.querySelector('.setceb-perfil');
 	if (!root) {
@@ -108,6 +110,14 @@
 	if (initialHash) {
 		activatePanel(initialHash, { silent: true, scroll: true });
 	}
+
+	window.addEventListener('hashchange', function () {
+		var h = window.location.hash.replace('#', '').replace(/^panel-/, '');
+		if (h) {
+			console.info('assoc: hashchange ->', h);
+			activatePanel(h, { silent: true, scroll: true });
+		}
+	});
 
 	/* Se a pagina carregou com aviso de formulario (GET), rola ate o painel. */
 	var noticePanel = document.querySelector('.assoc-panel.is-active');
