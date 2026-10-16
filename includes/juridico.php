@@ -597,24 +597,6 @@ function setceb_sol_botao_voltar( $perfil_url ) {
 }
 
 /**
- * Botao compacto "Nova" dentro do cabecalho da conversa.
- *
- * Sem ele o associado preso em uma conversa nao tem como iniciar outra
- * no mobile, porque a coluna de solicitacoes fica oculta no modo detalhe.
- *
- * @param string $perfil_url URL da pagina de perfil do associado.
- * @return string
- */
-function setceb_sol_botao_nova( $perfil_url ) {
-	$url = add_query_arg( 'sol_nova', 1, $perfil_url ) . '#panel-juridico';
-
-	return sprintf(
-		'<a class="assoc-sol__nova-mini" href="%1$s" data-sol-nova><span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span><span class="assoc-sol__nova-mini-label">Nova</span></a>',
-		esc_url( $url )
-	);
-}
-
-/**
  * Lista as solicitacoes de um associado (ou todas, para a equipe juridica).
  *
  * @param array $args {
@@ -780,95 +762,6 @@ function setceb_sol_listagem_admin( $args = array() ) {
 		'por_pagina' => $por_pagina,
 	);
 }
-
-/**
- * Renderiza a conversa (historico) de uma solicitacao.
- *
- * Usado pela listagem do painel para exibir o conteudo sem sair da tela.
- * Nao e um formulario: o advogado acompanha, nao responde por aqui.
- *
- * @param int $post_id ID da solicitacao.
- * @return string HTML da conversa.
- */
-function setceb_sol_render_conversa( $post_id ) {
-	$historico = setceb_sol_historico( $post_id, false );
-
-	if ( empty( $historico ) ) {
-		return '<p class="setceb-sol-vazio">Nenhuma interação registrada.</p>';
-	}
-
-	$html = '<ol class="setceb-sol-timeline setceb-sol-timeline--leitura">';
-
-	foreach ( array_reverse( $historico ) as $registro ) {
-		$html .= sprintf(
-			'<li class="setceb-sol-timeline__item setceb-sol-timeline__item--%1$s">
-				<span class="setceb-sol-timeline__marca" aria-hidden="true"><span class="dashicons %2$s"></span></span>
-				<div class="setceb-sol-timeline__conteudo">
-					<p class="setceb-sol-timeline__meta">
-						<strong>%3$s</strong>
-						<span class="setceb-sol-timeline__rotulo">%4$s</span>
-						%5$s
-					</p>
-					%6$s
-				</div>
-			</li>',
-			esc_attr( $registro['tipo'] ),
-			esc_attr( $registro['icone'] ),
-			esc_html( $registro['autor'] ),
-			esc_html( $registro['rotulo'] ),
-			'' !== $registro['data_txt']
-				? '<time class="setceb-sol-timeline__quando">' . esc_html( $registro['data_txt'] ) . '</time>'
-				: '',
-			'' !== $registro['texto']
-				? '<div class="setceb-sol-timeline__texto">' . nl2br( esc_html( $registro['texto'] ) ) . '</div>'
-				: ''
-		);
-	}
-
-	return $html . '</ol>';
-}
-
-/**
- * Devolve a conversa de uma solicitacao via AJAX.
- *
- * Leitura apenas: nao ha campo de resposta. Exige permissao de edicao
- * sobre a solicitacao, o mesmo que abre a tela de edicao.
- */
-function setceb_sol_ajax_conversa() {
-	$post_id = isset( $_POST['sol_id'] ) ? absint( $_POST['sol_id'] ) : 0;
-
-	if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
-		wp_send_json_error(
-			array( 'mensagem' => 'Sem permissão para ver esta solicitação.' ),
-			403
-		);
-	}
-
-	check_ajax_referer( 'setceb_sol_conversa', 'nonce' );
-
-	$post = get_post( $post_id );
-
-	if ( ! $post || SETCEB_SOL_CPT !== $post->post_type ) {
-		wp_send_json_error( array( 'mensagem' => 'Solicitação não encontrada.' ), 404 );
-	}
-
-	$solicitacao = setceb_sol_obter( $post_id );
-	$contato     = array();
-
-	foreach ( array( 'nome', 'email', 'telefone', 'empresa' ) as $campo ) {
-		$contato[ $campo ] = $solicitacao[ $campo ];
-	}
-
-	wp_send_json_success(
-		array(
-			'html'      => setceb_sol_render_conversa( $post_id ),
-			'protocolo' => $solicitacao['protocolo'],
-			'titulo'    => $solicitacao['titulo'],
-			'contato'   => $contato,
-		)
-	);
-}
-add_action( 'wp_ajax_setceb_sol_conversa', 'setceb_sol_ajax_conversa' );
 
 /**
  * Relatorio com uma unica consulta, consumido pela listagem do admin e
@@ -1928,42 +1821,6 @@ function setceb_sol_url_conversa( $post_id ) {
 
 
 /**
- * Linhas de identification da solicitacao, comuns aos e-mails.
- *
- * @param array $solicitacao Solicitacao.
- * @return array
- */
-function setceb_sol_email_identificacao( $solicitacao ) {
-	return array(
-		'Solicitação: ' . $solicitacao['protocolo'] . ' - ' . $solicitacao['titulo'],
-		'Solicitante: ' . $solicitacao['nome'],
-		'E-mail: ' . $solicitacao['email'],
-		'' !== $solicitacao['telefone'] ? 'Telefone: ' . $solicitacao['telefone'] : null,
-		'' !== $solicitacao['empresa'] ? 'Empresa: ' . $solicitacao['empresa'] : null,
-	);
-}
-
-/**
- * Remove as linhas nulas preservando as linhas em branco.
- *
- * As linhas vazias sao separadores propositais do corpo do e-mail e
- * por isso precisam sobreviver.
- *
- * @param array $linhas Linhas.
- * @return array
- */
-function setceb_sol_linhas( $linhas ) {
-	return array_values(
-		array_filter(
-			$linhas,
-			static function ( $linha ) {
-				return null !== $linha;
-			}
-		)
-	);
-}
-
-/**
  * Notifica a equipe juridica sobre uma nova solicitacao.
  *
  * O corpo e propositalmente curto: uma frase e o link do painel. Sem
@@ -2947,40 +2804,69 @@ function setceb_sol_menu() {
 	global $submenu;
 
 	$listagem = 'edit.php?post_type=' . SETCEB_SOL_CPT;
+	$obj      = get_post_type_object( SETCEB_SOL_CPT );
+
+	$rotulo = ( $obj && ! empty( $obj->labels->all_items ) ) ? $obj->labels->all_items : 'Solicitações';
+	$cap    = ( $obj && ! empty( $obj->cap->edit_posts ) ) ? $obj->cap->edit_posts : SETCEB_SOL_CAP;
 
 	/*
-	 * A listagem e o unico item do modulo que o core cria sozinho, em
-	 * $submenu[arquivo][0]. Aqui so se garante que ele exista - nunca
-	 * registra de novo.
+	 * A listagem entra no submenu uma vez so.
 	 *
-	 * Registrar com add_submenu_page() usando o mesmo slug do pai foi o
-	 * que quebrou a listagem: o core ja tinha criado a entrada, o
-	 * registro do tema cria a segunda, e o submenu passa a ter dois
-	 * "Solicitacoes" apontando para a mesma tela. Em producao isso fez
-	 * o item de topo deixar de levar a listagem.
+	 * Quem cria a primeira e o core, em $submenu[arquivo][0]. Em
+	 * producao apareceu uma segunda: o menu mostrava "Solicitacoes"
+	 * duas vezes, os dois apontando para edit.php?post_type=..., e os
+	 * dois marcados como atual ao mesmo tempo. Quem adicionou nao e este
+	 * arquivo - aqui so se escreve em $submenu em dois pontos, e nenhum
+	 * dos dois registra a listagem. Sobrou um add_submenu_page() de
+	 * terceiros, ou um hook de admin_menu anterior a este.
 	 *
-	 * A garantia e escrita direta no global, e nao add_submenu_page(),
-	 * pelo mesmo motivo: nao e o registro que estava dando problema. E o
-	 * mesmo caminho que setceb_sol_menu_minimo() usa, que funciona.
+	 * Por isso a correcao e uma deduplicacao, e nao um registro: ela
+	 * conserta o sintoma sem depender de saber quem duplicou, e nao
+	 * quebra se o duplicado nunca mais aparecer.
+	 *
+	 * Manter a primeira e normalizar o rotulo e a capacidade dela, em
+	 * vez de recriar a entrada: recriar em outra posicao trocaria a
+	 * ordem do submenu e o item marcado como atual.
 	 */
-	if ( ! isset( $submenu[ $listagem ][0] ) ) {
-		$obj  = get_post_type_object( SETCEB_SOL_CPT );
-		$rotulo = ( $obj && ! empty( $obj->labels->all_items ) ) ? $obj->labels->all_items : 'Solicitações';
-		$cap    = ( $obj && ! empty( $obj->cap->edit_posts ) ) ? $obj->cap->edit_posts : SETCEB_SOL_CAP;
+	$itens = ( isset( $submenu[ $listagem ] ) && is_array( $submenu[ $listagem ] ) )
+		? $submenu[ $listagem ]
+		: array();
 
-		$submenu[ $listagem ][0] = array( $rotulo, $cap, $listagem );
+	$saida = array();
+	$viu   = false;
+
+	foreach ( $itens as $chave => $item ) {
+		$destino = ( is_array( $item ) && isset( $item[2] ) ) ? $item[2] : '';
+
+		if ( $listagem !== $destino ) {
+			$saida[ $chave ] = $item;
+			continue;
+		}
+
+		if ( $viu ) {
+			// Segunda ocorrencia da listagem: descartada.
+			continue;
+		}
+
+		$viu       = true;
+		$saida[0]  = array( $rotulo, $cap, $listagem );
 	}
 
-	/* Tudo abaixo do menu "Juridico", que e o top-level do post type.
+	/* O core nao criou (outro plugin mexeu em $submenu antes do
+	   admin_menu): a listagem entra na primeira posicao. */
+	if ( ! $viu ) {
+		$saida = array_merge(
+			array( 0 => array( $rotulo, $cap, $listagem ) ),
+			$saida
+		);
+	}
 
-	   O dashboard JA foi registrado como top-level E como submenu com o
-	   mesmo slug. O WordPress resolve o submenu olhando
-	   $admin_page_hooks: como o slug ja era top-level, o submenu herdava o
-	   hookname "toplevel_page_setceb-sol-dashboard" e os dois itens
-	   levavam a mesma pagina. Pior: a duplicidade fazia o item de topo
-	   "Solicitacoes Juridicas" resolver tambem para o dashboard.
+	$submenu[ $listagem ] = $saida;
 
-	   Um slug por item de menu, e o dashboard so como submenu. */
+	/* Dashboard e Advogados, cada um com slug proprio.
+	   Um slug so por item: quando o dashboard era add_menu_page e
+	   add_submenu_page com o mesmo valor, o submenu herdava o hookname
+	   "toplevel_page_..." e os dois itens levavam a mesma pagina. */
 	setceb_sol_submenus( $listagem );
 }
 add_action( 'admin_menu', 'setceb_sol_menu', 20 );
@@ -3490,7 +3376,7 @@ function setceb_sol_pagina_dashboard() {
 			<?php if ( empty( $sol_lista['itens'] ) ) : ?>
 				<p class="description">Nenhuma solicitação encontrada com esses filtros.</p>
 			<?php else : ?>
-				<table class="widefat striped setceb-sol-lista" data-nonce="<?php echo esc_attr( wp_create_nonce( 'setceb_sol_conversa' ) ); ?>">
+				<table class="widefat striped setceb-sol-lista">
 					<thead>
 						<tr>
 							<th>Protocolo</th>
@@ -3517,13 +3403,6 @@ function setceb_sol_pagina_dashboard() {
 								</td>
 								<td><?php echo esc_html( '' !== $sol['advogado'] ? $sol['advogado'] : '—' ); ?></td>
 								<td><?php echo esc_html( setceb_sol_data( $sol['data'] ) ); ?></td>
-							</tr>
-							<tr class="setceb-sol-lista__conversa" id="setceb-sol-conversa-<?php echo (int) $sol['id']; ?>" data-sol-painel="<?php echo (int) $sol['id']; ?>" hidden>
-								<td colspan="5">
-									<div class="setceb-sol-conversa" data-sol-conversa="<?php echo (int) $sol['id']; ?>">
-										<p class="setceb-sol-vazio">Carregando conversa…</p>
-									</div>
-								</td>
 							</tr>
 						<?php endforeach; ?>
 					</tbody>
@@ -3782,6 +3661,13 @@ function setceb_sol_admin_assets( $hook ) {
 	$screen = get_current_screen();
 	$pagina = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
 
+	/*
+	 * O hook suffix de uma subpágina de post type e
+	 * "setceb_solicitacao_page_setceb-sol-dashboard", que nao comeca com
+	 * "setceb-sol" - a eighth letra e "_", nao "-". Por isso a checagem
+	 * de $_GET['page'] nao pode sair daqui: sem ela o Dashboard e a tela
+	 * de Advogados ficariam sem o CSS do modulo.
+	 */
 	$nossas_telas = ( $screen && SETCEB_SOL_CPT === $screen->post_type )
 		|| 0 === strpos( (string) $hook, 'setceb-sol' )
 		|| 0 === strpos( $pagina, 'setceb-sol' );
@@ -3798,24 +3684,5 @@ function setceb_sol_admin_assets( $hook ) {
 		array(),
 		$versao
 	);
-
-	/* O "Ver conversa" so existe na listagem do dashboard. */
-	if ( setceb_sol_dashboard_slug() === $pagina ) {
-		wp_enqueue_script(
-			'setceb-sol-admin',
-			get_stylesheet_directory_uri() . '/juridico-admin.js',
-			array(),
-			$versao,
-			true
-		);
-
-		wp_localize_script(
-			'setceb-sol-admin',
-			'setcebSolAdmin',
-			array(
-				'nonce' => wp_create_nonce( 'setceb_sol_conversa' ),
-			)
-		);
-	}
 }
 add_action( 'admin_enqueue_scripts', 'setceb_sol_admin_assets' );
