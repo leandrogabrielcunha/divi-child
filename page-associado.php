@@ -711,6 +711,25 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 												<?php echo setceb_sol_botao_voltar( $perfil_url ); ?>
 											</header>
 
+<?php /* Sem JS os dois passos aparecem e viram um formulario so. Os
+	   botoes "Continuar" e "Voltar" sao do wizard: sem JS eles nao
+	   fazem nada, entao somem em vez de oferecer um beco sem saida. */
+?>
+<noscript>
+	<style>
+		/* Sem JS o wizard nao existe: os dois passos viram um formulario
+		   so, e os botoes que so o wizard usa saem da tela em vez de
+		   oferecer um clique que nao faz nada. */
+		[data-wizard-next], [data-wizard-back], .assoc-wizard__bar { display: none !important; }
+
+		/* A troca lista <-> conversa e feita pela classe is-list, que vem
+		   do PHP. Sem JS nao ha como trocar a classe, entao a conversa
+		   ficaria oculta para sempre e o associado nao conseguiria nem ler
+		   o que escreveu, nem responder. O painel ativo e o unico sem o
+		   atributo hidden, entao mostrar o bloco inteiro mostra so ele. */
+		.assoc-sol.is-list > .assoc-sol__panes { display: block !important; }
+	</style>
+</noscript>
 <form class="assoc-form assoc-form--nova" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-assoc-form data-assoc-wizard>
 												<input type="hidden" name="action" value="setceb_juridico">
 												<?php wp_nonce_field( 'setceb_form_juridico' ); ?>

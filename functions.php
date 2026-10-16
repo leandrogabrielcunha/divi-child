@@ -117,7 +117,13 @@ function setceb_mascaras_register() {
 		true
 	);
 }
-add_action( 'wp_enqueue_scripts', 'setceb_mascaras_register' );
+/* Prioridade 5, e nao a 10: os modulos em includes/ tambem usam a 10
+   e chamam wp_enqueue_script( 'setceb-mascaras' ). Na ordem em que o
+   arquivo esta hoje o require vem DEPOIS deste add_action, entao o
+   registro rodaria depois do enqueue - e o WordPress descarta
+   silenciosamente o enqueue de um handle nao registrado. A mascara
+   simplesmente nao carregava, sem erro nenhum na tela. */
+add_action( 'wp_enqueue_scripts', 'setceb_mascaras_register', 5 );
 
 /*================================================
 #SETCEB - Regras de negocio do Associado
