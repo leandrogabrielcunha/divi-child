@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.47.6
+Version: 1.47.7
 Template: Divi
 */
 
@@ -3626,6 +3626,78 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 	display: none;
 }
 
+/* ---------- Modo painel unico ----------
+   A lista e a conversa NAO ficam lado a lado nem empilhadas: abrir um
+   protocolo substitui a lista, do mesmo jeito que o wizard de nova
+   solicitacao. A classe is-list vem do PHP (?sol_lista=1) e por isso
+   funciona sem JS.
+
+   Antes essa troca so valia abaixo de 1200px. No desktop a lista
+   continuava visivel e a conversa abria embaixo dela, sem botao de
+   voltar: clicar num protocolo rolava 352px e deixava a lista cortada
+   no topo da tela. Medido em 1280px. */
+.assoc-sol:not(.is-list) > .assoc-sol__side {
+	display: none;
+}
+
+.assoc-sol.is-list > .assoc-sol__panes {
+	display: none;
+}
+
+
+
+/* ---------- Barra da conversa ----------
+   So o caminho de volta para a lista. Titulo, protocolo, data e status
+   pertencem a lista - ela some da tela enquanto a conversa esta
+   aberta, entao aqui nao ha o que repetir.
+
+   Aparece em TODA largura, inclusive no desktop: a conversa substitui
+   a lista, entao sem este botao a tela seria beco sem saida. */
+.assoc-sol__pane-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	flex-wrap: nowrap;
+	padding: 8px 10px;
+	border-bottom: 1px solid var(--setceb-border);
+}
+
+.assoc-sol__voltar {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	align-self: auto;
+	min-height: 44px;
+	margin: 0;
+	padding: 0 16px 0 12px;
+	font-family: inherit;
+	font-size: 13.5px;
+	font-weight: 700;
+	line-height: 1.2;
+	color: var(--setceb-accent-dark);
+	background: var(--setceb-accent-tint);
+	border-radius: 999px;
+	text-decoration: none;
+	-webkit-tap-highlight-color: transparent;
+	transition: background 0.15s ease;
+}
+
+.assoc-sol__voltar:hover,
+.assoc-sol__voltar:focus-visible {
+	background: #D9EDF1;
+	color: var(--setceb-accent-dark);
+	text-decoration: none;
+}
+
+.assoc-sol__voltar .dashicons {
+	flex-shrink: 0;
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+}
+
+
 /* ---------- Wizard da nova solicitacao ----------
    Passo 1: assunto + duida. Passo 2: dados de contato (opcionais).
    Sem JS os dois passos aparecem, como o formulario unico de antes. */
@@ -3808,21 +3880,6 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 	background: var(--setceb-accent-tint);
 }
 
-/* ============================================================
- * Controles que so existem no mobile
- *
- * Este bloco fica no FIM de proposito: o tema tem varias regras base
- * com `display: none` escritas depois dos media queries, e media query
- * nao aumenta especificidade - quem ganha e a regra posterior. Por isso
- * o "esconder no desktop" fica declarado aqui, em min-width, e nunca
- * como `display: none` na regra base.
- * ============================================================ */
-@media (min-width: 1201px) {
-	.assoc-sol__pane-head,
-	.assoc-sol__voltar {
-		display: none;
-	}
-}
 
 .assoc-sol__pane {
 	/* O scrollIntoView da conversa deve deixar um respiro no topo. */
@@ -4025,76 +4082,6 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 	.assoc-sol__side,
 	.assoc-sol__pane {
 		border-radius: 14px;
-	}
-
-	/* A lista so aparece quando o modo lista esta ativo. */
-	.assoc-sol:not(.is-list) > .assoc-sol__side {
-		display: none;
-	}
-
-	.assoc-sol.is-list > .assoc-sol__panes {
-		display: none;
-	}
-
-	/* Cabecalho compacto: antes ocupava ~150px com 4 blocos empilhados.
-	   Agora sao 2 linhas - navegacao em cima, titulo + status embaixo. */
-	/* Barra de navegacao da conversa: so "Voltar" e "Nova". Titulo,
-	   protocolo, data e status ficam na lista - no mobile ela some da
-	   tela enquanto a conversa esta aberta, entao aqui so precisa o
-	   caminho de volta e o atalho para nova solicitacao. */
-	/* Barra minima do chat: apenas o caminho de volta para a lista.
-	   Titulo, protocolo, data e status pertencem a lista - no mobile ela
-	   some da tela enquanto a conversa esta aberta.
-
-	   O estilo inteiro da barra mora AQUI, e nao numa regra base. O
-	   cabecalho e escondido no desktop (bloco min-width:1201px do fim),
-	   entao nao existe versao desktop a preservar - e uma regra base
-	   escrita depois deste media query venceria a cascata e voltaria a
-	   impor 18px de padding e flex-wrap, Medido no iPhone 12: o cabecalho
-	   ficava com 89px para um botao so. */
-	.assoc-sol__pane-head {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 8px;
-		flex-wrap: nowrap;
-		padding: 8px 10px;
-		border-bottom: 1px solid var(--setceb-border);
-	}
-
-	/* Alvo de toque de 44px: com 30px era dificil acertar no celular. */
-	.assoc-sol__voltar {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-		align-self: auto;
-		min-height: 44px;
-		margin: 0;
-		padding: 0 16px 0 12px;
-		font-family: inherit;
-		font-size: 13.5px;
-		font-weight: 700;
-		line-height: 1.2;
-		color: var(--setceb-accent-dark);
-		background: var(--setceb-accent-tint);
-		border-radius: 999px;
-		text-decoration: none;
-		-webkit-tap-highlight-color: transparent;
-		transition: background 0.15s ease;
-	}
-
-	.assoc-sol__voltar:hover,
-	.assoc-sol__voltar:focus-visible {
-		background: #D9EDF1;
-		color: var(--setceb-accent-dark);
-		text-decoration: none;
-	}
-
-	.assoc-sol__voltar .dashicons {
-		flex-shrink: 0;
-		font-size: 16px;
-		width: 16px;
-		height: 16px;
 	}
 
 	.assoc-sol__list {
