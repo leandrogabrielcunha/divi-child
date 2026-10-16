@@ -47,11 +47,19 @@
 		});
 
 		if (options.scroll) {
-			window.scrollTo({ top: 0, behavior: 'smooth' });
 			if (panels[key] && typeof panels[key].scrollIntoView === 'function') {
-				window.setTimeout(function () {
-					panels[key].scrollIntoView({ behavior: 'smooth', block: 'start' });
-				}, 30);
+				var panel = panels[key];
+				panel.style.display = 'block';
+				window.requestAnimationFrame(function () {
+					window.requestAnimationFrame(function () {
+						window.scrollTo({ top: 0, behavior: 'smooth' });
+						window.setTimeout(function () {
+							try {
+								panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+							} catch (e) {}
+						}, 160);
+					});
+				});
 			}
 		}
 
