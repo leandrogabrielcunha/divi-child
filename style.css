@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.47.0
+Version: 1.47.1
 Template: Divi
 */
 
@@ -2279,6 +2279,15 @@ via fonte Dashicons.
 		gap: 14px;
 	}
 
+	/* O tema so aplica border-box em body.login. Sem isto, width:100%
+	   + padding estoura a largura do card (content-box). */
+	.assoc-sol,
+	.assoc-sol *,
+	.assoc-sol *::before,
+	.assoc-sol *::after {
+		box-sizing: border-box;
+	}
+
 	/* Chat em 100% da largura disponivel: nenhuma coluna com px fixo,
 	   nenhum min-width que estoure a tela. */
 	.assoc-sol,
@@ -3684,10 +3693,11 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 }
 
 /* No desktop o cabecalho da conversa e desnecessario: a coluna da lista
-   ja mostra titulo, protocolo e status de cada solicitacao. Ele volta a
-   existir no mobile como barra de navegacao (ver bloco de 1200px). */
+   ja mostra titulo, protocolo e status. O mobile trata a barra no bloco
+   de 1200px. Nao declarar display:none AQUI: esta regra vem depois do
+   media query no arquivo e media query nao ganha especificidade, o que
+   esconderia o botao de voltar justamente no mobile. */
 .assoc-sol__pane-head {
-	display: none;
 	align-items: flex-start;
 	justify-content: space-between;
 	gap: 14px;
@@ -3697,9 +3707,8 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 }
 
 /* ---------- Voltar para as solicitacoes ----------
-   Só aparece no mobile, onde a conversa ocupa a tela inteira. */
+   Só aparece no mobile; o hide fica no bloco min-width:1201px do fim. */
 .assoc-sol__voltar {
-	display: none;
 	align-items: center;
 	gap: 6px;
 	align-self: flex-start;
@@ -3911,6 +3920,22 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 
 .assoc-btn--ghost:hover {
 	background: var(--setceb-accent-tint);
+}
+
+/* ============================================================
+ * Controles que so existem no mobile
+ *
+ * Este bloco fica no FIM de proposito: o tema tem varias regras base
+ * com `display: none` escritas depois dos media queries, e media query
+ * nao aumenta especificidade - quem ganha e a regra posterior. Por isso
+ * o "esconder no desktop" fica declarado aqui, em min-width, e nunca
+ * como `display: none` na regra base.
+ * ============================================================ */
+@media (min-width: 1201px) {
+	.assoc-sol__pane-head,
+	.assoc-sol__voltar {
+		display: none;
+	}
 }
 
 .assoc-sol__pane {

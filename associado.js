@@ -358,6 +358,29 @@
 	/* ============================================================
 	 * Juridico: lista de solicitacoes + painel da conversa
 	 * ============================================================ */
+
+	/* replaceState lanca excecao em documento de origem nula (file://),
+	   iframe com sandbox ou URL de outra origem. Sem isso o clique morria
+	   no meio e o browser seguia o link, recarregando a pagina inteira
+	   e jogando o associado de volta para o topo do modulo. */
+	function trocarUrl( url ) {
+		if ( ! url || ! window.history || ! window.history.replaceState ) {
+			return false;
+		}
+
+		try {
+			window.history.replaceState( null, '', url );
+			return true;
+		} catch ( e ) {
+			return false;
+		}
+	}
+
+	function paneExiste( id ) {
+		return solPanes.some( function ( pane ) {
+			return pane.getAttribute( 'data-sol-pane' ) === String( id );
+		} );
+	}
 	var solLinks = qsa('[data-sol-link]');
 	var solPanes = qsa('[data-sol-pane]');
 	var solNovaLinks = qsa('[data-sol-nova]');
@@ -397,8 +420,8 @@
 			solBox.classList.remove('is-list');
 		}
 
-		if (options.url && window.history && window.history.replaceState) {
-			window.history.replaceState(null, '', options.url);
+		if ( options.url ) {
+			trocarUrl( options.url );
 		}
 
 		/* Em telas empilhadas (lista acima da conversa) leva a conversa
@@ -416,29 +439,36 @@
 
 	solLinks.forEach(function (link) {
 		link.addEventListener('click', function (event) {
-			var aberto = activateSolicitacao(link.getAttribute('data-sol-link'), {
+			var id = link.getAttribute('data-sol-link');
+
+			/* Sem JS funcional o proprio link (?sol_id=N#juridico) abre a
+			   solicitacao. Com JS, o cancelamento vem ANTES de tudo para
+			   que nenhuma excecao deixe o browser navegar. */
+			if (!paneExiste(id)) {
+				return;
+			}
+
+			event.preventDefault();
+
+			activateSolicitacao(id, {
 				url: link.getAttribute('href'),
 				scroll: true
 			});
-
-			/* Sem JS o proprio link (?sol_id=N#juridico) abre a solicitacao. */
-			if (aberto && window.history && window.history.replaceState) {
-				event.preventDefault();
-			}
 		});
 	});
 
 	solNovaLinks.forEach(function (link) {
 		link.addEventListener('click', function (event) {
-			var aberto = activateSolicitacao('nova', {
+			if (!paneExiste('nova')) {
+				return;
+			}
+
+			event.preventDefault();
+
+			activateSolicitacao('nova', {
 				url: link.getAttribute('href'),
 				scroll: true
 			});
-
-			/* Sem JS o proprio link (?sol_nova=1#juridico) abre o formulario. */
-			if (aberto && window.history && window.history.replaceState) {
-				event.preventDefault();
-			}
 		});
 	});
 
@@ -447,19 +477,16 @@
 	   entao sem JS o botao funciona por reload da pagina. */
 	qsa('[data-sol-voltar]').forEach(function (link) {
 		link.addEventListener('click', function (event) {
-			if (!window.history || !window.history.replaceState) {
+			if (!solBox) {
 				return;
 			}
 
 			event.preventDefault();
 
-			if (solBox) {
-				solBox.classList.add('is-list');
-			}
+			solBox.classList.add('is-list');
+			trocarUrl(link.getAttribute('href'));
 
-			window.history.replaceState(null, '', link.getAttribute('href'));
-
-			var side = solBox ? solBox.querySelector('.assoc-sol__side') : null;
+			var side = solBox.querySelector('.assoc-sol__side');
 
 			if (side && typeof side.scrollIntoView === 'function') {
 				side.scrollIntoView({ behavior: 'smooth', block: 'start' });
