@@ -190,6 +190,15 @@ Ver includes/juridico.php
 require_once get_stylesheet_directory() . '/includes/juridico.php';
 
 /*================================================
+#SETCEB - Diagnostico do menu (TEMPORARIO)
+Mostra o estado real de $menu/$submenu quando a URL traz
+?setceb_diag=menu. Existe ate achar por que o item de topo do modulo
+juridico nao aparece para o administrador. Sai depois.
+Ver includes/juridico-diag.php
+================================================*/
+require_once get_stylesheet_directory() . '/includes/juridico-diag.php';
+
+/*================================================
 #SETCEB - Header global customizado
 Estrutura do cabecalho e menu principal.
 Ver includes/setceb-header.php
