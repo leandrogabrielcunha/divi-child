@@ -1,7 +1,5 @@
 (function () {
 	'use strict';
-	console.log('assoc: script loaded');
-
 
 	var root = document.querySelector('.setceb-perfil');
 	if (!root) {
@@ -43,24 +41,10 @@
 
 		Object.keys(panels).forEach(function (name) {
 			panels[name].classList.toggle('is-active', name === key);
-			panels[name].style.display = name === key ? 'block' : 'none';
 		});
 
-		if (options.scroll) {
-			if (panels[key] && typeof panels[key].scrollIntoView === 'function') {
-				var panel = panels[key];
-				panel.style.display = 'block';
-				window.requestAnimationFrame(function () {
-					window.requestAnimationFrame(function () {
-						window.scrollTo({ top: 0, behavior: 'smooth' });
-						window.setTimeout(function () {
-							try {
-								panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-							} catch (e) {}
-						}, 160);
-					});
-				});
-			}
+		if (options.scroll && panelsBox && typeof panelsBox.scrollIntoView === 'function') {
+			panelsBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
 		}
 
 		if (!options.silent && window.history && window.history.replaceState) {
@@ -112,9 +96,7 @@
 	/* Botoes que abrem um painel especifico (ex.: Emissao de Boletos) */
 	qsa('[data-open-panel]').forEach(function (button) {
 		button.addEventListener('click', function () {
-			console.info('assoc: click data-open-panel=', button.getAttribute('data-open-panel'));
-			var aberto = activatePanel(button.getAttribute('data-open-panel'), { scroll: true });
-			console.info('assoc: activatePanel result=', aberto, 'active=', (document.querySelector('.assoc-panel.is-active') || {}).id);
+			activatePanel(button.getAttribute('data-open-panel'), { scroll: true });
 		});
 	});
 
@@ -124,14 +106,6 @@
 	if (initialHash) {
 		activatePanel(initialHash, { silent: true, scroll: true });
 	}
-
-	window.addEventListener('hashchange', function () {
-		var h = window.location.hash.replace('#', '').replace(/^panel-/, '');
-		if (h) {
-			console.info('assoc: hashchange ->', h);
-			activatePanel(h, { silent: true, scroll: true });
-		}
-	});
 
 	/* Se a pagina carregou com aviso de formulario (GET), rola ate o painel. */
 	var noticePanel = document.querySelector('.assoc-panel.is-active');
@@ -430,7 +404,6 @@
 			}
 		}
 
-		console.info('assoc: activatePanel after toggle ->', key, 'display=', (panels[key] || {}).style ? panels[key].style.display : null, 'is-active=', !!(panels[key] && panels[key].classList.contains('is-active')));
 		return true;
 	}
 

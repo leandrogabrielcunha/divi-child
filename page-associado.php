@@ -348,6 +348,8 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 											</a>
 								</div>
 
+							</section>
+
 							<!-- RECENTES -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'recentes', $active_panel, 'class' ) ) ); ?>" id="panel-recentes" role="tabpanel" aria-labelledby="tab-recentes" tabindex="0">
 								<?php setceb_modulo_cabecalho( 'recentes', $modulos ); ?>
