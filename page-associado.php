@@ -66,6 +66,15 @@ $simuladores  = setceb_simuladores();
 $recentes     = setceb_conteudos_recentes( 8 );
 $boletos      = setceb_boletos();
 $assuntos     = setceb_contato_assuntos();
+$sol_categorias = array(
+    'trabalhista'  => 'Trabalhista',
+    'tributario'   => 'Tributário',
+    'contratual'   => 'Contratual',
+    'previdencia'  => 'INSS / Previdência',
+    'civil'        => 'Cível',
+    'outro'        => 'Outro',
+);
+
 $notice       = setceb_associado_form_notice();
 
 /* Solicitações jurídicas (includes/juridico.php). O aviso do módulo
@@ -202,7 +211,7 @@ function setceb_panel_active_attr( $panel, $active_panel, $attr ) {
  * @param string $key     Chave do modulo.
  * @param array  $modulos Mapa de modulos da area do associado.
  */
-function setceb_modulo_cabecalho( $key, $modulos ) {
+function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 	if ( ! isset( $modulos[ $key ] ) ) {
 		return;
 	}
@@ -220,6 +229,23 @@ function setceb_modulo_cabecalho( $key, $modulos ) {
 				<h2 class="assoc-mod__title"><?php echo esc_html( $modulo['rotulo'] ); ?></h2>
 				<p class="assoc-mod__desc"><?php echo esc_html( $modulo['desc'] ); ?></p>
 			</div>
+			<?php if ( $year_filter ) : ?>
+			<div class="assoc-mod__year">
+				<span class="assoc-toolbar__label">Ano de referência</span>
+				<div class="assoc-year">
+					<button type="button" class="assoc-year__btn" aria-haspopup="listbox" aria-expanded="false" aria-label="Selecionar ano de referência">
+						<span class="dashicons dashicons-calendar-alt" aria-hidden="true"></span>
+						<span class="assoc-year__current"><?php echo esc_html( $ano_atual ); ?></span>
+						<span class="dashicons dashicons-arrow-down-alt2" aria-hidden="true"></span>
+					</button>
+					<ul class="assoc-year__list" role="listbox" aria-label="Anos disponíveis" hidden>
+						<?php foreach ( $anos as $ano ) : ?>
+							<li class="assoc-year__option<?php echo (string) $ano === $ano_atual ? ' is-selected' : ''; ?>" role="option" tabindex="-1" data-ano="<?php echo esc_attr( $ano ); ?>" aria-selected="<?php echo (string) $ano === $ano_atual ? 'true' : 'false'; ?>"><?php echo esc_html( $ano ); ?></li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
+			</div>
+			<?php endif; ?>
 		</div>
 	</header>
 	<?php
@@ -301,30 +327,6 @@ function setceb_modulo_cabecalho( $key, $modulos ) {
 
 					<div class="assoc-main">
 
-						<!-- Filtro de ano + emissao de boletos -->
-						<div class="assoc-toolbar">
-							<div class="assoc-toolbar__group">
-								<span class="assoc-toolbar__label">Ano de referência</span>
-								<div class="assoc-year">
-									<button type="button" class="assoc-year__btn" aria-haspopup="listbox" aria-expanded="false" aria-label="Selecionar ano de referência">
-										<span class="dashicons dashicons-calendar-alt" aria-hidden="true"></span>
-										<span class="assoc-year__current"><?php echo esc_html( $ano_atual ); ?></span>
-										<span class="dashicons dashicons-arrow-down-alt2" aria-hidden="true"></span>
-									</button>
-									<ul class="assoc-year__list" role="listbox" aria-label="Anos disponíveis" hidden>
-										<?php foreach ( $anos as $ano ) : ?>
-											<li class="assoc-year__option<?php echo (string) $ano === $ano_atual ? ' is-selected' : ''; ?>" role="option" tabindex="-1" data-ano="<?php echo esc_attr( $ano ); ?>" aria-selected="<?php echo (string) $ano === $ano_atual ? 'true' : 'false'; ?>"><?php echo esc_html( $ano ); ?></li>
-										<?php endforeach; ?>
-									</ul>
-								</div>
-							</div>
-
-							<button type="button" class="assoc-btn assoc-btn--boletos" data-open-panel="financeiro">
-								Emissão de Boletos
-								<span class="dashicons dashicons-arrow-right-alt2" aria-hidden="true"></span>
-							</button>
-						</div>
-
 						<noscript><style>.assoc-panel{display:block!important}</style></noscript>
 
 						<div class="assoc-panels">
@@ -400,7 +402,7 @@ function setceb_modulo_cabecalho( $key, $modulos ) {
 
 							<!-- PLANILHAS -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'planilhas', $active_panel, 'class' ) ) ); ?>" id="panel-planilhas" role="tabpanel" aria-labelledby="tab-planilhas" tabindex="0">
-								<?php setceb_modulo_cabecalho( 'planilhas', $modulos ); ?>
+								<?php setceb_modulo_cabecalho( 'planilhas', $modulos, true ); ?>
 
 								<?php if ( ! empty( $planilhas ) ) : ?>
 									<div class="assoc-filters" role="group" aria-label="Filtrar planilhas por categoria">
@@ -463,7 +465,7 @@ function setceb_modulo_cabecalho( $key, $modulos ) {
 
 							<!-- RELATORIOS -->
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'relatorios', $active_panel, 'class' ) ) ); ?>" id="panel-relatorios" role="tabpanel" aria-labelledby="tab-relatorios" tabindex="0">
-								<?php setceb_modulo_cabecalho( 'relatorios', $modulos ); ?>
+								<?php setceb_modulo_cabecalho( 'relatorios', $modulos, true ); ?>
 
 								<?php if ( ! empty( $relatorios ) ) : ?>
 									<ul class="assoc-list">
@@ -718,13 +720,16 @@ function setceb_modulo_cabecalho( $key, $modulos ) {
 													<label>Site<input type="text" name="setceb_website" tabindex="-1" autocomplete="off"></label>
 												</p>
 
+												<input type="hidden" name="setceb_nome" value="<?php echo esc_attr( $user_name ); ?>">
+												<input type="hidden" name="setceb_email" value="<?php echo esc_attr( $user_email ); ?>">
 												<p class="assoc-form__field">
-													<label for="assoc-jur-nome">Nome completo <span aria-hidden="true">*</span></label>
-													<input type="text" id="assoc-jur-nome" name="setceb_nome" value="<?php echo esc_attr( $user_name ); ?>" required autocomplete="name">
-												</p>
-												<p class="assoc-form__field">
-													<label for="assoc-jur-email">E-mail <span aria-hidden="true">*</span></label>
-													<input type="email" id="assoc-jur-email" name="setceb_email" value="<?php echo esc_attr( $user_email ); ?>" required autocomplete="email">
+													<label for="assoc-jur-categoria">Categoria <span aria-hidden="true">*</span></label>
+													<select id="assoc-jur-categoria" name="setceb_categoria" required>
+														<option value="">Selecione uma categoria</option>
+														<?php foreach ( $sol_categorias as $sol_cat_slug => $sol_cat_rotulo ) : ?>
+															<option value="<?php echo esc_attr( $sol_cat_slug ); ?>"><?php echo esc_html( $sol_cat_rotulo ); ?></option>
+														<?php endforeach; ?>
+													</select>
 												</p>
 												<p class="assoc-form__field">
 													<label for="assoc-jur-fone">Telefone</label>

@@ -1864,20 +1864,22 @@ function setceb_sol_process_nova() {
 	$email    = isset( $_POST['setceb_email'] ) ? sanitize_email( wp_unslash( $_POST['setceb_email'] ) ) : '';
 	$telefone = isset( $_POST['setceb_telefone'] ) ? sanitize_text_field( wp_unslash( $_POST['setceb_telefone'] ) ) : '';
 	$empresa  = isset( $_POST['setceb_empresa'] ) ? sanitize_text_field( wp_unslash( $_POST['setceb_empresa'] ) ) : '';
+$categoria = isset( $_POST['setceb_categoria'] ) ? sanitize_key( wp_unslash( $_POST['setceb_categoria'] ) ) : '';
 	$mensagem = isset( $_POST['setceb_mensagem'] ) ? sanitize_textarea_field( wp_unslash( $_POST['setceb_mensagem'] ) ) : '';
 
-	if ( '' === $nome || '' === $mensagem || ! is_email( $email ) ) {
+	if ( '' === $nome || '' === $mensagem || '' === $categoria || ! is_email( $email ) ) {
 		setceb_sol_redirecionar( 'campos' );
 		return;
 	}
 
 	$post_id = setceb_sol_criar(
 		array(
-			'nome'     => $nome,
-			'email'    => $email,
-			'telefone' => $telefone,
-			'empresa'  => $empresa,
-			'mensagem' => $mensagem,
+			'nome'      => $nome,
+			'email'     => $email,
+			'telefone'  => $telefone,
+			'empresa'   => $empresa,
+			'categoria' => $categoria,
+			'mensagem'  => $mensagem,
 		),
 		$usuario->ID
 	);
@@ -1932,11 +1934,13 @@ function setceb_sol_criar( $dados, $usuario_id ) {
 	$email    = isset( $dados['email'] ) ? sanitize_email( $dados['email'] ) : '';
 	$telefone = isset( $dados['telefone'] ) ? sanitize_text_field( $dados['telefone'] ) : '';
 	$empresa  = isset( $dados['empresa'] ) ? sanitize_text_field( $dados['empresa'] ) : '';
+	$categoria = isset( $dados['categoria'] ) ? sanitize_key( (string) $dados['categoria'] ) : '';
 
 	update_post_meta( $post_id, '_setceb_sol_nome', $nome );
 	update_post_meta( $post_id, '_setceb_sol_email', $email );
 	update_post_meta( $post_id, '_setceb_sol_telefone', $telefone );
 	update_post_meta( $post_id, '_setceb_sol_empresa', $empresa );
+	update_post_meta( $post_id, '_setceb_sol_categoria', $categoria );
 	update_post_meta( $post_id, '_setceb_sol_status', setceb_sol_status_padrao() );
 
 	$advogado = setceb_sol_advogado_padrao_id();

@@ -438,102 +438,123 @@
 	/* ============================================================
 	 * Seletor de ano (listbox acessivel)
 	 * ============================================================ */
-	var yearWrap = root.querySelector('.assoc-year');
-	var yearBtn = yearWrap ? yearWrap.querySelector('.assoc-year__btn') : null;
-	var yearList = yearWrap ? yearWrap.querySelector('.assoc-year__list') : null;
-	var yearCurrent = yearWrap ? yearWrap.querySelector('.assoc-year__current') : null;
-	var yearOptions = yearList ? qsa('[role="option"]', yearList) : [];
+	var yearWidgets = [];
+	qsa('.assoc-year').forEach(function (wrap) {
+		var yb = wrap.querySelector('.assoc-year__btn');
+		var yl = wrap.querySelector('.assoc-year__list');
+		var yc = wrap.querySelector('.assoc-year__current');
+		var yo = yl ? qsa('[role="option"]', yl) : [];
+		yearWidgets.push({ wrap: wrap, btn: yb, list: yl, current: yc, options: yo });
+	});
 
-	function closeYear() {
-		if (!yearList || !yearBtn) {
+	function closeYearWrap(dw) {
+		if (!dw || !dw.list || !dw.btn) {
 			return;
 		}
-		yearList.hidden = true;
-		yearBtn.setAttribute('aria-expanded', 'false');
+		dw.list.hidden = true;
+		dw.btn.setAttribute('aria-expanded', 'false');
 	}
 
-	function selectYear(option) {
+	function closeAllYears() {
+		yearWidgets.forEach(closeYearWrap);
+	}
+
+	function syncYearSelection() {
+		yearWidgets.forEach(function (dw) {
+			if (dw.current) {
+				dw.current.textContent = currentYear || '';
+			}
+			if (dw.options) {
+				dw.options.forEach(function (opt) {
+					opt.setAttribute('aria-selected', 'false');
+					opt.classList.remove('is-selected');
+					if (opt.getAttribute('data-ano') === String(currentYear)) {
+						opt.setAttribute('aria-selected', 'true');
+						opt.classList.add('is-selected');
+					}
+				});
+			}
+		});
+	}
+
+	function selectYearOption(option, dw) {
 		if (!option) {
 			return;
 		}
-
-		yearOptions.forEach(function (other) {
-			other.setAttribute('aria-selected', other === option ? 'true' : 'false');
-			other.classList.toggle('is-selected', other === option);
-		});
-
-		if (yearCurrent) {
-			yearCurrent.textContent = option.textContent.trim();
-		}
-
 		currentYear = option.getAttribute('data-ano');
 		currentPage = 1;
-		closeYear();
-		yearBtn.focus();
+		closeYearWrap(dw);
+		syncYearSelection();
+		if (dw && dw.btn) {
+			dw.btn.focus();
+		}
 		applyDocFilters();
 	}
 
-	if (yearBtn && yearList) {
-		yearBtn.addEventListener('click', function () {
-			var willOpen = yearList.hidden;
-			yearList.hidden = !willOpen;
-			yearBtn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-
+	yearWidgets.forEach(function (dw) {
+		if (!dw.btn || !dw.list) {
+			return;
+		}
+		dw.btn.addEventListener('click', function () {
+			var willOpen = dw.list.hidden;
+			closeAllYears();
+			dw.list.hidden = !willOpen;
+			dw.btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
 			if (willOpen) {
-				var selected = yearOptions.filter(function (option) {
-					return option.getAttribute('aria-selected') === 'true';
+				var sel = (dw.options || []).filter(function (o) {
+					return o.getAttribute('aria-selected') === 'true';
 				})[0];
-				(selected || yearOptions[0]).focus();
+				(sel || dw.options[0] || dw.list).focus();
 			}
 		});
-
-		yearList.addEventListener('keydown', function (event) {
-			var index = yearOptions.indexOf(document.activeElement);
-
+		dw.list.addEventListener('keydown', function (event) {
+			var index = (dw.options || []).indexOf(document.activeElement);
 			switch (event.key) {
 				case 'ArrowDown':
 					event.preventDefault();
-					(yearOptions[index + 1] || yearOptions[0]).focus();
+					((dw.options[index + 1]) || dw.options[0]).focus();
 					break;
 				case 'ArrowUp':
 					event.preventDefault();
-					(yearOptions[index - 1] || yearOptions[yearOptions.length - 1]).focus();
+					((dw.options[index - 1]) || dw.options[dw.options.length - 1]).focus();
 					break;
 				case 'Home':
 					event.preventDefault();
-					yearOptions[0].focus();
+					dw.options[0].focus();
 					break;
 				case 'End':
 					event.preventDefault();
-					yearOptions[yearOptions.length - 1].focus();
+					dw.options[dw.options.length - 1].focus();
 					break;
 				case 'Enter':
 				case ' ':
 					event.preventDefault();
-					selectYear(document.activeElement);
+					selectYearOption(document.activeElement, dw);
 					break;
 				case 'Escape':
 				case 'Tab':
-					closeYear();
+					closeYearWrap(dw);
 					if (event.key === 'Escape') {
-						yearBtn.focus();
+						dw.btn.focus();
 					}
 					break;
 			}
 		});
-
-		yearOptions.forEach(function (option) {
+		(dw.options || []).forEach(function (option) {
 			option.addEventListener('click', function () {
-				selectYear(option);
+				selectYearOption(option, dw);
 			});
 		});
+	});
 
-		document.addEventListener('click', function (event) {
-			if (yearWrap && !yearWrap.contains(event.target)) {
-				closeYear();
-			}
+	document.addEventListener('click', function (event) {
+		var inside = yearWidgets.some(function (dw) {
+			return dw.wrap && dw.wrap.contains(event.target);
 		});
-	}
+		if (!inside) {
+			closeAllYears();
+		}
+	});
 
 	/* ============================================================
 	 * Formularios: estado de envio (loading)
