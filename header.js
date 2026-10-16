@@ -8,7 +8,9 @@
 
 	var toggle = header.querySelector('.setceb-header__burger');
 	var nav = header.querySelector('.setceb-header__nav');
-	if (!toggle || !nav) {
+	// O menu de navegacao pode estar oculto em pagina de perfil
+	// (setceb_header_minimal), sem impedir o restante da UI.
+	if (!toggle && !header.querySelector('[data-setceb-account]')) {
 		return;
 	}
 
@@ -82,10 +84,14 @@ var accountWrap = header.querySelector('[data-setceb-account]');
 	}
 
 	function closeMenu() {
-		nav.classList.remove('is-open');
-		toggle.classList.remove('is-open');
-		toggle.setAttribute('aria-expanded', 'false');
-		toggle.setAttribute('aria-label', 'Abrir menu');
+		if (nav) {
+			nav.classList.remove('is-open');
+		}
+		if (toggle) {
+			toggle.classList.remove('is-open');
+			toggle.setAttribute('aria-expanded', 'false');
+			toggle.setAttribute('aria-label', 'Abrir menu');
+		}
 	}
 
 	toggle.addEventListener('click', function () {
