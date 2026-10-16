@@ -2845,21 +2845,12 @@ function setceb_sol_remover_advogado( $user_id ) {
  * listagem e o atendimento das solicitacoes.
  */
 function setceb_sol_submenus( $listagem ) {
-	$obj = get_post_type_object( SETCEB_SOL_CPT );
-	$rotulo = ( $obj && ! empty( $obj->labels->all_items ) ) ? $obj->labels->all_items : 'Solicitações';
-	$cap    = ( $obj && ! empty( $obj->cap->edit_posts ) ) ? $obj->cap->edit_posts : SETCEB_SOL_CAP;
+	/* A listagem NAO entra aqui - ver setceb_sol_menu().
 
-	/* A listagem entra aqui, e nao fica por conta do core.
-
-	   Em producao ela simplesmente nao aparecia: o menu "Juridico" abria
-	   a listagem (o item de topo aponta para ela) mas o submenu so tinha
-	   Dashboard e Advogados. Ou seja, a entrada que o core cria sozinho
-	   nao chegou ao $submenu - e o item de topo continuava funcionando
-	   justamente porque nao depende dela.
-
-	   Declarando os tres aqui, o menu do modulo inteiro passa a ter um
-   unico dono: o tema. */
-	add_submenu_page( $listagem, $rotulo, $rotulo, $cap, $listagem );
+	   Registrar este item com add_submenu_page() usando o mesmo slug do
+	   pai cria uma segunda entrada da listagem (o core ja cria uma) e,
+	   em producao, o item de topo deixou de levar a listagem. O caminho
+	   do registro e o problema, nao o texto. */
 
 	add_submenu_page(
 		$listagem,
@@ -2881,7 +2872,32 @@ function setceb_sol_submenus( $listagem ) {
 }
 
 function setceb_sol_menu() {
+	global $submenu;
+
 	$listagem = 'edit.php?post_type=' . SETCEB_SOL_CPT;
+
+	/*
+	 * A listagem e o unico item do modulo que o core cria sozinho, em
+	 * $submenu[arquivo][0]. Aqui so se garante que ele exista - nunca
+	 * registra de novo.
+	 *
+	 * Registrar com add_submenu_page() usando o mesmo slug do pai foi o
+	 * que quebrou a listagem: o core ja tinha criado a entrada, o
+	 * registro do tema cria a segunda, e o submenu passa a ter dois
+	 * "Solicitacoes" apontando para a mesma tela. Em producao isso fez
+	 * o item de topo deixar de levar a listagem.
+	 *
+	 * A garantia e escrita direta no global, e nao add_submenu_page(),
+	 * pelo mesmo motivo: nao e o registro que estava dando problema. E o
+	 * mesmo caminho que setceb_sol_menu_minimo() usa, que funciona.
+	 */
+	if ( ! isset( $submenu[ $listagem ][0] ) ) {
+		$obj  = get_post_type_object( SETCEB_SOL_CPT );
+		$rotulo = ( $obj && ! empty( $obj->labels->all_items ) ) ? $obj->labels->all_items : 'Solicitações';
+		$cap    = ( $obj && ! empty( $obj->cap->edit_posts ) ) ? $obj->cap->edit_posts : SETCEB_SOL_CAP;
+
+		$submenu[ $listagem ][0] = array( $rotulo, $cap, $listagem );
+	}
 
 	/* Tudo abaixo do menu "Juridico", que e o top-level do post type.
 
