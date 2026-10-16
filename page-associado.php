@@ -840,14 +840,6 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 																		<p><?php echo nl2br( esc_html( $registro['texto'] ) ); ?></p>
 																	</div>
 																</div>
-															<?php else : ?>
-																<p class="assoc-thread__event">
-																	<span class="dashicons <?php echo esc_attr( $registro['icone'] ); ?>" aria-hidden="true"></span>
-																	<?php echo esc_html( $registro['rotulo'] ); ?>
-																	<?php if ( '' !== $registro['data_txt'] ) : ?>
-																		&middot; <?php echo esc_html( $registro['data_txt'] ); ?>
-																	<?php endif; ?>
-																</p>
 															<?php endif; ?>
 														<?php endforeach; ?>
 													</div>
