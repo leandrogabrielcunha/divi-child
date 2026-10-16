@@ -2245,7 +2245,7 @@ function setceb_sol_criar( $dados, $usuario_id ) {
 		setceb_sol_historico_add(
 			$post_id,
 			'status',
-			'Atribuída a ' . get_the_author_meta( 'display_name', $advogado ) . '.',
+			'Atribuída à ' . get_the_author_meta( 'display_name', $advogado ) . '.',
 			$usuario_id,
 			true
 		);
