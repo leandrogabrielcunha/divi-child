@@ -1883,8 +1883,8 @@ function setceb_sol_email_nova_solicitacao( $post_id ) {
 
 	setceb_sol_email(
 		$emails,
-		setceb_sol_email_assunto( 'Nova solicitacao juridica ' . $solicitacao['protocolo'] ),
-		setceb_sol_email_corpo_painel( 'Voce recebeu uma nova solicitacao juridica.' )
+		setceb_sol_email_assunto( 'Nova solicitação jurídica ' . $solicitacao['protocolo'] ),
+		setceb_sol_email_corpo_painel( 'Você recebeu uma nova solicitação jurídica.' )
 	);
 }
 
@@ -1909,9 +1909,9 @@ function setceb_sol_email_associado( $post_id, $resposta ) {
 
 	setceb_sol_email(
 		$solicitacao['email'],
-		setceb_sol_email_assunto( 'Resposta na sua solicitacao ' . $solicitacao['protocolo'] ),
+		setceb_sol_email_assunto( 'Resposta na sua solicitação ' . $solicitacao['protocolo'] ),
 		setceb_sol_email_corpo_painel(
-			'A Assessoria Juridica respondeu a sua solicitacao ' . $solicitacao['protocolo'] . '.',
+			'A Assessoria Jurídica respondeu à sua solicitação ' . $solicitacao['protocolo'] . '.',
 			setceb_sol_url_conversa( $post_id )
 		)
 	);
@@ -1937,9 +1937,9 @@ function setceb_sol_email_associado_status( $post_id, $status ) {
 
 	setceb_sol_email(
 		$solicitacao['email'],
-		setceb_sol_email_assunto( 'Atualizacao na sua solicitacao ' . $solicitacao['protocolo'] ),
+		setceb_sol_email_assunto( 'Atualização na sua solicitação ' . $solicitacao['protocolo'] ),
 		setceb_sol_email_corpo_painel(
-			'A sua solicitacao ' . $solicitacao['protocolo'] . ' foi atualizada.',
+			'A sua solicitação ' . $solicitacao['protocolo'] . ' foi atualizada.',
 			setceb_sol_url_conversa( $post_id )
 		)
 	);
@@ -2019,15 +2019,15 @@ function setceb_sol_notice() {
 	$mensagens = array(
 		'ok'       => array(
 			'tipo'  => 'sucesso',
-			'texto' => 'Solicitacao registrada com sucesso. A equipe juridica foi notificada e voce pode acompanhar o atendimento pela Area do Associado.',
+			'texto' => 'Solicitação registrada com sucesso. A equipe jurídica foi notificada e você pode acompanhar o atendimento pela Área do Associado.',
 		),
 		'resposta' => array(
 			'tipo'  => 'sucesso',
-			'texto' => 'Mensagem enviada. O juridico foi notificado e podera complementar a resposta.',
+			'texto' => 'Mensagem enviada. O jurídico foi notificado e poderá complementar a resposta.',
 		),
 		'encerrada' => array(
 			'tipo'  => 'erro',
-			'texto' => 'Esta solicitacao ja foi encerrada. Abra uma nova solicitacao para continuar o atendimento.',
+			'texto' => 'Esta solicitação já foi encerrada. Abra uma nova solicitação para continuar o atendimento.',
 		),
 		'throttle' => array(
 			'tipo'  => 'erro',
@@ -2035,11 +2035,11 @@ function setceb_sol_notice() {
 		),
 		'campos'   => array(
 			'tipo'  => 'erro',
-			'texto' => 'Verifique os campos obrigatorios e tente novamente.',
+			'texto' => 'Verifique os campos obrigatórios e tente novamente.',
 		),
 		'erro'     => array(
 			'tipo'  => 'erro',
-			'texto' => 'Nao foi possivel registrar a solicitacao agora. Tente novamente em alguns minutos.',
+			'texto' => 'Não foi possível registrar a solicitação agora. Tente novamente em alguns minutos.',
 		),
 	);
 
@@ -2066,7 +2066,7 @@ function setceb_sol_notice_messages( $mensagens, $forma ) {
 		return $mensagens;
 	}
 
-	$mensagens['ok']['texto'] = 'Solicitacao registrada com sucesso. A equipe juridica foi notificada e voce pode acompanhar o atendimento por aqui.';
+	$mensagens['ok']['texto'] = 'Solicitação registrada com sucesso. A equipe jurídica foi notificada e você pode acompanhar o atendimento por aqui.';
 
 	return $mensagens;
 }
