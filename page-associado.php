@@ -92,6 +92,10 @@ $minhas_solicitacoes = function_exists( 'setceb_sol_listar' ) ? setceb_sol_lista
 $sol_aberta          = isset( $_GET['sol_id'] ) ? absint( $_GET['sol_id'] ) : 0;
 $sol_nova_aberta     = isset( $_GET['sol_nova'] ) && absint( $_GET['sol_nova'] ) > 0;
 
+/* "Voltar para solicitacoes": no mobile a lista ocupa a tela inteira e
+   a conversa abre por cima dela. Server-side para funcionar sem JS. */
+$sol_lista_aberta    = isset( $_GET['sol_lista'] ) && absint( $_GET['sol_lista'] ) > 0;
+
 /* Painel visivel: aviso de formulario > solicitacao da URL > acesso rapido. */
 $active_panel = 'visao-geral';
 
@@ -196,7 +200,8 @@ $sol_ativa = in_array( (int) $sol_aberta, $sol_ids, true ) ? (int) $sol_aberta :
 $sol_total = count( $minhas_solicitacoes );
 
 /* Painel "Nova solicitacao" visivel: pedido pela URL ou estado inicial de
-   quem ainda nao possui solicitacoes. */
+   quem ainda nao possui solicitacoes. A visao de lista (sol_lista) e
+   apenas um estado de layout do mobile e nao altera qual painel abre. */
 $sol_nova_ativa = $sol_nova_aberta || empty( $minhas_solicitacoes );
 
 /**
@@ -640,7 +645,7 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 									</div>
 								<?php endif; ?>
 
-								<div class="assoc-sol">
+								<div class="assoc-sol<?php echo $sol_lista_aberta ? ' is-list' : ''; ?>">
 
 									<aside class="assoc-sol__side">
 										<div class="assoc-sol__side-head">
@@ -690,11 +695,12 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 										<?php endif; ?>
 									</aside>
 
-									<div class="assoc-sol__panes">
+									<div class="assoc-sol__panes" aria-live="polite">
 
 										<!-- Nova solicitacao: o formulario abre na coluna da conversa -->
 										<article class="assoc-sol__pane assoc-sol__pane--nova" id="sol-pane-nova" data-sol-pane="nova" aria-labelledby="sol-nova-btn"<?php echo $sol_nova_ativa ? '' : ' hidden'; ?>>
-											<header class="assoc-sol__pane-head">
+											<header class="assoc-sol__pane-head assoc-sol__pane-head--nova">
+												<?php echo setceb_sol_botao_voltar( $perfil_url ); ?>
 												<div class="assoc-sol__pane-heading">
 													<h3 class="assoc-sol__pane-title">Nova solicitação</h3>
 													<p class="assoc-sol__pane-meta">Descreva sua dúvida para a Assessoria Jurídica do SETCEB. A resposta chega aqui nesta conversa.</p>
@@ -745,6 +751,7 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 											<?php $sol_esta_ativa = ( (int) $sol['id'] === $sol_ativa ) && ! $sol_nova_ativa; ?>
 											<article class="assoc-sol__pane" id="sol-pane-<?php echo (int) $sol['id']; ?>" data-sol-pane="<?php echo (int) $sol['id']; ?>" aria-labelledby="sol-tab-<?php echo (int) $sol['id']; ?>"<?php echo $sol_esta_ativa ? '' : ' hidden'; ?>>
 													<header class="assoc-sol__pane-head">
+														<?php echo setceb_sol_botao_voltar( $perfil_url ); ?>
 														<div class="assoc-sol__pane-heading">
 															<h3 class="assoc-sol__pane-title"><?php echo esc_html( $sol['titulo'] ); ?></h3>
 															<p class="assoc-sol__pane-meta">

@@ -361,6 +361,7 @@
 	var solLinks = qsa('[data-sol-link]');
 	var solPanes = qsa('[data-sol-pane]');
 	var solNovaLink = root.querySelector('[data-sol-nova]');
+	var solBox = root.querySelector('.assoc-sol');
 
 	function activateSolicitacao(id, options) {
 		options = options || {};
@@ -389,6 +390,12 @@
 		solPanes.forEach(function (pane) {
 			pane.hidden = pane.getAttribute('data-sol-pane') !== alvo;
 		});
+
+		/* No mobile a lista fica escondida enquanto a conversa esta aberta
+		   (modo detalhe). Escolher uma solicitacao fecha o modo lista. */
+		if (solBox) {
+			solBox.classList.remove('is-list');
+		}
 
 		if (options.url && window.history && window.history.replaceState) {
 			window.history.replaceState(null, '', options.url);
@@ -434,6 +441,31 @@
 			}
 		});
 	}
+
+	/* Voltar para as solicitacoes: so aparece no mobile, onde a lista fica
+	   oculta enquanto a conversa esta aberta. O href e real (?sol_lista=1),
+	   entao sem JS o botao funciona por reload da pagina. */
+	qsa('[data-sol-voltar]').forEach(function (link) {
+		link.addEventListener('click', function (event) {
+			if (!window.history || !window.history.replaceState) {
+				return;
+			}
+
+			event.preventDefault();
+
+			if (solBox) {
+				solBox.classList.add('is-list');
+			}
+
+			window.history.replaceState(null, '', link.getAttribute('href'));
+
+			var side = solBox ? solBox.querySelector('.assoc-sol__side') : null;
+
+			if (side && typeof side.scrollIntoView === 'function') {
+				side.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			}
+		});
+	});
 
 	/* ============================================================
 	 * Seletor de ano (listbox acessivel)

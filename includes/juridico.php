@@ -416,9 +416,35 @@ function setceb_sol_data( $data ) {
 		return '';
 	}
 
-	$formatado = mysql2date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (string) $data );
+	/* Formato curto (dd/mm/aaaa hh:mm): o formato do WP ("F j, Y g:i a")
+	   gera cabecalhos de 3-4 linhas na conversa, principalmente no mobile.
+	   Usa gmdate porque a data e' local "naive" - a mesma convencao de
+	   setceb_sol_tempo_relativo() - e date_i18n() somaria o offset 2x. */
+	$timestamp = strtotime( (string) $data . ' UTC' );
 
-	return is_string( $formatado ) ? $formatado : '';
+	if ( false === $timestamp ) {
+		return '';
+	}
+
+	return gmdate( 'd/m/Y H:i', $timestamp );
+}
+
+/**
+ * Botao "Solicitacoes" que devolve o usuario a lista das solicitacoes.
+ *
+ * No mobile a conversa abre em tela cheia (modo detalhe); este botao e a
+ * unica saida. E um link real (?sol_lista=1) para funcionar tambem sem JS.
+ *
+ * @param string $perfil_url URL da pagina de perfil do associado.
+ * @return string
+ */
+function setceb_sol_botao_voltar( $perfil_url ) {
+	$url = add_query_arg( 'sol_lista', 1, $perfil_url ) . '#juridico';
+
+	return sprintf(
+		'<a class="assoc-sol__voltar" href="%1$s" data-sol-voltar><span class="dashicons dashicons-arrow-left-alt2" aria-hidden="true"></span><span class="assoc-sol__voltar-label">Solicitações</span></a>',
+		esc_url( $url )
+	);
 }
 
 /**

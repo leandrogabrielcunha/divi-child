@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.46.4
+Version: 1.46.5
 Template: Divi
 */
 
@@ -2278,20 +2278,74 @@ via fonte Dashicons.
 }
 
 @media (max-width: 1200px) {
-	/* A conversa do juridico passa para baixo da lista antes do restante
-	   do layout, para nao ficar estreita demais. */
+	/* Juridico no mobile: modo conversa.
+
+	   1) Sem scroll aninhado - a pagina rola uma vez so (antes eram tres:
+	      pagina + lista de 320px + conversa de 62vh).
+	   2) A conversa ocupa a tela inteira e a lista some, com botao de volta
+	      (regra do WhatsApp/Intercom). Estado controlado pela classe
+	      is-list, que vem do PHP (?sol_lista=1) e funciona sem JS.
+	   3) O campo de resposta fica grudado no rodape, sempre alcancavel. */
 	.assoc-sol {
 		grid-template-columns: minmax(0, 1fr);
-		gap: 16px;
+		gap: 14px;
+	}
+
+	.assoc-sol__side,
+	.assoc-sol__pane {
+		border-radius: 14px;
+	}
+
+	/* A lista so aparece quando o modo lista esta ativo. */
+	.assoc-sol:not(.is-list) > .assoc-sol__side {
+		display: none;
+	}
+
+	.assoc-sol.is-list > .assoc-sol__panes {
+		display: none;
+	}
+
+	.assoc-sol__voltar {
+		display: inline-flex;
 	}
 
 	.assoc-sol__list {
-		max-height: 320px;
-		overflow-y: auto;
+		max-height: none;
+		overflow: visible;
 	}
 
+	/* A conversa flui na pagina: sem caixa rolavel. */
 	.assoc-thread {
-		max-height: 62vh;
+		max-height: none;
+		overflow: visible;
+		padding: 16px 14px;
+	}
+
+	.assoc-thread__msg {
+		max-width: 94%;
+	}
+
+	/* position: sticky exige que nenhum ancestral corte o overflow. */
+	.assoc-sol__pane {
+		overflow: visible;
+	}
+
+	/* Barra de resposta fixa: sempre alcancavel, sem rolar ate o fim.
+	   A borda inferior e o raio ficam com o proprio painel. */
+	.assoc-form--resposta {
+		position: sticky;
+		bottom: 0;
+		z-index: 5;
+		padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+		background: #fff;
+		border-top: 1px solid var(--setceb-border);
+		border-radius: 0 0 13px 13px;
+		box-shadow: 0 -6px 18px rgba(18, 61, 115, 0.09);
+	}
+
+	.assoc-form--resposta .assoc-btn {
+		width: 100%;
+		justify-content: center;
 	}
 }
 
@@ -2373,6 +2427,33 @@ via fonte Dashicons.
 		grid-column: 2;
 		justify-self: start;
 		margin-top: 6px;
+	}
+
+	/* iOS/Safari dá zoom automático ao focar campos com fonte < 16px,
+	   o que quebra o layout da conversa ao digitar a resposta. */
+	.assoc-form__field input,
+	.assoc-form__field select,
+	.assoc-form__field textarea {
+		font-size: 16px;
+		min-height: 52px;
+	}
+
+	.assoc-form--nova,
+	.assoc-form--resposta {
+		padding: 16px 14px;
+	}
+
+	.assoc-sol__pane-head {
+		padding: 16px 14px;
+		gap: 10px;
+	}
+
+	.assoc-sol__pane-title {
+		font-size: 17px;
+	}
+
+	.assoc-sol__pane-meta {
+		font-size: 12px;
 	}
 }
 
@@ -3547,6 +3628,46 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 	font-size: 12.5px;
 	line-height: 1.5;
 	color: var(--setceb-muted);
+}
+
+/* ---------- Voltar para as solicitacoes ----------
+   Só aparece no mobile, onde a conversa ocupa a tela inteira. */
+.assoc-sol__voltar {
+	display: none;
+	align-items: center;
+	gap: 6px;
+	align-self: flex-start;
+	margin: -4px 0 10px;
+	padding: 7px 12px 7px 10px;
+	font-family: inherit;
+	font-size: 13px;
+	font-weight: 700;
+	line-height: 1.2;
+	color: var(--setceb-accent-dark);
+	background: var(--setceb-accent-tint);
+	border-radius: 999px;
+	text-decoration: none;
+	-webkit-tap-highlight-color: transparent;
+	transition: background 0.15s ease;
+}
+
+.assoc-sol__voltar:hover,
+.assoc-sol__voltar:focus-visible {
+	background: #D9EDF1;
+	color: var(--setceb-accent-dark);
+	text-decoration: none;
+}
+
+.assoc-sol__voltar .dashicons {
+	flex-shrink: 0;
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+}
+
+.assoc-sol__pane {
+	/* O scrollIntoView da conversa deve deixar um respiro no topo. */
+	scroll-margin-top: 16px;
 }
 
 /* ---------- Conversa ---------- */
