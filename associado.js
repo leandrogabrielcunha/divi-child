@@ -96,7 +96,9 @@
 	/* Botoes que abrem um painel especifico (ex.: Emissao de Boletos) */
 	qsa('[data-open-panel]').forEach(function (button) {
 		button.addEventListener('click', function () {
-			activatePanel(button.getAttribute('data-open-panel'), { scroll: true });
+			console.info('assoc: click data-open-panel=', button.getAttribute('data-open-panel'));
+			var aberto = activatePanel(button.getAttribute('data-open-panel'), { scroll: true });
+			console.info('assoc: activatePanel result=', aberto, 'active=', (document.querySelector('.assoc-panel.is-active') || {}).id);
 		});
 	});
 
