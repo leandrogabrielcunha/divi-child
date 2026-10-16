@@ -4,7 +4,7 @@ Theme URI: https://www.starfez.com
 Description: Tema filho do Divi com identidade visual SETCEB, incluindo tela de login personalizada.
 Author: Leandro Gabriel
 Author URI: https://www.starfez.com
-Version: 1.47.10
+Version: 1.47.11
 Template: Divi
 */
 
@@ -3485,6 +3485,14 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 /* Formulario da nova solicitacao na coluna da conversa */
 .assoc-form--nova {
 	padding: 20px;
+	gap: 12px;
+}
+
+/* A duida e o unico campo que cresce com o texto. 120px de minimum
+   ocupavam meia tela do celular num formulario que tem quatro campos:
+   agora comeca em 96px e o resize vertical continua valendo. */
+.assoc-form--nova .assoc-form__field textarea {
+	min-height: 96px;
 }
 
 /* ---------- Estados: lista vazia e coluna da conversa ---------- */
@@ -3738,110 +3746,44 @@ com a conversa e formulario de nova mensagem. Modulo juridico.php.
 /* ---------- Wizard da nova solicitacao ----------
    Passo 1: assunto + duida. Passo 2: dados de contato (opcionais).
    Sem JS os dois passos aparecem, como o formulario unico de antes. */
-.assoc-wizard {
+/* Formulario unico da nova solicitacao.
+
+   Era um wizard de dois passos; virou um formulario so porque o
+   "Continuar" so existia com JS e, sem JS, os dois passos apareciam
+   juntos com um botao que nao fazia nada. Sem passos, o formulario
+   cabe na tela: assunto, duida, telefone e empresa.
+
+   A grade de duas colunas so existe com largura de sobra; no celular
+   os quatro campos viram uma coluna, com telefone e empresa lado a
+   lado a partir de 420px. */
+.assoc-form__grid {
 	display: grid;
-	gap: 16px;
+	gap: 12px;
+	grid-template-columns: minmax(0, 1fr);
 }
 
-.assoc-wizard__bar {
-	display: none;
-	align-items: center;
-	gap: 10px;
-	margin: 0;
-	padding: 0;
-	list-style: none;
+@media (min-width: 420px) {
+	.assoc-form__grid {
+		grid-template-columns: 1fr 1fr;
+	}
+
+	/* Assunto e duida ocupam a linha inteira: sao os campos que
+	   precisam de espaco para ler. */
+	.assoc-form__grid .assoc-form__field--largo {
+		grid-column: 1 / -1;
+	}
 }
 
-.assoc-form--nova.is-wizard .assoc-wizard__bar {
-	display: flex;
-}
-
-/* Resumo do passo 1, mostrado no passo 2.
-
-   Este bloco existia no HTML e nao existia no CSS: o recap saia como
-   texto solto, colado no campo seguinte - "TributarioFui cobrado de
-   taxa nao prevista..." numa linha so, sem caixa e sem separacao. */
-.assoc-wizard__recap {
+.assoc-form__actions {
 	display: grid;
-	gap: 4px;
-	margin: 0 0 16px;
-	padding: 12px 14px;
-	background: #F2F7FB;
-	border: 1px solid #D7E4F0;
-	border-left: 3px solid var(--setceb-accent);
-	border-radius: 10px;
+	gap: 8px;
+	justify-items: stretch;
 }
 
-.assoc-wizard__recap strong {
-	display: block;
-	font-size: 12px;
-	font-weight: 700;
-	letter-spacing: 0.5px;
-	text-transform: uppercase;
-	color: var(--setceb-accent-deep, var(--setceb-blue));
+.assoc-form__actions .assoc-btn--full {
+	justify-self: stretch;
 }
 
-.assoc-wizard__bar-item {
-	display: flex;
-	align-items: center;
-	gap: 7px;
-	min-width: 0;
-	font-size: 12.5px;
-	font-weight: 700;
-	color: var(--setceb-muted);
-	white-space: nowrap;
-}
-
-.assoc-wizard__bar-item + .assoc-wizard__bar-item::before {
-	content: '';
-	flex-shrink: 0;
-	width: 20px;
-	height: 2px;
-	background: #DCE5EE;
-	border-radius: 2px;
-}
-
-.assoc-wizard__num {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	flex-shrink: 0;
-	width: 22px;
-	height: 22px;
-	font-size: 12px;
-	color: var(--setceb-muted);
-	background: #EBF0F6;
-	border-radius: 999px;
-}
-
-.assoc-wizard__bar-item.is-current {
-	color: var(--setceb-blue);
-}
-
-.assoc-wizard__bar-item.is-current .assoc-wizard__num {
-	color: #fff;
-	background: var(--setceb-accent);
-}
-
-.assoc-wizard__bar-item.is-done .assoc-wizard__num {
-	color: #fff;
-	background: var(--setceb-accent-dark);
-}
-
-.assoc-wizard__title {
-	margin: 0 0 2px;
-	font-size: 15px;
-	font-weight: 700;
-	color: var(--setceb-blue);
-}
-
-.assoc-wizard__opt {
-	font-size: 11px;
-	font-weight: 700;
-	letter-spacing: 0.4px;
-	text-transform: uppercase;
-	color: var(--setceb-muted);
-}
 
 /* ---------- Conversa ---------- */
 .assoc-thread {

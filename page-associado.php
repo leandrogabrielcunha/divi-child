@@ -711,17 +711,16 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 												<?php echo setceb_sol_botao_voltar( $perfil_url ); ?>
 											</header>
 
-<?php /* Sem JS os dois passos aparecem e viram um formulario so. Os
-	   botoes "Continuar" e "Voltar" sao do wizard: sem JS eles nao
-	   fazem nada, entao somem em vez de oferecer um beco sem saida. */
-?>
+<?php /* Formulario unico, sem passos.
+
+	   O assunto e os dados foram numero de passos por um tempo, com um
+	   "Continuar" que so existia com JS. Sem JS os dois passos apareciam
+	   juntos e o botao nao fazia nada - e o JS nao carregava em parte dos
+	   ambiente. Um formulario so nao depende de script para existir: o
+	   servidor valida, o navegador mostra os campos obrigatorios, e o
+	   espaco em tela e o de quatro campos. */ ?>
 <noscript>
 	<style>
-		/* Sem JS o wizard nao existe: os dois passos viram um formulario
-		   so, e os botoes que so o wizard usa saem da tela em vez de
-		   oferecer um clique que nao faz nada. */
-		[data-wizard-next], [data-wizard-back], .assoc-wizard__bar { display: none !important; }
-
 		/* A troca lista <-> conversa e feita pela classe is-list, que vem
 		   do PHP. Sem JS nao ha como trocar a classe, entao a conversa
 		   ficaria oculta para sempre e o associado nao conseguiria nem ler
@@ -730,83 +729,56 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 		.assoc-sol.is-list > .assoc-sol__panes { display: block !important; }
 	</style>
 </noscript>
-<form class="assoc-form assoc-form--nova" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-assoc-form data-assoc-wizard>
-												<input type="hidden" name="action" value="setceb_juridico">
-												<?php wp_nonce_field( 'setceb_form_juridico' ); ?>
+<form class="assoc-form assoc-form--nova" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-assoc-form>
+														<input type="hidden" name="action" value="setceb_juridico">
+														<?php wp_nonce_field( 'setceb_form_juridico' ); ?>
 
-												<p class="assoc-hp" aria-hidden="true">
-													<label>Site<input type="text" name="setceb_website" tabindex="-1" autocomplete="off"></label>
-												</p>
-
-												<input type="hidden" name="setceb_nome" value="<?php echo esc_attr( $user_name ); ?>">
-												<input type="hidden" name="setceb_email" value="<?php echo esc_attr( $user_email ); ?>">
-
-												<div class="assoc-wizard">
-
-													<ol class="assoc-wizard__bar" data-wizard-bar hidden>
-														<li class="assoc-wizard__bar-item" data-wizard-dot="1">
-															<span class="assoc-wizard__num" aria-hidden="true">1</span>
-															<span class="assoc-wizard__bar-label">Sua dúvida</span>
-														</li>
-														<li class="assoc-wizard__bar-item" data-wizard-dot="2">
-															<span class="assoc-wizard__num" aria-hidden="true">2</span>
-															<span class="assoc-wizard__bar-label">Seus dados</span>
-														</li>
-													</ol>
-
-													<?php /* Passo 1. Sem JS os dois passos aparecem (formulario unico). */ ?>
-													<section class="assoc-wizard__step" data-wizard-step="1">
-														<?php /* Select, e nao um grupo de radios: seis bolhas de
-														   categoria ocupavam meia tela do celular, com alvo pequeno. A
-														   lista vem de setceb_sol_categorias() - a mesma funcao que o
-														   servidor usa para validar, porque um array solto no template
-														   seria a mesma lista em dois lugares. */ ?>
-														<p class="assoc-form__field">
-															<label for="assoc-jur-categoria">Qual é o assunto? <span aria-hidden="true">*</span></label>
-															<select id="assoc-jur-categoria" name="setceb_categoria" data-wizard-categoria>
-																<option value="">Selecione um assunto</option>
-																<?php foreach ( $sol_categorias as $sol_cat_slug => $sol_cat_rotulo ) : ?>
-																	<option value="<?php echo esc_attr( $sol_cat_slug ); ?>"><?php echo esc_html( $sol_cat_rotulo ); ?></option>
-																<?php endforeach; ?>
-															</select>
-														</p>
-														<p class="assoc-wizard__error" data-wizard-error="categoria" hidden>Escolha um assunto para continuar.</p>
-
-														<p class="assoc-form__field">
-															<label for="assoc-jur-msg">Descreva sua dúvida <span aria-hidden="true">*</span></label>
-															<textarea id="assoc-jur-msg" name="setceb_mensagem" rows="6" aria-required="true" placeholder="Explique o que aconteceu. Se possivel, informe datas e os documentos envolvidos."></textarea>
-														</p>
-														<p class="assoc-wizard__error" data-wizard-error="mensagem" hidden>Escreva sua dúvida para continuar.</p>
-
-														<button type="button" class="assoc-btn assoc-btn--full" data-wizard-next>Continuar</button>
-													</section>
-
-													<?php /* Passo 2 */ ?>
-													<section class="assoc-wizard__step" data-wizard-step="2">
-														<h4 class="assoc-wizard__title">Seus dados <span class="assoc-wizard__opt">opcional</span></h4>
-
-														<div class="assoc-wizard__recap" data-wizard-recap hidden></div>
-
-														<p class="assoc-form__field">
-															<label for="assoc-jur-fone">Telefone</label>
-															<input type="tel" id="assoc-jur-fone" name="setceb_telefone" autocomplete="tel" inputmode="tel" data-mask-phone maxlength="18" placeholder="(00) 00000-0000">
-														</p>
-														<p class="assoc-form__field">
-															<label for="assoc-jur-empresa">Empresa</label>
-															<input type="text" id="assoc-jur-empresa" name="setceb_empresa" autocomplete="organization">
+														<p class="assoc-hp" aria-hidden="true">
+															<label>Site<input type="text" name="setceb_website" tabindex="-1" autocomplete="off"></label>
 														</p>
 
-														<div class="assoc-wizard__actions">
-															<button type="button" class="assoc-btn assoc-btn--ghost" data-wizard-back>Voltar</button>
-															<button type="submit" class="assoc-btn">
-																	<span class="assoc-btn__label">Registrar solicitação</span>
-																</button>
+														<input type="hidden" name="setceb_nome" value="<?php echo esc_attr( $user_name ); ?>">
+														<input type="hidden" name="setceb_email" value="<?php echo esc_attr( $user_email ); ?>">
+
+														<?php /* A lista vem de setceb_sol_categorias(): e a mesma
+														   funcao que o servidor usa para validar, entao um
+														   array solto no template nao pode divergir do que o
+														   servidor aceita. */ ?>
+														<div class="assoc-form__grid">
+															<p class="assoc-form__field assoc-form__field--largo">
+																<label for="assoc-jur-categoria">Assunto <span aria-hidden="true">*</span></label>
+																<select id="assoc-jur-categoria" name="setceb_categoria" required>
+																	<option value="">Selecione um assunto</option>
+																	<?php foreach ( $sol_categorias as $sol_cat_slug => $sol_cat_rotulo ) : ?>
+																		<option value="<?php echo esc_attr( $sol_cat_slug ); ?>"><?php echo esc_html( $sol_cat_rotulo ); ?></option>
+																	<?php endforeach; ?>
+																</select>
+															</p>
+
+															<p class="assoc-form__field assoc-form__field--largo">
+																<label for="assoc-jur-msg">Descreva sua dúvida <span aria-hidden="true">*</span></label>
+																<textarea id="assoc-jur-msg" name="setceb_mensagem" rows="4" required placeholder="Explique o que aconteceu. Se possível, informe datas e os documentos envolvidos."></textarea>
+															</p>
+
+															<?php /* Telefone e empresa lado a lado quando ha largura.
+															   No celular viram uma coluna, como antes. */ ?>
+															<p class="assoc-form__field">
+																<label for="assoc-jur-fone">Telefone</label>
+																<input type="tel" id="assoc-jur-fone" name="setceb_telefone" autocomplete="tel" inputmode="tel" data-mask-phone maxlength="18" placeholder="(00) 00000-0000">
+															</p>
+															<p class="assoc-form__field">
+																<label for="assoc-jur-empresa">Empresa</label>
+																<input type="text" id="assoc-jur-empresa" name="setceb_empresa" autocomplete="organization">
+															</p>
 														</div>
-														<p class="assoc-form__note">Campos com <span aria-hidden="true">*</span> são obrigatórios.</p>
-													</section>
 
-												</div>
-											</form>
+														<div class="assoc-form__actions">
+															<button type="submit" class="assoc-btn assoc-btn--full">
+																<span class="assoc-btn__label">Registrar solicitação</span>
+															</button>
+															<p class="assoc-form__note">Campos com <span aria-hidden="true">*</span> são obrigatórios.</p>
+														</div>
+												</form>
 										</article>
 
 										<?php foreach ( $minhas_solicitacoes as $sol ) : ?>
