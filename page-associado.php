@@ -864,14 +864,21 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 							<section class="<?php echo esc_attr( trim( setceb_panel_active_attr( 'financeiro', $active_panel, 'class' ) ) ); ?>" id="panel-financeiro" role="tabpanel" aria-labelledby="tab-financeiro" tabindex="0">
 								<?php setceb_modulo_cabecalho( 'financeiro', $modulos ); ?>
 
-								<div class="setceb-perfil__boletos">
+								<?php /* Mesmo componente dos cards da Visao geral
+									   (.assoc-quick), nao um desenho proprio. O
+									   caixa de boleto tinha o seu proprio visual -
+									   centralizado, fundo cinza, borda mais grossa e
+									   sem sombra - e ficava destoando de todo o resto
+									   do portal. Reusar o componente traz o hover, o
+									   foco visivel e o responsivo de graca. */ ?>
+								<div class="assoc-quick">
 									<?php foreach ( $boletos as $boleto ) : ?>
-										<a class="setceb-perfil__boleto"
+										<a class="assoc-quick__card"
 											href="<?php echo esc_url( $boleto['url'] ); ?>"
 											target="_blank" rel="noopener noreferrer">
-											<span class="setceb-perfil__boleto-icon"><span class="dashicons <?php echo esc_attr( isset( $boleto_icons[ $boleto['icon'] ] ) ? $boleto_icons[ $boleto['icon'] ] : 'dashicons-media-document' ); ?>" aria-hidden="true"></span></span>
-											<span class="setceb-perfil__boleto-label"><?php echo esc_html( $boleto['label'] ); ?></span>
-											<span class="setceb-perfil__boleto-cta">Emitir boleto</span>
+											<span class="assoc-quick__icon"><span class="dashicons <?php echo esc_attr( isset( $boleto_icons[ $boleto['icon'] ] ) ? $boleto_icons[ $boleto['icon'] ] : 'dashicons-media-document' ); ?>" aria-hidden="true"></span></span>
+											<span class="assoc-quick__title"><?php echo esc_html( $boleto['label'] ); ?></span>
+											<span class="assoc-quick__desc">Emitir boleto</span>
 										</a>
 									<?php endforeach; ?>
 								</div>
