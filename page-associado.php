@@ -703,20 +703,10 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 
 									<div class="assoc-sol__panes" aria-live="polite">
 
-										<div class="assoc-sol__placeholder">
-											<span class="dashicons dashicons-format-chat" aria-hidden="true"></span>
-											<p><strong>Nenhuma solicitacao aberta.</strong></p>
-											<p>Escolha uma solicitacao na lista ao lado para ver a conversa completa.</p>
-										</div>
-
 										<!-- Nova solicitacao: o formulario abre na coluna da conversa -->
 										<article class="assoc-sol__pane assoc-sol__pane--nova" id="sol-pane-nova" data-sol-pane="nova" aria-labelledby="sol-nova-btn"<?php echo $sol_nova_ativa ? '' : ' hidden'; ?>>
-											<header class="assoc-sol__pane-head assoc-sol__pane-head--nova">
+											<header class="assoc-sol__pane-head">
 												<?php echo setceb_sol_botao_voltar( $perfil_url ); ?>
-												<div class="assoc-sol__pane-heading">
-													<h3 class="assoc-sol__pane-title">Nova solicitação</h3>
-													<p class="assoc-sol__pane-meta">Descreva sua dúvida para a Assessoria Jurídica do SETCEB. A resposta chega aqui nesta conversa.</p>
-												</div>
 											</header>
 
 <form class="assoc-form assoc-form--nova" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-assoc-form data-assoc-wizard>
@@ -799,21 +789,6 @@ function setceb_modulo_cabecalho( $key, $modulos, $year_filter = false ) {
 											<article class="assoc-sol__pane" id="sol-pane-<?php echo (int) $sol['id']; ?>" data-sol-pane="<?php echo (int) $sol['id']; ?>" aria-labelledby="sol-tab-<?php echo (int) $sol['id']; ?>"<?php echo $sol_esta_ativa ? '' : ' hidden'; ?>>
 													<header class="assoc-sol__pane-head">
 														<?php echo setceb_sol_botao_voltar( $perfil_url ); ?>
-														<?php echo setceb_sol_botao_nova( $perfil_url ); ?>
-														<div class="assoc-sol__pane-heading">
-															<h3 class="assoc-sol__pane-title"><?php echo esc_html( $sol['titulo'] ); ?></h3>
-															<p class="assoc-sol__pane-meta">
-																Protocolo <?php echo esc_html( $sol['protocolo'] ); ?>
-																&middot; Aberta em <?php echo esc_html( setceb_sol_data( $sol['data'] ) ); ?>
-																<?php if ( '' !== $sol['advogado'] ) : ?>
-																	&middot; Responsável: <?php echo esc_html( $sol['advogado'] ); ?>
-																<?php endif; ?>
-															</p>
-														</div>
-														<span class="assoc-badge" style="--setceb-sol-cor:<?php echo esc_attr( $sol['status_cor'] ); ?>">
-															<span class="dashicons <?php echo esc_attr( $sol['status_icone'] ); ?>" aria-hidden="true"></span>
-															<?php echo esc_html( $sol['status_rotulo'] ); ?>
-														</span>
 													</header>
 
 													<div class="assoc-thread">
