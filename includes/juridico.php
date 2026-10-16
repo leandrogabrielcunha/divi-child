@@ -2496,6 +2496,18 @@ function setceb_sol_menu_minimo() {
 		}
 	}
 
+	/*
+	 * Um unico submenu, e ele aponta para o mesmo endereco do item de
+	 * topo. O WordPress colapsa um menu assim: sem seta, sem lista, o
+	 * "Juridico" vira um link direto para a listagem.
+	 *
+	 * Aqui isso e o resultado esperado e nao um defeito: a conta
+	 * restrita so alcanca a listagem e o atendimento de cada solicitacao
+	 * (Dashboard e Advogados exigem manage_options). Um menu de uma tela
+	 * so nao precisa de lista. Se um dia essa conta ganhar uma segunda
+	 * tela, o item da lista entra aqui junto com ela - e a seta volta
+	 * sozinha.
+	 */
 	$menu    = array( 26 => $item );
 	$submenu = array( $slug => array( 5 => array( $obj->labels->all_items, $cap, $slug ) ) );
 
@@ -2833,6 +2845,22 @@ function setceb_sol_remover_advogado( $user_id ) {
  * listagem e o atendimento das solicitacoes.
  */
 function setceb_sol_submenus( $listagem ) {
+	$obj = get_post_type_object( SETCEB_SOL_CPT );
+	$rotulo = ( $obj && ! empty( $obj->labels->all_items ) ) ? $obj->labels->all_items : 'Solicitacoes';
+	$cap    = ( $obj && ! empty( $obj->cap->edit_posts ) ) ? $obj->cap->edit_posts : SETCEB_SOL_CAP;
+
+	/* A listagem entra aqui, e nao fica por conta do core.
+
+	   Em producao ela simplesmente nao aparecia: o menu "Juridico" abria
+	   a listagem (o item de topo aponta para ela) mas o submenu so tinha
+	   Dashboard e Advogados. Ou seja, a entrada que o core cria sozinho
+	   nao chegou ao $submenu - e o item de topo continuava funcionando
+	   justamente porque nao depende dela.
+
+	   Declarando os tres aqui, o menu do modulo inteiro passa a ter um
+   unico dono: o tema. */
+	add_submenu_page( $listagem, $rotulo, $rotulo, $cap, $listagem );
+
 	add_submenu_page(
 		$listagem,
 		'Dashboard Juridico',
@@ -2974,8 +3002,6 @@ function setceb_sol_garantir_menu() {
 		$obj->menu_icon ? $obj->menu_icon : 'dashicons-admin-post',
 		$obj->menu_position
 	);
-
-	add_submenu_page( $slug, $obj->labels->all_items, $obj->labels->all_items, $obj->cap->edit_posts, $slug );
 
 	/* Sem isto, um plugin que derrubasse o menu perderia o Dashboard e
 	   os Advogados junto - e o modulo ficaria so com a listagem. */
