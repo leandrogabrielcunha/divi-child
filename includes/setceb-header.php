@@ -185,6 +185,7 @@ function setceb_header_markup() {
 			</div>
 		</div>
 
+<?php if ( empty( $GLOBALS['setceb_header_minimal'] ) ) : ?>
 		<nav class="setceb-header__nav" id="setceb-header-menu" aria-label="Menu principal">
 			<?php setceb_header_menu(); ?>
 			<div class="setceb-header__mobile-actions">
@@ -196,6 +197,7 @@ function setceb_header_markup() {
 				<?php endif; ?>
 			</div>
 		</nav>
+<?php endif; ?>
 	</header>
 	<?php
 	return ob_get_clean();

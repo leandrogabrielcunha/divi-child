@@ -21,6 +21,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/* Sinaliza para o header global (setceb-header.php) que esta e a pagina
+   minimalista: esconde os links de navegacao, mantendo logo, busca e
+   "Minha conta". */
+$GLOBALS['setceb_header_minimal'] = true;
+
 $is_entitled = setceb_is_associado() || current_user_can( 'manage_options' );
 $home        = home_url( '/' );
 
