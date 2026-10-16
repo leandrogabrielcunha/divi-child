@@ -1097,13 +1097,7 @@ function setceb_sol_meta_box_atendimento( $post ) {
 				</div>
 			<?php endif; ?>
 
-			<div class="setceb-sol-bloco__campo">
-				<label for="setceb-sol-titulo">
-					<span class="setceb-sol-bloco__titulo">Título interno</span>
-					<span class="setceb-sol-bloco__dica">Título da conversa, da coluna “Solicitação” da listagem e do Dashboard. O padrão são os primeiros caracteres da solicitação.</span>
-				</label>
-				<input type="text" id="setceb-sol-titulo" name="post_title" value="<?php echo esc_attr( $post->post_title ); ?>">
-			</div>
+
 		</div>
 
 		<div class="setceb-sol-bloco">
