@@ -2,9 +2,10 @@
 /**
  * SETCEB - Carrossel de conteudos exclusivos para associados.
  *
- * Shortcode: [setceb_carrossel_associados quantidade="10"]
- * Usa posts marcados como exclusivos no metabox existente e o controle
- * de acesso definido em includes/associado.php.
+ * Shortcode: [setceb_carrossel_associados]
+ * Exibe uma previa publica dos dez posts mais recentes marcados como
+ * exclusivos. O post individual aplica o controle de acesso existente
+ * em includes/associado.php.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -99,42 +100,19 @@ function setceb_associados_carousel_enqueue_assets() {
 }
 
 /**
- * Renderiza o carrossel de posts exclusivos para associados.
+ * Renderiza a previa publica dos dez posts exclusivos mais recentes.
  *
- * @param array|string $atts Atributos do shortcode.
- * @return string HTML do carrossel ou mensagem de acesso.
+ * @param array|string $atts Atributos ignorados; o limite e sempre dez.
+ * @return string HTML do carrossel.
  */
 function setceb_associados_carousel_shortcode( $atts = array() ) {
-	$atts = shortcode_atts(
-		array(
-			'quantidade' => 10,
-		),
-		$atts,
-		'setceb_carrossel_associados'
-	);
-
 	setceb_associados_carousel_enqueue_assets();
 
-	if ( ! function_exists( 'setceb_can_view_restricted_news' ) || ! setceb_can_view_restricted_news() ) {
-		$return_url = get_permalink();
-		$return_url = $return_url ? $return_url : home_url( '/' );
-
-		ob_start();
-		?>
-		<div class="setceb-associados-carousel__notice">
-			<p>Entre com sua conta de associado para acessar estes conteúdos.</p>
-			<a class="setceb-associados-carousel__login" href="<?php echo esc_url( wp_login_url( $return_url ) ); ?>">Entrar como associado</a>
-		</div>
-		<?php
-		return ob_get_clean();
-	}
-
-	$quantidade = min( 30, max( 1, absint( $atts['quantidade'] ) ) );
 	$query      = new WP_Query(
 		array(
 			'post_type'           => 'post',
 			'post_status'         => 'publish',
-			'posts_per_page'      => $quantidade,
+			'posts_per_page'      => 10,
 			'orderby'             => 'date',
 			'order'               => 'DESC',
 			'ignore_sticky_posts' => true,
