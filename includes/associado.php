@@ -248,7 +248,13 @@ add_filter( 'get_the_excerpt', 'setceb_gate_news_excerpt', 10, 2 );
  * Bloco de login exibido no lugar do conteudo restrito.
  */
 function setceb_news_login_prompt() {
-	$login_url = wp_login_url( get_permalink() );
+	$return_url = get_permalink();
+
+	if ( '1' === get_query_var( 'setceb_associado_preview' ) ) {
+		$return_url = add_query_arg( 'setceb_associado_preview', '1', $return_url );
+	}
+
+	$login_url = wp_login_url( $return_url );
 	ob_start();
 	?>
 	<div class="setceb-news-gate">
