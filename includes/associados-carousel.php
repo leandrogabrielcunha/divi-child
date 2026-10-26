@@ -152,6 +152,32 @@ function setceb_associados_carousel_enqueue_assets() {
 }
 
 /**
+ * Limita titulo por caracteres sem quebrar texto UTF-8.
+ *
+ * @param string $titulo Titulo completo.
+ * @param int    $limite Limite de caracteres.
+ * @return string
+ */
+function setceb_associados_carousel_truncate_title( $titulo, $limite = 60 ) {
+	$titulo = trim( wp_strip_all_tags( (string) $titulo ) );
+	$limite = max( 1, (int) $limite );
+
+	$caracteres = preg_split( '//u', $titulo, -1, PREG_SPLIT_NO_EMPTY );
+
+	if ( false === $caracteres ) {
+		return function_exists( 'mb_substr' )
+			? mb_substr( $titulo, 0, $limite, 'UTF-8' ) . '…'
+			: substr( $titulo, 0, $limite ) . '...';
+	}
+
+	if ( count( $caracteres ) <= $limite ) {
+		return $titulo;
+	}
+
+	return rtrim( implode( '', array_slice( $caracteres, 0, $limite ) ) ) . '…';
+}
+
+/**
  * Renderiza a previa publica dos dez conteudos recentes da area do associado.
  *
  * @param array|string $atts Atributos ignorados; o limite e sempre dez.
@@ -177,46 +203,41 @@ function setceb_associados_carousel_shortcode( $atts = array() ) {
 			<ul class="setceb-associados-carousel__track" data-carousel-track>
 				<?php foreach ( $itens as $item ) : ?>
 					<?php
-					$categoria = ! empty( $item['categoria'] ) ? $item['categoria'] : $item['tipo_label'];
-					$titulo    = $item['titulo'];
-					$url       = add_query_arg( 'setceb_conteudo_associado', absint( $item['id'] ), home_url( '/' ) );
-					$imagem_id = absint( $item['imagem_id'] );
+					$categoria    = ! empty( $item['categoria'] ) ? $item['categoria'] : $item['tipo_label'];
+					$titulo       = $item['titulo'];
+					$titulo_curto = setceb_associados_carousel_truncate_title( $titulo );
+					$url          = add_query_arg( 'setceb_conteudo_associado', absint( $item['id'] ), home_url( '/' ) );
+					$imagem_id    = absint( $item['imagem_id'] );
 					?>
 					<li class="setceb-associados-carousel__slide">
-						<article class="setceb-associados-carousel__card">
+						<a class="setceb-associados-carousel__card" href="<?php echo esc_url( $url ); ?>" aria-label="<?php echo esc_attr( 'Acessar conteúdo: ' . $titulo ); ?>">
 							<div class="setceb-associados-carousel__media<?php echo $imagem_id ? '' : ' setceb-associados-carousel__media--fallback'; ?>">
-								<a class="setceb-associados-carousel__image-link" href="<?php echo esc_url( $url ); ?>" tabindex="-1" aria-hidden="true">
-									<?php if ( $imagem_id ) : ?>
-										<?php
-										echo wp_get_attachment_image(
-											$imagem_id,
-											'large',
-											false,
-											array(
-												'class'    => 'setceb-associados-carousel__image',
-												'alt'      => $titulo,
-												'loading'  => 'lazy',
-												'decoding' => 'async',
-											)
-										);
-										?>
-									<?php else : ?>
-										<img class="setceb-associados-carousel__image setceb-associados-carousel__image--fallback" src="<?php echo esc_url( $fallback ); ?>" alt="" loading="lazy" decoding="async">
-									<?php endif; ?>
-								</a>
+								<?php if ( $imagem_id ) : ?>
+									<?php
+									echo wp_get_attachment_image(
+										$imagem_id,
+										'large',
+										false,
+										array(
+											'class'    => 'setceb-associados-carousel__image',
+											'alt'      => '',
+											'loading'  => 'lazy',
+											'decoding' => 'async',
+										)
+									);
+									?>
+								<?php else : ?>
+									<img class="setceb-associados-carousel__image setceb-associados-carousel__image--fallback" src="<?php echo esc_url( $fallback ); ?>" alt="" loading="lazy" decoding="async">
+								<?php endif; ?>
 								<span class="setceb-associados-carousel__category"><?php echo esc_html( $categoria ); ?></span>
 							</div>
 							<div class="setceb-associados-carousel__body">
-								<h3 class="setceb-associados-carousel__title"><a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $titulo ); ?></a></h3>
+								<h3 class="setceb-associados-carousel__title"><?php echo esc_html( $titulo_curto ); ?></h3>
 								<time class="setceb-associados-carousel__date" datetime="<?php echo esc_attr( get_post_time( 'c', true, $item['id'] ) ); ?>">
 									<?php echo esc_html( get_the_date( 'j F Y', $item['id'] ) ); ?>
 								</time>
-								<a class="setceb-associados-carousel__button" href="<?php echo esc_url( $url ); ?>">
-									<span>Acessar conteúdo</span>
-									<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M4 10h11M10 5l5 5-5 5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg>
-								</a>
 							</div>
-						</article>
+						</a>
 					</li>
 				<?php endforeach; ?>
 			</ul>

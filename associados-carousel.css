@@ -60,22 +60,23 @@
 	scroll-snap-align: start;
 }
 
-.setceb-associados-carousel__card {
+.setceb-associados-carousel .setceb-associados-carousel__card {
 	display: flex;
 	flex: 1 1 auto;
 	flex-direction: column;
 	width: 100%;
 	min-width: 0;
-	min-height: 350px;
 	overflow: hidden;
+	color: var(--setceb-carousel-ink);
 	background: #fff;
 	border: 1px solid var(--setceb-carousel-border);
 	border-radius: 16px;
 	box-shadow: 0 5px 18px rgba(18, 61, 115, 0.08);
+	text-decoration: none;
 	transition: box-shadow 180ms ease, transform 180ms ease;
 }
 
-.setceb-associados-carousel__card:hover {
+.setceb-associados-carousel .setceb-associados-carousel__card:hover {
 	box-shadow: 0 9px 24px rgba(18, 61, 115, 0.13);
 	transform: translateY(-2px);
 }
@@ -94,12 +95,6 @@
 	align-items: center;
 	justify-content: center;
 	background: #f5f7fa;
-}
-
-.setceb-associados-carousel__image-link {
-	display: block;
-	width: 100%;
-	height: 100%;
 }
 
 .setceb-associados-carousel__image {
@@ -143,7 +138,7 @@
 	padding: 18px;
 }
 
-.setceb-associados-carousel__title {
+.setceb-associados-carousel .setceb-associados-carousel__title {
 	width: 100%;
 	min-height: 4.2em;
 	margin: 0;
@@ -151,15 +146,11 @@
 	font-size: 1rem;
 	font-weight: 700;
 	line-height: 1.4;
+	transition: color 160ms ease;
 }
 
-.setceb-associados-carousel__title a {
-	color: inherit;
-	text-decoration: none;
-}
-
-.setceb-associados-carousel__title a:hover,
-.setceb-associados-carousel__title a:focus-visible {
+.setceb-associados-carousel .setceb-associados-carousel__card:hover .setceb-associados-carousel__title,
+.setceb-associados-carousel .setceb-associados-carousel__card:focus-visible .setceb-associados-carousel__title {
 	color: var(--setceb-carousel-blue-light);
 	text-decoration: underline;
 }
@@ -171,38 +162,6 @@
 	line-height: 1.4;
 }
 
-.setceb-associados-carousel__button {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: 8px;
-	min-height: 44px;
-	padding: 10px 14px;
-	color: #fff !important;
-	background: var(--setceb-carousel-blue);
-	border: 1px solid var(--setceb-carousel-blue);
-	border-radius: 8px;
-	font-size: 0.88rem;
-	font-weight: 700;
-	line-height: 1.2;
-	text-align: center;
-	text-decoration: none !important;
-	transition: background-color 160ms ease, border-color 160ms ease;
-}
-
-.setceb-associados-carousel__button {
-	width: 100%;
-	margin-top: auto;
-}
-
-.setceb-associados-carousel__button:hover,
-.setceb-associados-carousel__button:focus-visible {
-	color: #fff !important;
-	background: var(--setceb-carousel-blue-light);
-	border-color: var(--setceb-carousel-blue-light);
-}
-
-.setceb-associados-carousel__button svg,
 .setceb-associados-carousel__arrow svg {
 	flex: 0 0 20px;
 	width: 20px;
@@ -244,7 +203,7 @@
 }
 
 .setceb-associados-carousel__arrow:focus-visible,
-.setceb-associados-carousel__button:focus-visible {
+.setceb-associados-carousel .setceb-associados-carousel__card:focus-visible {
 	outline: 3px solid rgba(29, 91, 159, 0.35);
 	outline-offset: 3px;
 }
@@ -285,10 +244,6 @@
 		flex-basis: 86%;
 	}
 
-	.setceb-associados-carousel__card {
-		min-height: 340px;
-	}
-
 	.setceb-associados-carousel__body {
 		gap: 10px;
 		padding: 16px;
@@ -310,8 +265,7 @@
 		scroll-behavior: auto;
 	}
 
-	.setceb-associados-carousel__card,
-	.setceb-associados-carousel__button,
+	.setceb-associados-carousel .setceb-associados-carousel__card,
 	.setceb-associados-carousel__arrow {
 		transition: none;
 	}
