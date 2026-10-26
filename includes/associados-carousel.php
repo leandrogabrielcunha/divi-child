@@ -3,9 +3,9 @@
  * SETCEB - Carrossel de conteudos exclusivos para associados.
  *
  * Shortcode: [setceb_carrossel_associados]
- * Exibe uma previa publica dos dez posts mais recentes. Os links do
- * carrossel usam o controle de acesso para associados sem alterar os
- * metadados dos posts.
+ * Exibe uma previa publica dos dez conteudos mais recentes da area do associado.
+ * Os dados sao os mesmos usados no modulo "Conteudos recentes" do perfil.
+ * Os links usam o fluxo de acesso de associado sem alterar os conteudos.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,83 +13,56 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Habilita a imagem destacada nativa nos posts, usada como capa do card.
- */
-function setceb_associados_carousel_enable_featured_images() {
-	add_theme_support( 'post-thumbnails' );
-}
-add_action( 'after_setup_theme', 'setceb_associados_carousel_enable_featured_images', 20 );
-
-/**
- * Garante o suporte a imagem destacada no tipo de post padrao.
- */
-function setceb_associados_carousel_enable_post_thumbnail_support() {
-	add_post_type_support( 'post', 'thumbnail' );
-}
-add_action( 'init', 'setceb_associados_carousel_enable_post_thumbnail_support', 20 );
-
-/**
- * Registra a query var que identifica o acesso iniciado pelo carrossel.
+ * Registra a query var do acesso restrito a um conteudo associado.
  *
  * @param string[] $vars Query vars publicas.
  * @return string[]
  */
 function setceb_associados_carousel_query_vars( $vars ) {
-	$vars[] = 'setceb_associado_preview';
+	$vars[] = 'setceb_conteudo_associado';
 
 	return $vars;
 }
 add_filter( 'query_vars', 'setceb_associados_carousel_query_vars' );
 
 /**
- * Indica se a requisicao e um link do carrossel sem permissao de associado.
- *
- * @return bool
+ * Intermedeia o acesso ao arquivo associado, exigindo autenticacao.
  */
-function setceb_associados_carousel_requires_associate() {
-	if ( ! is_singular( 'post' ) || '1' !== get_query_var( 'setceb_associado_preview' ) ) {
-		return false;
+function setceb_associados_carousel_access_content() {
+	$content_id = absint( get_query_var( 'setceb_conteudo_associado' ) );
+
+	if ( 0 === $content_id ) {
+		return;
 	}
 
-	return ! function_exists( 'setceb_can_view_restricted_news' ) || ! setceb_can_view_restricted_news();
-}
+	$content = get_post( $content_id );
+	$types   = function_exists( 'setceb_documento_post_types' ) ? setceb_documento_post_types() : array();
+	$url     = get_post_meta( $content_id, '_setceb_doc_url', true );
 
-/**
- * Protege o conteudo integral quando o post foi aberto pelo carrossel.
- *
- * @param string $content Conteudo do post.
- * @return string
- */
-function setceb_associados_carousel_gate_content( $content ) {
-	if ( ! setceb_associados_carousel_requires_associate() ) {
-		return $content;
+	if ( ! $content || 'publish' !== $content->post_status || ! in_array( $content->post_type, $types, true ) || '' === $url ) {
+		wp_die( 'Conteúdo não encontrado.', '', array( 'response' => 404 ) );
 	}
 
-	return function_exists( 'setceb_news_login_prompt' )
-		? setceb_news_login_prompt()
-		: '<p>Conteúdo exclusivo para associados. Entre com sua conta de associado para continuar.</p>';
-}
-add_filter( 'the_content', 'setceb_associados_carousel_gate_content', 4 );
+	nocache_headers();
 
-/**
- * Evita que o resumo do post seja exibido fora da previa do carrossel.
- *
- * @param string  $excerpt Resumo do post.
- * @param WP_Post $post    Post consultado.
- * @return string
- */
-function setceb_associados_carousel_gate_excerpt( $excerpt, $post ) {
-	if (
-		! ( $post instanceof WP_Post )
-		|| (int) $post->ID !== (int) get_queried_object_id()
-		|| ! setceb_associados_carousel_requires_associate()
-	) {
-		return $excerpt;
+	$tem_acesso = ( function_exists( 'setceb_is_associado' ) && setceb_is_associado() )
+		|| current_user_can( 'manage_options' );
+
+	if ( ! $tem_acesso ) {
+		if ( ! is_user_logged_in() ) {
+			$return_url = add_query_arg( 'setceb_conteudo_associado', $content_id, home_url( '/' ) );
+			wp_safe_redirect( wp_login_url( $return_url ) );
+			exit;
+		}
+
+		wp_safe_redirect( setceb_associado_perfil_url() );
+		exit;
 	}
 
-	return 'Conteúdo exclusivo para associados.';
+	wp_redirect( esc_url_raw( $url ) );
+	exit;
 }
-add_filter( 'get_the_excerpt', 'setceb_associados_carousel_gate_excerpt', 4, 2 );
+add_action( 'template_redirect', 'setceb_associados_carousel_access_content', 1 );
 
 /**
  * Registra os assets do carrossel.
@@ -179,7 +152,7 @@ function setceb_associados_carousel_enqueue_assets() {
 }
 
 /**
- * Renderiza a previa publica dos dez posts mais recentes.
+ * Renderiza a previa publica dos dez conteudos recentes da area do associado.
  *
  * @param array|string $atts Atributos ignorados; o limite e sempre dez.
  * @return string HTML do carrossel.
@@ -187,19 +160,10 @@ function setceb_associados_carousel_enqueue_assets() {
 function setceb_associados_carousel_shortcode( $atts = array() ) {
 	setceb_associados_carousel_enqueue_assets();
 
-	$query      = new WP_Query(
-		array(
-			'post_type'           => 'post',
-			'post_status'         => 'publish',
-			'posts_per_page'      => 10,
-			'orderby'             => 'date',
-			'order'               => 'DESC',
-			'ignore_sticky_posts' => true,
-			'no_found_rows'       => true,
-		)
-	);
+	$itens = function_exists( 'setceb_conteudos_recentes' ) ? (array) setceb_conteudos_recentes( 10 ) : array();
+	$itens = array_slice( $itens, 0, 10 );
 
-	if ( ! $query->have_posts() ) {
+	if ( empty( $itens ) ) {
 		return '<div class="setceb-associados-carousel__empty"><p>Nenhum conteúdo foi publicado recentemente.</p></div>';
 	}
 
@@ -209,15 +173,14 @@ function setceb_associados_carousel_shortcode( $atts = array() ) {
 	ob_start();
 	?>
 	<div id="<?php echo esc_attr( $carousel_id ); ?>" class="setceb-associados-carousel" data-setceb-associados-carousel>
-		<div class="setceb-associados-carousel__viewport" data-carousel-viewport tabindex="0" aria-label="Conteúdos exclusivos para associados">
+		<div class="setceb-associados-carousel__viewport" data-carousel-viewport tabindex="0" aria-label="Conteúdos recentes para associados">
 			<ul class="setceb-associados-carousel__track" data-carousel-track>
-				<?php foreach ( $query->posts as $post ) : ?>
+				<?php foreach ( $itens as $item ) : ?>
 					<?php
-					$categorias = get_the_category( $post->ID );
-					$categoria  = ! empty( $categorias ) ? $categorias[0]->name : 'Associados';
-					$titulo     = get_the_title( $post );
-					$url        = add_query_arg( 'setceb_associado_preview', '1', get_permalink( $post ) );
-					$imagem_id  = get_post_thumbnail_id( $post->ID );
+					$categoria = ! empty( $item['categoria'] ) ? $item['categoria'] : $item['tipo_label'];
+					$titulo    = $item['titulo'];
+					$url       = add_query_arg( 'setceb_conteudo_associado', absint( $item['id'] ), home_url( '/' ) );
+					$imagem_id = absint( $item['imagem_id'] );
 					?>
 					<li class="setceb-associados-carousel__slide">
 						<article class="setceb-associados-carousel__card">
@@ -245,8 +208,8 @@ function setceb_associados_carousel_shortcode( $atts = array() ) {
 							</div>
 							<div class="setceb-associados-carousel__body">
 								<h3 class="setceb-associados-carousel__title"><a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $titulo ); ?></a></h3>
-								<time class="setceb-associados-carousel__date" datetime="<?php echo esc_attr( get_post_time( 'c', true, $post ) ); ?>">
-									<?php echo esc_html( get_the_date( 'j F Y', $post ) ); ?>
+								<time class="setceb-associados-carousel__date" datetime="<?php echo esc_attr( get_post_time( 'c', true, $item['id'] ) ); ?>">
+									<?php echo esc_html( get_the_date( 'j F Y', $item['id'] ) ); ?>
 								</time>
 								<a class="setceb-associados-carousel__button" href="<?php echo esc_url( $url ); ?>">
 									<span>Acessar conteúdo</span>

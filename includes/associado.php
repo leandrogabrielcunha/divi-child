@@ -248,13 +248,7 @@ add_filter( 'get_the_excerpt', 'setceb_gate_news_excerpt', 10, 2 );
  * Bloco de login exibido no lugar do conteudo restrito.
  */
 function setceb_news_login_prompt() {
-	$return_url = get_permalink();
-
-	if ( '1' === get_query_var( 'setceb_associado_preview' ) ) {
-		$return_url = add_query_arg( 'setceb_associado_preview', '1', $return_url );
-	}
-
-	$login_url = wp_login_url( $return_url );
+	$login_url = wp_login_url( get_permalink() );
 	ob_start();
 	?>
 	<div class="setceb-news-gate">
@@ -463,7 +457,7 @@ function setceb_simuladores() {
  * ordenados pela data de publicacao. Itens sem URL sao ignorados.
  *
  * @param int $limite Quantidade maxima de itens.
- * @return array[]
+ * @return array[] Cada item contem id, imagem_id, titulo, url, tipo, tipo_label, icone, data, ano, categoria e destaque.
  */
 function setceb_conteudos_recentes( $limite = 8 ) {
 	if ( ! function_exists( 'setceb_documento_post_types' ) ) {
@@ -486,6 +480,13 @@ function setceb_conteudos_recentes( $limite = 8 ) {
 			'orderby'          => 'date',
 			'order'            => 'DESC',
 			'suppress_filters' => false,
+			'meta_query'       => array(
+				array(
+					'key'     => '_setceb_doc_url',
+					'value'   => '',
+					'compare' => '!=',
+				),
+			),
 		)
 	);
 
@@ -502,6 +503,8 @@ function setceb_conteudos_recentes( $limite = 8 ) {
 		$info = isset( $rotulos[ $post->post_type ] ) ? $rotulos[ $post->post_type ] : array( ucfirst( $post->post_type ), 'dashicons-media-document' );
 
 		$item = array(
+			'id'         => (int) $post->ID,
+			'imagem_id'  => (int) get_post_thumbnail_id( $post ),
 			'titulo'     => get_the_title( $post ),
 			'url'        => $url,
 			'tipo'       => $post->post_type,

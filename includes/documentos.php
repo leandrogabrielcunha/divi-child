@@ -11,7 +11,7 @@
  * - Outros Materiais       (setceb_outros_mat)
  * - Simuladores            (setceb_simulador)
  *
- * Cada item possui: titulo, arquivo (URL da biblioteca de midia ou
+ * Cada item possui: titulo, imagem destacada, arquivo (URL da biblioteca de midia ou
  * link externo), categoria (taxonomia "Categorias de Documentos",
  * exclusiva das Planilhas, ja populada com as categorias de
  * transporte), ano e opcao de destaque.
@@ -33,6 +33,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 function setceb_documento_post_types() {
 	return array( 'setceb_planilha', 'setceb_relatorio', 'setceb_convencoes', 'setceb_outros_mat', 'setceb_simulador' );
 }
+
+/**
+ * Habilita imagens destacadas como capa nos conteudos da area do associado.
+ */
+function setceb_documentos_enable_featured_images() {
+	add_theme_support( 'post-thumbnails' );
+}
+add_action( 'after_setup_theme', 'setceb_documentos_enable_featured_images', 20 );
 
 /**
  * Registra a taxonomia e os tipos de documento.
@@ -84,7 +92,7 @@ function setceb_documentos_register() {
 				'menu_position'   => $info[3],
 				'capability_type' => 'post',
 				'map_meta_cap'    => true,
-				'supports'        => array( 'title' ),
+				'supports'        => array( 'title', 'thumbnail' ),
 				'has_archive'     => false,
 				'rewrite'         => false,
 				'show_in_rest'    => true,
