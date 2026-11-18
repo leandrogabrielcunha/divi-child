@@ -520,3 +520,213 @@ Prefixos: .cetech-wa
 		height: 30px;
 	}
 }
+
+/* ---------- Campanha Black November ---------- */
+.cetech-blacknovember[hidden] {
+	display: none !important;
+}
+
+.cetech-blacknovember {
+	position: fixed;
+	inset: 0;
+	z-index: 100001;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+	font-family: var(--cetech-font, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif);
+}
+
+.cetech-blacknovember *,
+.cetech-blacknovember *::before,
+.cetech-blacknovember *::after {
+	box-sizing: border-box;
+}
+
+.cetech-blacknovember__backdrop {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	border: 0;
+	background: rgba(8, 12, 32, 0.72);
+	backdrop-filter: blur(5px);
+	cursor: default;
+	animation: cetech-blacknovember-fade 0.22s ease both;
+}
+
+.cetech-blacknovember__dialog {
+	position: relative;
+	z-index: 1;
+	width: min(100%, 460px);
+	padding: 52px 42px 34px;
+	overflow: hidden;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: 26px;
+	background:
+		radial-gradient(circle at 100% 0%, rgba(0, 232, 168, 0.28), transparent 35%),
+		linear-gradient(145deg, #11113f 0%, #2020ee 70%, #1717b8 100%);
+	color: #fff;
+	text-align: center;
+	box-shadow: 0 30px 100px rgba(0, 0, 0, 0.4);
+	transform: translateY(16px) scale(0.97);
+	opacity: 0;
+	transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.22s ease;
+}
+
+.cetech-blacknovember.is-open .cetech-blacknovember__dialog {
+	transform: none;
+	opacity: 1;
+}
+
+.cetech-blacknovember__dialog::before,
+.cetech-blacknovember__dialog::after {
+	position: absolute;
+	z-index: -1;
+	width: 180px;
+	height: 180px;
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	border-radius: 50%;
+	content: "";
+	pointer-events: none;
+}
+
+.cetech-blacknovember__dialog::before {
+	top: -112px;
+	left: -96px;
+}
+
+.cetech-blacknovember__dialog::after {
+	right: -118px;
+	bottom: -126px;
+	width: 230px;
+	height: 230px;
+}
+
+.cetech-blacknovember__close {
+	position: absolute;
+	top: 14px;
+	right: 14px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	padding: 0;
+	border: 1px solid rgba(255, 255, 255, 0.24);
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.1);
+	color: #fff;
+	cursor: pointer;
+	transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.cetech-blacknovember__close:hover {
+	transform: rotate(90deg);
+	background: rgba(255, 255, 255, 0.2);
+}
+
+.cetech-blacknovember__close:focus-visible,
+.cetech-blacknovember__cta:focus-visible {
+	outline: 3px solid #00e8a8;
+	outline-offset: 3px;
+}
+
+.cetech-blacknovember__badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 7px 13px;
+	border: 1px solid rgba(0, 232, 168, 0.5);
+	border-radius: 999px;
+	background: rgba(0, 232, 168, 0.13);
+	color: #7fffd6;
+	font-size: 11px;
+	font-weight: 800;
+	letter-spacing: 1.5px;
+	text-transform: uppercase;
+}
+
+.cetech-blacknovember__eyebrow {
+	margin: 25px 0 0;
+	color: rgba(255, 255, 255, 0.75);
+	font-size: 14px;
+	font-weight: 800;
+	letter-spacing: 8px;
+	line-height: 1;
+}
+
+.cetech-blacknovember__dialog h2 {
+	margin: 8px 0 18px;
+	color: #fff;
+	font-size: clamp(39px, 10vw, 58px);
+	font-weight: 900;
+	letter-spacing: -2px;
+	line-height: 1;
+}
+
+.cetech-blacknovember__copy {
+	max-width: 330px;
+	margin: 0 auto 26px;
+	color: rgba(255, 255, 255, 0.84);
+	font-size: 15px;
+	line-height: 1.65;
+}
+
+.cetech-blacknovember__cta {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	width: 100%;
+	min-height: 54px;
+	padding: 12px 22px;
+	border: 0;
+	border-radius: 14px;
+	background: #00e8a8;
+	color: #10103a;
+	font-family: inherit;
+	font-size: 15px;
+	font-weight: 800;
+	cursor: pointer;
+	box-shadow: 0 12px 28px rgba(0, 232, 168, 0.25);
+	transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cetech-blacknovember__cta:hover {
+	transform: translateY(-2px);
+	background: #35f2bd;
+	box-shadow: 0 16px 34px rgba(0, 232, 168, 0.35);
+}
+
+.cetech-blacknovember__footnote {
+	margin: 16px 0 0;
+	color: rgba(255, 255, 255, 0.65);
+	font-size: 12px;
+}
+
+@keyframes cetech-blacknovember-fade {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+@media (max-width: 560px) {
+	.cetech-blacknovember {
+		padding: 16px;
+	}
+
+	.cetech-blacknovember__dialog {
+		padding: 48px 24px 28px;
+		border-radius: 22px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.cetech-blacknovember__backdrop,
+	.cetech-blacknovember__dialog,
+	.cetech-blacknovember__close,
+	.cetech-blacknovember__cta {
+		animation: none;
+		transition: none;
+	}
+}

@@ -26,6 +26,9 @@
 		var continueBtn = root.querySelector('[data-cetech-wa-continue]');
 		var backBtn = root.querySelector('[data-cetech-wa-back]');
 		var backTipoBtn = root.querySelector('[data-cetech-wa-back-tipo]');
+		var campaignModal = root.querySelector('[data-cetech-blacknovember]');
+		var campaignCloseButtons = root.querySelectorAll('[data-cetech-blacknovember-close]');
+		var campaignCta = root.querySelector('[data-cetech-blacknovember-cta]');
 		var tipoCliente = '';
 
 		var isOpen = false;
@@ -229,13 +232,20 @@
 		 * planos só é montada depois que a pessoa escolhe o perfil, então
 		 * normalmente ainda não há a opção para pré-selecionar.
 		 */
-		function openWithPlan(planId, tipo) {
+		function openWithPlan(planId, tipo, message) {
 			open();
 
 			var tipoBtn = root.querySelector('.cetech-wa__tipo[data-tipo="' + (tipo || 'novo') + '"]');
 
 			if (tipoBtn) {
 				tipoBtn.click();
+			}
+
+			if (message) {
+				var messageField = form.querySelector('textarea[name="mensagem"]');
+				if (messageField) {
+					messageField.value = message;
+				}
 			}
 
 			if (!planId || !planoSelect) {
@@ -262,6 +272,78 @@
 			return isOpen;
 		};
 
+		function closeCampaignPopup() {
+			if (!campaignModal || campaignModal.hidden) {
+				return;
+			}
+
+			if (campaignModal.contains(document.activeElement)) {
+				if (btn) {
+					btn.focus();
+				} else {
+					document.activeElement.blur();
+				}
+			}
+
+			campaignModal.classList.remove('is-open');
+			campaignModal.setAttribute('aria-hidden', 'true');
+			campaignModal.hidden = true;
+		}
+
+		function openCampaignPopup() {
+			if (!campaignModal || !config.blackNovember || isOpen) {
+				return;
+			}
+
+			campaignModal.hidden = false;
+			campaignModal.setAttribute('aria-hidden', 'false');
+			campaignModal.classList.add('is-open');
+
+			var closeButton = campaignModal.querySelector('.cetech-blacknovember__close');
+			if (closeButton) {
+				closeButton.focus();
+			}
+
+			try {
+				window.sessionStorage.setItem(config.blackNovember.sessionKey, '1');
+			} catch (error) {
+				/* A campanha ainda funciona se o navegador bloquear o storage. */
+			}
+		}
+
+		if (campaignModal) {
+			campaignCloseButtons.forEach(function (closeButton) {
+				closeButton.addEventListener('click', closeCampaignPopup);
+			});
+
+			if (campaignCta) {
+				campaignCta.addEventListener('click', function () {
+					closeCampaignPopup();
+
+					if (window.cetechWhatsappApi && window.cetechWhatsappApi.openWithPlan) {
+						window.cetechWhatsappApi.openWithPlan(
+							null,
+							'novo',
+							config.blackNovember ? config.blackNovember.message : ''
+						);
+					}
+				});
+			}
+
+			if (config.blackNovember) {
+				var shouldShowCampaign = true;
+				try {
+					shouldShowCampaign = !window.sessionStorage.getItem(config.blackNovember.sessionKey);
+				} catch (error) {
+					/* Sem sessionStorage, a campanha aparece nesta visita. */
+				}
+
+				if (shouldShowCampaign) {
+					window.setTimeout(openCampaignPopup, Number(config.blackNovember.delay) || 5000);
+				}
+			}
+		}
+
 		if (btn) {
 			btn.addEventListener('click', function (event) {
 				event.stopPropagation();
@@ -279,6 +361,10 @@
 
 		document.addEventListener('keyup', function (event) {
 			if (event.key === 'Escape' || event.key === 'Esc') {
+				if (campaignModal && !campaignModal.hidden) {
+					closeCampaignPopup();
+					return;
+				}
 				close();
 			}
 		});
@@ -381,7 +467,7 @@
 				var data = new FormData(form);
 				var nome = (data.get('nome') || '').trim();
 				var fone = (data.get('fone') || '').trim();
-				var setorVal = (data.get('setor') || '').trim();
+				var setorVal = 'novo' === tipoCliente ? 'Comercial' : (data.get('setor') || '').trim();
 				var mensagem = (data.get('mensagem') || '').trim();
 				var perfilVal = data.get('perfil') ? String(data.get('perfil')) : '';
 				var planoId = data.get('plano') ? String(data.get('plano')) : '';
